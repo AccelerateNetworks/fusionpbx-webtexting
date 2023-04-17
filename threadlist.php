@@ -32,7 +32,8 @@ if(!$extension) {
     color: #000;
 }
 </style>
-<form method='get' action="thread.php">
+<form method='get' action="thread.php" onsubmit="clean_number()">
+<input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
 <div id='modal-new-thread' class='modal-window'>
     <div>
         <span title="" class='modal-close' onclick="modal_close(); ">&times</span>
@@ -116,7 +117,7 @@ foreach($threads as $number => $thread) {
             $name_parts[] = $thread['contact']['contact_name_family'];
         }
         if(sizeof($name_parts) > 0) {
-            $display_name = implode(" ", $name_parts)." (".$number.")";
+            $display_name = implode(" ", $name_parts)." <small>(".$number.")</small>";
         }
     }
 
@@ -130,5 +131,11 @@ foreach($threads as $number => $thread) {
 }
 
 echo "</table>\n";
-
+?>
+<script type="text/javascript">
+    function clean_number() { // clean any non-digits out of the phone number box
+        document.querySelector("#new-thread-number").value = document.querySelector("#new-thread-number").value.replace(/[^\d+]/g, "");
+    }
+</script>
+<?php
 require_once "footer.php";

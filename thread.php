@@ -104,17 +104,24 @@ if(!$extension) {
   .textentry:focus {
     outline: none; /* hide the browser's extra focus outline */
   }
+
+  .timestamp {
+    font-size: 7pt;
+  }
+
+  .message-body {
+    margin: 0;
+  }
 </style>
 
 <?php
 echo "<div class='action_bar' id='action_bar'>\n";
-echo "	<div class='heading'><b>WebTexting</b></div>";
+echo "	<div class='heading'><b>WebTexting</b> - ".$extension['outbound_caller_id_name']." (".$extension['outbound_caller_id_number'].")</div>";
 echo "	<div class='actions'>\n";
 echo button::create(['type'=>'button','label'=>"All Texts",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'threadlist.php?extension_uuid='.$extension['extension_uuid']]);
 echo "	</div>\n";
 echo "	<div style='clear: both;'></div>\n";
 echo "</div>\n";
-echo "Sending as ".$extension['outbound_caller_id_name']." (".$extension['outbound_caller_id_number'].")";
 echo "<br />\n";
 
 // compute the name to display based on number and a potential contact name
@@ -173,7 +180,10 @@ if($contact) {
     while($i) {
       $message = $messages[--$i];
       echo "<div class='message-wrapper'>";
-      echo "<div class='message message-".$message['direction']."'>".$message['message']."</div>";
+      echo "<div class='message message-".$message['direction']."'>";
+      echo "<p class='message-body'>".$message['message']."</p>";
+      echo "<span class='timestamp' data-timestamp='".$message['start_stamp']."'></span>";
+      echo "</div>";
       echo "</div>";
     }
     unset($parameters);
@@ -205,7 +215,6 @@ $opts = array(
   const opts = <?php echo json_encode($opts); ?>;
 
   const messageContainer = document.querySelector('.message-container');
-  messageContainer.scrollTo(0, messageContainer.scrollHeight); // scroll message container to the bottom in case there are more messages than fit on the screen
 
   function pushMessage(message, direction) {
     const wrapper = document.createElement("div");
@@ -214,12 +223,22 @@ $opts = array(
     const messageDiv = document.createElement("div");
     messageDiv.classList.add("message");
     messageDiv.classList.add("message-" + direction);
-    messageDiv.textContent = message;
+
+    const messageBody = document.createElement('p');
+    messageBody.classList.add('message-body');
+    messageBody.textContent = message;
+    messageDiv.appendChild(messageBody);
+
+    const messageTimestamp = document.createElement('span');
+    messageTimestamp.classList.add('timestamp');
+    messageTimestamp.dataset.timestamp = moment.utc().format();
+    messageTimestamp.textContent = "now";
+    messageDiv.appendChild(messageTimestamp);
+
     wrapper.appendChild(messageDiv);
 
     messageContainer.appendChild(wrapper);
     messageContainer.scrollTo(0, messageContainer.scrollHeight); // scroll message container to the bottom
-    console.log(messageDiv, wrapper);
   }
 
   // inbound
@@ -250,6 +269,7 @@ $opts = array(
   const registerer = new SIP.Registerer(userAgent);
   userAgent.start().then(() => {
     registerer.register();
+    messageContainer.scrollTo(0, messageContainer.scrollHeight);
   });
 
   // outbound

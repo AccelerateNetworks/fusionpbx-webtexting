@@ -4,15 +4,19 @@
 }
 ?>
 <script type="text/javascript">
+  function clean_number() { // clean any non-digits out of the phone number box
+      document.querySelector("#new-thread-number").value = document.querySelector("#new-thread-number").value.replace(/[^\d+]/g, "");
+  }
+
   function updateTimestamps() {
     document.querySelectorAll('.timestamp').forEach((e) => {
       e.textContent = moment.utc(e.dataset.timestamp).fromNow();
     })
   }
-$(document).ready(() => {
-  updateTimestamps();
-  setInterval(updateTimestamps, 10000);
-})
+  $(document).ready(() => {
+    updateTimestamps();
+    setInterval(updateTimestamps, 10000);
+  })
 </script>
 
 <?php
