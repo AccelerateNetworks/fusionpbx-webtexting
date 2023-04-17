@@ -1,15 +1,22 @@
 <?php
-/*
-	GNU Public License
-	Version: GPL 3
-*/
 require_once "root.php";
 require_once "resources/require.php";
 require_once "resources/check_auth.php";
 require_once "resources/header.php";
 require_once "resources/paging.php";
 
-$number = $_GET['number'];
+foreach($_SESSION['user']['extension'] as $ext) {
+  if($ext['extension_uuid'] == $_GET['extension_uuid']) {
+    $extension = $ext;
+    break;
+  }
+}
+
+if(!$extension) {
+  echo "invalid extension, please <a href='index.php'>try again</a>";
+  require_once "footer.php";
+  die();
+}
 ?>
 <style type="text/css">
   .container-fluid {
@@ -24,14 +31,32 @@ $number = $_GET['number'];
     max-width: 50em;
     height: calc(100% - 120px);
     margin: 0 auto;
-    border: solid #999 2px;
-    border-radius: 0.5em;
+    border-left: solid #999 2px;
+    border-right: solid #999 2px;
+    border-bottom: solid #999 2px;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
     padding-left: 0.5em;
     padding-right: 0.5em;
 
     /* stupid hack to get the text entry box to display inside the bounds of the thread */
     display: flex; 
     flex-direction: column;
+  }
+
+  .thread-header {
+    max-width: 50em;
+    margin: 0 auto;
+    padding: 1em;
+    background-color: rgba(0,0,0,0.90);
+    color: #fff;
+    border-top-left-radius: 0.5em;
+    border-top-right-radius: 0.5em;
+    font-weight: bold;
+  }
+
+  .white {
+    color: #fff;
   }
 
   .message-container {
@@ -60,10 +85,10 @@ $number = $_GET['number'];
 
   .sendbox {
     display: flex;
+    margin-bottom: 0.5em;
   }
 
   .textentry {
-    margin-bottom: 0.5em;
     border: 0;
     background-color: #eee;
     resize: none; /* prevent the user from resizing the text box */
@@ -73,6 +98,7 @@ $number = $_GET['number'];
   .btn-send {
     flex-grow: 1;
     max-width: fit-content;
+    margin: auto 0;
   }
 
   .textentry:focus {
@@ -82,57 +108,94 @@ $number = $_GET['number'];
 
 <?php
 echo "<div class='action_bar' id='action_bar'>\n";
-echo "	<div class='heading'><b>WebTexting - ".$number."</b></div>\n";
+echo "	<div class='heading'><b>WebTexting</b></div>";
 echo "	<div class='actions'>\n";
-echo button::create(['type'=>'button','label'=>"back",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'index.php']);
+echo button::create(['type'=>'button','label'=>"All Texts",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'threadlist.php?extension_uuid='.$extension['extension_uuid']]);
 echo "	</div>\n";
 echo "	<div style='clear: both;'></div>\n";
 echo "</div>\n";
+echo "Sending as ".$extension['outbound_caller_id_name']." (".$extension['outbound_caller_id_number'].")";
 echo "<br />\n";
+
+// compute the name to display based on number and a potential contact name
+$number = $_GET['number'];
+$sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
+$parameters['number'] = $number;
+$parameters['domain_uuid'] = $domain_uuid;
+$database = new database;
+$contact = $database->select($sql, $parameters, 'row');
+unset($parameters);
+
+$display_name = $number;
+if($contact) {
+    $name_parts = array();
+    if($contact['contact_name_given']) {
+        $name_parts[] = $contact['contact_name_given'];
+    }
+    if($contact['contact_name_middle']) {
+        $name_parts[] = $contact['contact_name_middle'];
+    }
+    if($contact['contact_name_family']) {
+        $name_parts[] = $contact['contact_name_family'];
+    }
+    if(sizeof($name_parts) > 0) {
+        $display_name = implode(" ", $name_parts);
+        $display_name .= " <small>";
+        if(permission_exists('contact_phone_edit')) {
+          $display_name .= "<a class='white' href='/app/contacts/contact_edit.php?id=".$contact['contact_uuid']."'><span class='fas fa-edit fa-fw'> </span></a> ";
+        }
+        $display_name .= "(".$number.")</small>";
+    } elseif(permission_exists('contact_phone_edit')) {
+      $display_name .= " <small><a class='white' href='/app/contacts/contact_edit.php?id=".$contact['contact_uuid']."'><span class='fas fa-edit fa-fw'> </span></a></small>";
+    }
+}
+
+// The UX here is confusing to the point that I have disabled it, because we can't pre-file the contact number,
+// and if the user forgets to do that they just make a contact with no number. Solution would be to create a blank
+// contact with just a number and redirect to it's edit screen when this is clicked
+// if($display_name == $number && permission_exists('contact_phone_add')) {
+//   $display_name .= " <small><a class='white' href='/app/contacts/contact_edit.php'><span class='fas fa-edit fa-fw'> </span></a></small>";
+// }
+
 ?>
+<div class="thread-header">
+  <?php echo $display_name; ?>
+</div>
 <div class="thread">
-<div class="message-container">
-  <?php
-  $sql = "SELECT * FROM v_sms_messages WHERE extension_uuid = :extension_uuid AND (from_number = :number OR to_number = :number) ORDER BY start_stamp DESC LIMIT 50";
-	$parameters['extension_uuid'] = $_SESSION['user']['extension'][0]['extension_uuid'];
-	$parameters['number'] = $number;
-	$database = new database;
-  $messages = $database->select($sql, $parameters, 'all');
-  $i = count($messages);
-	while($i) {
-    $message = $messages[--$i];
-    echo "<div class='message-wrapper'>";
-    echo "<div class='message message-".$message['direction']."'>".$message['message']."</div>";
-    echo "</div>";
-  }
-	unset($parameters);
-  ?>
-</div>
-<div class="sendbox">
-  <textarea class="textentry" autofocus="autofocus"></textarea>
-  <input type="button" value="send" class="btn-send" />
-</div>
+  <div class="message-container">
+    <?php
+    $sql = "SELECT * FROM v_sms_messages WHERE extension_uuid = :extension_uuid AND (from_number = :number OR to_number = :number) ORDER BY start_stamp DESC LIMIT 50";
+    $parameters['extension_uuid'] = $extension['extension_uuid'];
+    $parameters['number'] = $number;
+    $database = new database;
+    $messages = $database->select($sql, $parameters, 'all');
+    $i = count($messages);
+    while($i) {
+      $message = $messages[--$i];
+      echo "<div class='message-wrapper'>";
+      echo "<div class='message message-".$message['direction']."'>".$message['message']."</div>";
+      echo "</div>";
+    }
+    unset($parameters);
+    ?>
+  </div>
+  <div class="sendbox">
+    <textarea class="textentry" autofocus="autofocus"></textarea>
+    <input type="button" value="send" class="btn btn-send" />
+  </div>
 </div>
 
 <?php
-if(sizeof($_SESSION['user']['extension']) == 0) {
-  echo "<b style='color: red'>no extension for user</b>\n";
-}
-
 $sql = "SELECT v_extensions.extension, v_extensions.password FROM v_extensions, v_domains WHERE v_domains.domain_uuid = v_extensions.domain_uuid AND v_domains.domain_name = :domain_name AND v_extensions.extension_uuid = :extension_uuid";
-$parameters['domain_name'] = $_SESSION['user']['extension'][0]['user_context'];
-$parameters['extension_uuid'] = $_SESSION['user']['extension'][0]['extension_uuid'];
+$parameters['domain_name'] = $extension['user_context'];
+$parameters['extension_uuid'] = $extension['extension_uuid'];
 $database = new database;
-$extension = $database->select($sql, $parameters, 'row');
-
-if(!$extension) {
-  echo "<b style='color: red'>extension ".$_SESSION['user']['extension'][0]['extension_uuid']." not found on domain ".$_SESSION['user']['extension'][0]['user_context']."</b>\n";
-}
+$extension_details = $database->select($sql, $parameters, 'row');
 
 $opts = array(
-  "server" => $_SESSION['user']['extension'][0]['user_context'],
-  "username" => $extension['extension'],
-  "password" => $extension['password'],
+  "server" => $extension['user_context'],
+  "username" => $extension_details['extension'],
+  "password" => $extension_details['password'],
   "remote_number" => $number,
 );
 

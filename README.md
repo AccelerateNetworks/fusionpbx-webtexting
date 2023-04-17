@@ -1,8 +1,15 @@
 # WebTexting
 
 Install notes:
-* must enable websocket connections on an internal SIP profile, must be on port 7443 for now
+* must enable websockets on your profile, must be on port 7443 for now
 * must install fusionpbx-apps.git/sms
   * must put https://github.com/fusionpbx/fusionpbx-apps/blob/master/sms/resources/templates/conf/chatplan/default.xml in /etc/freeswitch/chatplan/default.xml (overwrite existing)
   * above is not documented anywhere that i can find
-  * when this is in a more stable state it will likely require a custom chatplan xml that will call FusionPBX scripts as well as ours
+* Has no schema or permissions of it's own
+
+## Current limitations
+* Contacts are displayed to users who don't have contact_read_* permissions
+* Contact edit button may be displayed to users who do not have contact edit permission (they will see a "permission denied" screen when they click)
+* Threads list does not update when new messages are received
+* Having a thread open registers a SIP client on the extension, calls to which will be ignored
+* no native notifications, even when the page is open

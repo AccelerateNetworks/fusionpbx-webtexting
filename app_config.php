@@ -11,9 +11,3 @@ $apps[$x]['description']['en-us'] = "Web Texting";
 
 
 $y = 0;
-$apps[$x]['permissions'][$y]['name'] = "webtexting_manage_domain";
-$apps[$x]['permissions'][$y]['groups'][] = "admin";
-$y++;
-
-$apps[$x]['permissions'][$y]['name'] = "webtexting_manage_all";
-$apps[$x]['permissions'][$y]['groups'][] = "superadmin";
