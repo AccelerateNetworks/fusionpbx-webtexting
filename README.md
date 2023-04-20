@@ -5,6 +5,7 @@ Install notes:
 * must install fusionpbx-apps.git/sms
   * must put https://github.com/fusionpbx/fusionpbx-apps/blob/master/sms/resources/templates/conf/chatplan/default.xml in /etc/freeswitch/chatplan/default.xml (overwrite existing)
   * above is not documented anywhere that i can find
+  * probably have to reloadxml after doing this
 * Has no schema or permissions of it's own
 
 ## Current limitations

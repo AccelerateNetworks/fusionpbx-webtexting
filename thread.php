@@ -115,9 +115,11 @@ if(!$extension) {
 </style>
 
 <?php
+$number = $_GET['number'];
 echo "<div class='action_bar' id='action_bar'>\n";
 echo "	<div class='heading'><b>WebTexting</b> - ".$extension['outbound_caller_id_name']." (".$extension['outbound_caller_id_number'].")</div>";
 echo "	<div class='actions'>\n";
+echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'label' => '?', 'onclick' => 'toggleNotifications()']);
 echo button::create(['type'=>'button','label'=>"All Texts",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'threadlist.php?extension_uuid='.$extension['extension_uuid']]);
 echo "	</div>\n";
 echo "	<div style='clear: both;'></div>\n";
@@ -125,7 +127,6 @@ echo "</div>\n";
 echo "<br />\n";
 
 // compute the name to display based on number and a potential contact name
-$number = $_GET['number'];
 $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
 $parameters['number'] = $number;
 $parameters['domain_uuid'] = $domain_uuid;
@@ -212,7 +213,16 @@ $opts = array(
 ?>
 <script src="lib/sip-0.21.2.min.js"></script>
 <script type="text/javascript">
-  const opts = <?php echo json_encode($opts); ?>;
+  // webpush
+  window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'], "remote_identifier" => $number)); ?>;
+
+  const channel = new BroadcastChannel('message-pushes');
+  channel.onmessage = (event) => {
+    if(event.data.from == window.notification_data.remote_identifier) {
+      console.log("got message from service worker: ", event.data);
+      // pushMessage(event.data.body, "inbound");
+    }
+  };
 
   const messageContainer = document.querySelector('.message-container');
 
@@ -232,7 +242,7 @@ $opts = array(
     const messageTimestamp = document.createElement('span');
     messageTimestamp.classList.add('timestamp');
     messageTimestamp.dataset.timestamp = moment.utc().format();
-    messageTimestamp.textContent = "now";
+    messageTimestamp.textContent = "a few seconds ago";
     messageDiv.appendChild(messageTimestamp);
 
     wrapper.appendChild(messageDiv);
@@ -240,6 +250,9 @@ $opts = array(
     messageContainer.appendChild(wrapper);
     messageContainer.scrollTo(0, messageContainer.scrollHeight); // scroll message container to the bottom
   }
+
+  // sipjs
+  const opts = <?php echo json_encode($opts); ?>;
 
   // inbound
   const uaOpts = {
@@ -284,8 +297,9 @@ $opts = array(
     messager.message();
   }
 
-  document.querySelector(".textentry").addEventListener("keyup", (e) => {
+  document.querySelector(".textentry").addEventListener("keypress", (e) => {
     if(e.key == "Enter" && !e.shiftKey) {
+      e.preventDefault();
       send();
       return false;
     }
