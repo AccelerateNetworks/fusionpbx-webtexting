@@ -49,7 +49,10 @@ self.addEventListener('notificationclick', function (event) {
       if(tab) {
         tab.focus();
       } else {
-        self.clients.openWindow(self.origin + '/app/webtexting/thread.php?extension_uuid=' + payload.to + '&number=' + payload.from);
+        let u = self.origin + '/app/webtexting/thread.php?extension_uuid=' + payload.to + '&number=' + payload.from;
+        console.log('opening URL:', u);
+        self.clients.openWindow(u)
+          .then((windowClient) => (windowClient ? windowClient.focus() : null));
       }
     })
   );
