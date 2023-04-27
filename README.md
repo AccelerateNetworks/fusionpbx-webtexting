@@ -14,4 +14,3 @@ Install notes:
 * Contact edit button may be displayed to users who do not have contact edit permission (they will see a "permission denied" screen when they click)
 * Threads list does not update when new messages are received
 * Having a thread open registers a SIP client on the extension, calls to which will be ignored
-* no native notifications, even when the page is open

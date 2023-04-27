@@ -19,32 +19,38 @@ self.addEventListener('push', function (event) {
 
       channel.postMessage(payload);
 
-      // Check if there's at least one focused client.
-      var focused = clientList.some(function (client) {
-        return client.focused;
+      var tab = clientList.some(function (client) {
+        let u = new URL(client.url);
+        return u.searchParams.get('extension_uuid') == payload.to && u.searchParams.get('number') == payload.from;
       });
 
-      if (!focused) {
-        return self.registration.showNotification(payload.display_name, {
-          body: payload.body,
-        });
+      if(tab) {
+        console.log("tab with conversation exists");
+        if(tab.focused) {
+          console.log('tab with conversation is focused, not sending notification');
+          return;
+        }
       }
+
+      return self.registration.showNotification(payload.display_name, {body: payload.body});
     })
   );
 });
 
-// Register event listener for the 'notificationclick' event.
 self.addEventListener('notificationclick', function (event) {
+  e.notification.close();
   event.waitUntil(
-    // Retrieve a list of the clients of this service worker.
     self.clients.matchAll().then(function (clientList) {
-      // If there is at least one client, focus it.
-      if (clientList.length > 0) {
-        return clientList[0].focus();
-      }
+      var tab = clientList.some(function (client) {
+        let u = new URL(client.url);
+        return u.searchParams.get('extension_uuid') == payload.to && u.searchParams.get('number') == payload.from;
+      });
 
-      // Otherwise, open a new page.
-      return self.clients.openWindow('../push-clients_demo.html');
+      if(tab) {
+        tab.focus();
+      } else {
+        self.clients.openWindow(self.origin + '/app/webtexting/thread.php?extension_uuid=' + payload.to + '&number=' + payload.from);
+      }
     })
   );
 });

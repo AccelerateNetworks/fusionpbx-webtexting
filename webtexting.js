@@ -63,9 +63,13 @@ async function toggleNotifications() {
 }
 
 function setNotificationButtonState(notificationState) {
-    console.log("notificationState:", notificationState);
+    console.log("notificationState:", notificationState.state);
 
     const btn = document.querySelector('#notification-btn');
+    if(!btn) {
+        return;
+    }
+
     btn.dataset.state = notificationState.state;
 
     const icon = btn.querySelector('.fas')
@@ -83,6 +87,7 @@ function setNotificationButtonState(notificationState) {
         case "off":
             icon.classList.add("fa-bell-slash");
             icon.classList.remove("fa-bell");
+            break;
     }
     
     const label = btn.querySelector('.button-label');

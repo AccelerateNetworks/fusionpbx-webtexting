@@ -119,7 +119,7 @@ $number = $_GET['number'];
 echo "<div class='action_bar' id='action_bar'>\n";
 echo "	<div class='heading'><b>WebTexting</b> - ".$extension['outbound_caller_id_name']." (".$extension['outbound_caller_id_number'].")</div>";
 echo "	<div class='actions'>\n";
-echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'label' => '?', 'onclick' => 'toggleNotifications()']);
+// echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'label' => '?', 'onclick' => 'toggleNotifications()']);
 echo button::create(['type'=>'button','label'=>"All Texts",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'threadlist.php?extension_uuid='.$extension['extension_uuid']]);
 echo "	</div>\n";
 echo "	<div style='clear: both;'></div>\n";

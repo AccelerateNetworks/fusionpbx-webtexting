@@ -54,7 +54,7 @@ echo "	<div class='actions'>\n";
 if(sizeof($_SESSION['user']['extension']) > 1) {
 	echo button::create(['type'=>'button','label'=>"All Extensions",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'index.php']);
 }
-echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'onclick' => 'toggleNotifications()']);
+echo button::create(['type'=>'button','icon'=>'bell-slash', 'label' => '?', 'style' => 'display: none','id'=>'notification-btn', 'onclick' => 'toggleNotifications()']);
 echo button::create(['type'=>'button','icon'=>$_SESSION['theme']['button_icon_add'],'onclick'=>"modal_open('modal-new-thread','new-thread-number');"]);
 echo "	</div>\n";
 echo "	<div style='clear: both;'></div>\n";
