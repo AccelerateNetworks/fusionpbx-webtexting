@@ -112,6 +112,15 @@ if(!$extension) {
   .message-body {
     margin: 0;
   }
+
+  .statusbox {
+    font-size: 7pt;
+    text-align: right;
+  }
+
+  .statusbox .error {
+    color: #ff5555;
+  }
 </style>
 
 <?php
@@ -192,8 +201,9 @@ if($contact) {
   </div>
   <div class="sendbox">
     <textarea class="textentry" autofocus="autofocus"></textarea>
-    <input type="button" value="send" class="btn btn-send" />
+    <input type="button" value="send" class="btn btn-send" disabled />
   </div>
+  <div class="statusbox">loading</div>
 </div>
 
 <?php
@@ -254,6 +264,8 @@ $opts = array(
   // sipjs
   const opts = <?php echo json_encode($opts); ?>;
 
+  let backoff = 0;
+
   // inbound
   const uaOpts = {
     uri: SIP.UserAgent.makeURI("sip:" + opts.username + "@" + opts.server),
@@ -278,11 +290,68 @@ $opts = array(
       }
     }
   };
+
   const userAgent = new SIP.UserAgent(uaOpts);
+  userAgent.stateChange.on((s) => console.log("ua state change: ", s))
+
+  function reconnect() {
+    let statusbox = document.querySelector('.statusbox');
+    if(backoff > 0) {
+      if(statusbox) {
+        statusbox.textContent = "reconnecting in " + Math.round(backoff) + " seconds";
+      }
+      setTimeout(() => {
+        console.log('reconnecting');
+        if(statusbox) {
+          statusbox.textContent = "reconnecting";
+        }
+        userAgent.reconnect().catch(reconnect);
+      }, backoff*1000);
+      if(backoff < 30) { // max backoff 30 seconds
+        backoff = backoff * 1.1;
+      }
+    } else {
+      if(statusbox) {
+        statusbox.textContent = "reconnecting";
+      }
+      backoff = 2;
+      console.log('reconnecting');
+      userAgent.reconnect().catch(reconnect);
+    }
+  }
+
+  userAgent.onTransportConnect = () => {
+    let btn = document.querySelector('.btn-send');
+    if(btn) {
+      btn.disabled = false;
+    }
+    let statusbox = document.querySelector('.statusbox');
+    if(statusbox) {
+      statusbox.textContent = "connected";
+      statusbox.classList.remove('error');
+    }
+
+    backoff = 0;
+  };
+  userAgent.onTransportDisconnect = (error) => {
+    let btn = document.querySelector('.btn-send');
+    if(btn) {
+      btn.disabled = true;
+    }
+    let statusbox = document.querySelector('.statusbox');
+    if(statusbox) {
+      statusbox.classList.add('error');
+    }
+    reconnect();
+  }
+
   const registerer = new SIP.Registerer(userAgent, {expires: 60});
   userAgent.start().then(() => {
     registerer.register();
     messageContainer.scrollTo(0, messageContainer.scrollHeight);
+  }).catch((e) => {
+    console.error("error starting: ", e);
+    reconnect();
   });
 
   // outbound

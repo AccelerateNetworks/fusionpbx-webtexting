@@ -117,7 +117,10 @@ if (window.notification_data) {
                 }),
             }).then((r) => r.json());
         }
-        document.querySelector('#notification-btn').style.display = 'inline-block';
-        setNotificationButtonState(buttonState);
+        let btn = document.querySelector('#notification-btn');
+        if(btn) {
+            btn.style.display = 'inline-block';
+            setNotificationButtonState(buttonState);
+        }
     });
 }
