@@ -279,7 +279,7 @@ $opts = array(
     }
   };
   const userAgent = new SIP.UserAgent(uaOpts);
-  const registerer = new SIP.Registerer(userAgent);
+  const registerer = new SIP.Registerer(userAgent, {expires: 60});
   userAgent.start().then(() => {
     registerer.register();
     messageContainer.scrollTo(0, messageContainer.scrollHeight);
