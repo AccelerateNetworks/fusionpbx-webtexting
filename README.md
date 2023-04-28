@@ -1,13 +1,12 @@
 # WebTexting
 
 Install notes:
-* must enable websockets on your profile, must be on port 7443 for now
+* must enable websockets on the SIP profile, must be on port 7443
 * must install [fork of fusionpbx-apps.git/sms](https://github.com/AccelerateNetworks/fusionpbx-sms-fork)
   * must put https://github.com/fusionpbx/fusionpbx-apps/blob/master/sms/resources/templates/conf/chatplan/default.xml in /etc/freeswitch/chatplan/default.xml (overwrite existing)
-  * above is not documented anywhere that i can find
+  * above is not documented anywhere that i can find, but appears to be required to install the stock sms app
   * probably have to reloadxml after doing this
-  * our fork does not involve any changes to this file
-* Has no schema or permissions of it's own
+  * our fork does not involve any changes to this file, it's fine to use upstream's
 
 ## Current limitations
 * Contacts are displayed to users who don't have contact_read_* permissions

@@ -1,10 +1,20 @@
 <?php
 
-function webtexting_sms_hook($to, $domain_uuid, $from, $body)
-{
+function webtexting_sms_hook($to, $domain_uuid, $from, $body) {
+    $sql = "SELECT v_contacts.contact_name_given, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
+    $parameters['number'] = $from;
+    $parameters['domain_uuid'] = $domain_uuid;
+    $database = new database;
+    $contact = $database->select($sql, $parameters, 'row');
+    unset($parameters);
+
+    $display_name = $from;
+    if($contact) {
+        $display_name = $contact['contact_name_given']." ".$contact['contact_name_family'];
+    }
+
     $payload['payload'] = array(
-        "display_name" => "<" . $from . ">",
-        // TODO: look up contact name
+        "display_name" => $display_name,
         "from" => $from,
         "to" => $to,
         "body" => $body
@@ -18,7 +28,6 @@ function webtexting_sms_hook($to, $domain_uuid, $from, $body)
     $parameters['extension'] = $to;
     $parameters['domain_uuid'] = $domain_uuid;
     $parameters['remote_identifier'] = $from;
-    $database = new database;
     $targets = $database->select($sql, $parameters, 'all');
     unset($parameters);
 
@@ -27,7 +36,6 @@ function webtexting_sms_hook($to, $domain_uuid, $from, $body)
     }
 
     $sql = "SELECT value FROM webtexting_settings WHERE setting = 'vapid_private_key'";
-    $database = new database;
     $payload['vapid_private_key'] = $database->select($sql, null, 'column');
     unset($parameters);
 
@@ -44,9 +52,9 @@ function webtexting_sms_hook($to, $domain_uuid, $from, $body)
     }
 
     $descriptorspec = array(
-        0 => array("pipe", "r"), // stdin is a pipe that the child will read from
-        1 => array("pipe", "w"), // stdout is a pipe that the child will write to
-        2 => array("pipe", "w"), // stderr is a file to write to
+        0 => array("pipe", "r"), // subprocess's stdin is a pipe
+        1 => array("pipe", "w"), // subprocess's stdout is a pipe
+        2 => array("pipe", "w"), // subprocess's stderr pipe
     );
 
     $wd = dirname(__FILE__);
@@ -80,11 +88,9 @@ function webtexting_sms_hook($to, $domain_uuid, $from, $body)
 
             $sql = "DELETE FROM webtexting_subscriptions USING webtexting_clients WHERE webtexting_subscriptions.client_uuid = webtexting_clients.client_uuid AND webtexting_clients.endpoint = :endpoint";
             $parameters['endpoint'] = $result->subscription->endpoint;
-            $database = new database;
             $database->execute($sql, $parameters);
 
             $sql = "DELETE FROM webtexting_clients WHERE endpoint = :endpoint";
-            $database = new database;
             $database->execute($sql, $parameters);
 
             unset($parameters);
