@@ -160,7 +160,7 @@ foreach($extensions as $extension) {
         'fix' => 'upstream_routing',
         'number' => $trimmed_number,
     );
-    if($trimmed_number && $sms_destination['messaging_data']) {
+    if($trimmed_number != "" && $sms_destination['messaging_data']) {
         $actualUrl = $sms_destination['messaging_data']->callbackUrl;
         $desiredUrl = "https://".$_SESSION['domain_name']."/app/sms/hook/sms_hook_acceleratenetworks.php";
 
