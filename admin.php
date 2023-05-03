@@ -27,7 +27,7 @@ switch($_POST['fix']) {
         }
         unset($parameters);
         break;
-    case "sms_destination":
+    case "update_sms_destination":
         $sql = "UPDATE v_sms_destinations SET chatplan_detail_data = :chatplan_detail_data WHERE sms_destination_uuid = :destination AND domain_uuid = :domain_uuid";
         $parameters['chatplan_detail_data'] = $_POST['chatplan_detail_data'];
         $parameters['destination'] = $_POST['destination'];
@@ -36,6 +36,19 @@ switch($_POST['fix']) {
             message::add("updated SMS destination chatplan detail data ".$_POST['destination']);
         } else {
             message::add("error updating SMS destination chatplan detail data ".$_POST['destination'], 'negative');
+        }
+        unset($parameters);
+        break;
+    case "create_sms_destination":
+        $sql = "INSERT INTO v_sms_destinations (sms_destination_uuid, domain_uuid, destination, carrier, enabled, chatplan_detail_data) VALUES (:sms_destination_uuid, :domain_uuid, :destination, 'acceleratenetworks', t, :chatplan_detail_data)";
+        $parameters['sms_destination_uuid'] = uuid();
+        $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['destination'] = $_POST['destination'];
+        $parameters['chatplan_detail_data'] = $_POST['chatplan_detail_data'];
+        if($database->execute($sql, $parameters)) {
+            message::add("added SMS destination for ".$_POST['destination']);
+        } else {
+            message::add("error adding SMS destination for ".$_POST['destination'], 'negative');
         }
         unset($parameters);
         break;
@@ -126,7 +139,7 @@ foreach($extensions as $extension) {
             echo "<td class='success'>".$trimmed_number." -> ".$destination_extenion."</td>";
         } else {
             $fix = array(
-                'fix' => 'sms_destination',
+                'fix' => 'update_sms_destination',
                 'destination' => $sms_destination['sms_destination_uuid'],
                 'chatplan_detail_data' => $extension['extension'],
             );
@@ -168,7 +181,7 @@ foreach($extensions as $extension) {
         }
     } else if($trimmed_number) {
         $fix = array(
-            'fix' => 'sms_destination',
+            'fix' => 'create_sms_destination',
             'destination' => $sms_destination['sms_destination_uuid'],
             'chatplan_detail_data' => $extension['extension'],
         );
