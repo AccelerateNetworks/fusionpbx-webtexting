@@ -162,6 +162,7 @@ foreach($extensions as $extension) {
             } else {
                 echo "<td class='success'>inbound SMS routed correctly</td>";
             }
+            unset($errors);
         } else {
             echo "<td class='error'>".fixbutton("number not routed upstream", $fix)."</td>";
         }
