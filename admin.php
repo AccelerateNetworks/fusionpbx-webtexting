@@ -167,7 +167,12 @@ foreach($extensions as $extension) {
             echo "<td class='error'>".fixbutton("number not routed upstream", $fix)."</td>";
         }
     } else if($trimmed_number) {
-        echo "<td class='error'>no SMS destination for ".$trimmed_number."</td>";
+        $fix = array(
+            'fix' => 'sms_destination',
+            'destination' => $sms_destination['sms_destination_uuid'],
+            'chatplan_detail_data' => $extension['extension'],
+        );
+        echo "<td class='error'>".fixbutton("no SMS destination for ".$trimmed_number, $fix)."</td>";
         echo "<td>-</td>";
     } else {
         echo "<td>-</td>";
