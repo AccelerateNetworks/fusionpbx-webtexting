@@ -171,7 +171,7 @@ foreach($extensions as $extension) {
         $actualToken = $sms_destination['messaging_data']->clientSecret;
         $desiredToken = $_SESSION['sms']['acceleratenetworks_inbound_token']['text'];
         if($actualToken != $desiredToken) {
-            $errors[] = "token incorrect: ".$actualToken." -> ".$desiredToken;
+            $errors[] = "token incorrect: ";
         }
 
         if(sizeof($errors) > 0) {
@@ -180,14 +180,14 @@ foreach($extensions as $extension) {
                 echo "<li>".$error."</li>";
             }
             echo "</ul>";
-            echo fixbutton("upstream routing", $fix);
+            echo fixbutton($trimmed_number." upstream routing", $fix);
             echo "</td>";
         } else {
             echo "<td class='success'>inbound SMS routed correctly</td>";
         }
         unset($errors);
     } else if($trimmed_number) {
-        echo "<td class='error'>".fixbutton("number not routed upstream", $fix)."</td>";
+        echo "<td class='error'>".fixbutton($trimmed_number." not routed upstream", $fix)."</td>";
     } else {
         echo "<td>-</td>";
     }
