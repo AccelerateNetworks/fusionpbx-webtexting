@@ -133,7 +133,7 @@ foreach($extensions as $extension) {
     }
 
     $sms_destination = $sms_destinations[$trimmed_number];
-    if($sms_destination) {
+    if($sms_destination && $sms_destination['sms_destination_uuid']) {
         $destination_extenion = $sms_destination['chatplan_detail_data'];
         if($destination_extenion == $extension['extension']) {
             echo "<td class='success'>".$trimmed_number." -> ".$destination_extenion."</td>";
@@ -145,40 +145,6 @@ foreach($extensions as $extension) {
             );
             echo "<td class='error'>".fixbutton("SMS routes to wrong extension: ".$trimmed_number." -> ".$destination_extenion, $fix)."</td>";
         }
-
-        $fix = array(
-            'fix' => 'upstream_routing',
-            'number' => $trimmed_number,
-        );
-        if($sms_destination['messaging_data']) {
-            $actualUrl = $sms_destination['messaging_data']->callbackUrl;
-            $desiredUrl = "https://".$_SESSION['domain_name']."/app/sms/hook/sms_hook_acceleratenetworks.php";
-
-            if($actualUrl != $desiredUrl) {
-                $errors[] = "callback URL incorrect: ".$actualUrl." -> ".$desiredUrl;
-            }
-
-            $actualToken = $sms_destination['messaging_data']->clientSecret;
-            $desiredToken = $_SESSION['sms']['acceleratenetworks_inbound_token']['text'];
-            if($actualToken != $desiredToken) {
-                $errors[] = "token incorrect: ".$actualToken." -> ".$desiredToken;
-            }
-
-            if(sizeof($errors) > 0) {
-                echo "<td class='error'><ul>";
-                foreach($errors as $error) {
-                    echo "<li>".$error."</li>";
-                }
-                echo "</ul>";
-                echo fixbutton("upstream routing", $fix);
-                echo "</td>";
-            } else {
-                echo "<td class='success'>inbound SMS routed correctly</td>";
-            }
-            unset($errors);
-        } else {
-            echo "<td class='error'>".fixbutton("number not routed upstream", $fix)."</td>";
-        }
     } else if($trimmed_number) {
         $fix = array(
             'fix' => 'create_sms_destination',
@@ -186,10 +152,42 @@ foreach($extensions as $extension) {
             'chatplan_detail_data' => $extension['extension'],
         );
         echo "<td class='error'>".fixbutton("no SMS destination for ".$trimmed_number, $fix)."</td>";
-        echo "<td>-</td>";
     } else {
         echo "<td>-</td>";
-        echo "<td>-</td>";
+    }
+
+    $fix = array(
+        'fix' => 'upstream_routing',
+        'number' => $trimmed_number,
+    );
+    if($sms_destination['messaging_data']) {
+        $actualUrl = $sms_destination['messaging_data']->callbackUrl;
+        $desiredUrl = "https://".$_SESSION['domain_name']."/app/sms/hook/sms_hook_acceleratenetworks.php";
+
+        if($actualUrl != $desiredUrl) {
+            $errors[] = "callback URL incorrect: ".$actualUrl." -> ".$desiredUrl;
+        }
+
+        $actualToken = $sms_destination['messaging_data']->clientSecret;
+        $desiredToken = $_SESSION['sms']['acceleratenetworks_inbound_token']['text'];
+        if($actualToken != $desiredToken) {
+            $errors[] = "token incorrect: ".$actualToken." -> ".$desiredToken;
+        }
+
+        if(sizeof($errors) > 0) {
+            echo "<td class='error'><ul>";
+            foreach($errors as $error) {
+                echo "<li>".$error."</li>";
+            }
+            echo "</ul>";
+            echo fixbutton("upstream routing", $fix);
+            echo "</td>";
+        } else {
+            echo "<td class='success'>inbound SMS routed correctly</td>";
+        }
+        unset($errors);
+    } else {
+        echo "<td class='error'>".fixbutton("number not routed upstream", $fix)."</td>";
     }
     echo "</tr>";
 }
