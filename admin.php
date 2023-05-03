@@ -40,15 +40,15 @@ switch($_POST['fix']) {
         unset($parameters);
         break;
     case "create_sms_destination":
-        $sql = "INSERT INTO v_sms_destinations (sms_destination_uuid, domain_uuid, destination, carrier, enabled, chatplan_detail_data) VALUES (:sms_destination_uuid, :domain_uuid, :number, 'acceleratenetworks', t, :chatplan_detail_data)";
+        $sql = "INSERT INTO v_sms_destinations (sms_destination_uuid, domain_uuid, destination, carrier, enabled, chatplan_detail_data) VALUES (:sms_destination_uuid, :domain_uuid, :number, 'acceleratenetworks', true, :chatplan_detail_data)";
         $parameters['sms_destination_uuid'] = uuid();
         $parameters['domain_uuid'] = $domain_uuid;
         $parameters['number'] = $_POST['number'];
         $parameters['chatplan_detail_data'] = $_POST['chatplan_detail_data'];
         if($database->execute($sql, $parameters)) {
-            message::add("added SMS destination for ".$_POST['destination']);
+            message::add("added SMS destination for ".$_POST['number']);
         } else {
-            message::add("error adding SMS destination for ".$_POST['destination'], 'negative');
+            message::add("error adding SMS destination for ".$_POST['number'], 'negative');
         }
         unset($parameters);
         break;
