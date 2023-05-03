@@ -40,10 +40,10 @@ switch($_POST['fix']) {
         unset($parameters);
         break;
     case "create_sms_destination":
-        $sql = "INSERT INTO v_sms_destinations (sms_destination_uuid, domain_uuid, destination, carrier, enabled, chatplan_detail_data) VALUES (:sms_destination_uuid, :domain_uuid, :destination, 'acceleratenetworks', t, :chatplan_detail_data)";
+        $sql = "INSERT INTO v_sms_destinations (sms_destination_uuid, domain_uuid, destination, carrier, enabled, chatplan_detail_data) VALUES (:sms_destination_uuid, :domain_uuid, :number, 'acceleratenetworks', t, :chatplan_detail_data)";
         $parameters['sms_destination_uuid'] = uuid();
         $parameters['domain_uuid'] = $domain_uuid;
-        $parameters['destination'] = $_POST['destination'];
+        $parameters['number'] = $_POST['number'];
         $parameters['chatplan_detail_data'] = $_POST['chatplan_detail_data'];
         if($database->execute($sql, $parameters)) {
             message::add("added SMS destination for ".$_POST['destination']);
@@ -182,7 +182,7 @@ foreach($extensions as $extension) {
     } else if($trimmed_number) {
         $fix = array(
             'fix' => 'create_sms_destination',
-            'destination' => $sms_destination['sms_destination_uuid'],
+            'number' => $trimmed_number,
             'chatplan_detail_data' => $extension['extension'],
         );
         echo "<td class='error'>".fixbutton("no SMS destination for ".$trimmed_number, $fix)."</td>";
