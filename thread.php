@@ -272,7 +272,8 @@ $opts = array(
     authorizationUsername: opts.username,
     authorizationPassword: opts.password,
     transportOptions: {
-      server: "wss://" + opts.server + ":7443",
+      server: "wss://" + opts.server + "/ws",
+      headerProtocol: "WS",
     },
     delegate: {
       onInvite: (invitation) => {
