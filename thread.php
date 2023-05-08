@@ -86,13 +86,19 @@ if(!$extension) {
   .sendbox {
     display: flex;
     margin-bottom: 0.5em;
+    background-color: #eee;
   }
 
   .textentry {
     border: 0;
-    background-color: #eee;
+    background-color: inherit;
     resize: none; /* prevent the user from resizing the text box */
     flex-grow: 1;
+  }
+
+  .btn-attach {
+    padding: 0;
+    margin: auto 0;
   }
 
   .btn-send {
@@ -120,6 +126,23 @@ if(!$extension) {
 
   .statusbox .error {
     color: #ff5555;
+  }
+
+  .attachment-preview {
+    display: flex;
+    justify-content: left;
+    background-color: #eee;
+  }
+
+  .attachment-preview-wrapper {
+    height: 150px;
+    width: 150px;
+  }
+
+  .attachment-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 </style>
 
@@ -199,9 +222,12 @@ if($contact) {
     unset($parameters);
     ?>
   </div>
+  <div class="attachment-preview"></div>
   <div class="sendbox">
     <textarea class="textentry" autofocus="autofocus"></textarea>
-    <input type="button" value="send" class="btn btn-send" disabled />
+    <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
+    <input type="file" multiple id="attachment-upload" style="display: none;" />
+    <button class="btn btn-send" disabled><span class="fas fa-paper-plane fa-fw"></span></button>
   </div>
   <div class="statusbox">loading</div>
 </div>
@@ -350,16 +376,24 @@ $opts = array(
   userAgent.start().then(() => {
     registerer.register();
     messageContainer.scrollTo(0, messageContainer.scrollHeight);
+    document.querySelector('.sendbox > textarea').focus()
   }).catch((e) => {
     console.error("error starting: ", e);
     reconnect();
   });
 
   // outbound
+  const attached = new Array();
   const remoteURI = SIP.UserAgent.makeURI("sip:" + opts.remote_number + "@" + opts.server);
+
   function send() {
-    const message = document.querySelector(".textentry").value;
-    console.log("sending ", message);
+    const message = document.querySelector(".textentry").value.trim();
+    if(message.length == 0 && attached.length == 0) {
+      document.querySelector('.sendbox > textarea').focus();
+      return;
+    }
+
+    console.log("sending ", message, " with ", attached.length, " attachment(s)");
     pushMessage(message, 'outbound');
     const messager = new SIP.Messager(userAgent, remoteURI, message);
     document.querySelector(".textentry").value = "";
@@ -375,7 +409,49 @@ $opts = array(
     }
   });
 
+  async function uploadAttachment(file, wrapper) {
+    const uploadTarget = await fetch("upload.php", {
+      method: "POST",
+      body: JSON.stringify({filename: file.name})
+    }).then(r => r.json());
+
+    console.log("uploading ", uploadTarget);
+    const resp = await fetch(uploadTarget.upload_url, {
+      method: "PUT",
+      body: await file.arrayBuffer(),
+    });
+
+    console.log("uploaded: ", resp);
+
+    return uploadTarget.path;
+  }
+
+  function attach() {
+    for(const file of this.files) {
+      const wrapper = document.createElement('div');
+      wrapper.classList.add('attachment-preview-wrapper')
+
+      const img = document.createElement('img');
+      img.classList.add('attachment-preview-img');
+      img.src = URL.createObjectURL(file);
+
+      const removeBtn = document.createElement('span');
+      removeBtn.classList.add('fas', 'fa-trash', 'fa-fw');
+
+      wrapper.appendChild(img);
+      wrapper.appendChild(removeBtn);
+      document.querySelector('.attachment-preview').appendChild(wrapper);
+
+      attached.push({
+        file: file,
+        preview: wrapper,
+        upload: uploadAttachment(file, wrapper),
+      });
+    }
+  }
+
   document.querySelector(".btn-send").addEventListener("click", send);
+  document.querySelector("#attachment-upload").addEventListener("change", attach)
 </script>
 <?php
 require_once "footer.php";

@@ -1,0 +1,14 @@
+{
+    "name": "acceleratenetworks/fusionpbx-webtexting",
+    "type": "project",
+    "license": "AGPLv3",
+    "authors": [
+        {
+            "name": "Finn Herzfeld",
+            "email": "finn@acceleratenetworks.com"
+        }
+    ],
+    "require": {
+        "aws/aws-sdk-php": "^3.269"
+    }
+}
