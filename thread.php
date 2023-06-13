@@ -298,7 +298,7 @@ $opts = array(
     authorizationUsername: opts.username,
     authorizationPassword: opts.password,
     transportOptions: {
-      server: "wss://" + opts.server + "/ws",
+      server: "wss://" + window.location.hostname + "/ws",
       headerProtocol: "WS",
     },
     delegate: {

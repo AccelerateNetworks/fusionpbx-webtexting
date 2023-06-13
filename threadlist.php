@@ -17,6 +17,19 @@ if(!$extension) {
   require_once "footer.php";
   die();
 }
+
+$database = new database;
+
+$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
+$parameters['domain_uuid'] = $domain_uuid;
+$parameters['extension_uuid'] = $extension['extension_uuid'];
+$destination = $database->select($sql, $parameters, 'column');
+unset($parameters);
+if(!$destination) {
+    echo "no destination for this extension";
+    require_once "footer.php";
+    die();
+}
 ?>
 <style type="text/css">
 .timestamp {
@@ -59,63 +72,45 @@ echo button::create(['type'=>'button','icon'=>$_SESSION['theme']['button_icon_ad
 echo "	</div>\n";
 echo "	<div style='clear: both;'></div>\n";
 echo "</div>\n";
-echo "<br /><br />\n";
 echo "<table class='table'>\n";
 
-$sql = "SELECT from_number, to_number, direction FROM v_sms_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid GROUP BY from_number, to_number, direction";
-$parameters['extension_uuid'] = $extension['extension_uuid'];
+$sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message";
+$parameters['local_number'] = $destination;
 $parameters['domain_uuid'] = $domain_uuid;
-$database = new database;
-$messages = $database->select($sql, $parameters, 'all');
+$threads = $database->select($sql, $parameters, 'all');
+// echo "<pre>query ".$sql."\nparams: ".print_r($parameters, true)."\nresults: ".print_r($threads, true)."</pre>";
 unset($parameters);
 
-$threads = array();
-foreach($messages as $message) {
-    $number = $message['direction'] == "inbound" ? $message['from_number'] : $message['to_number'];
-    if($threads[$number]) {
-        continue;
-    }
-
-    $sql = "SELECT * FROM v_sms_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND (from_number = :number OR to_number = :number) ORDER BY start_stamp DESC LIMIT 1";
+echo "<table>\n";
+foreach($threads as $thread) {
+    $number = $thread['remote_number'];
+    
+    // get the latest message from this thread
+    $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND (from_number = :number OR to_number = :number) ORDER BY start_stamp DESC LIMIT 1";
     $parameters['extension_uuid'] = $extension['extension_uuid'];
     $parameters['domain_uuid'] = $domain_uuid;
     $parameters['number'] = $number;
-    $database = new database;
-    $threads[$number] = $database->select($sql, $parameters, 'row');
+    $last_message = $database->select($sql, $parameters, 'row');
     unset($parameters);
 
     $sql = "SELECT v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
     $parameters['number'] = $number;
     $parameters['domain_uuid'] = $domain_uuid;
-    $database = new database;
-    $threads[$number]['contact'] = $database->select($sql, $parameters, 'row');
+    $contact = $database->select($sql, $parameters, 'row');
     unset($parameters);
-}
-// $thread_order = array_keys($threads);
-uksort($threads, function($a, $b) {
-global $threads;
-$a_time = strtotime($threads[$a]['start_stamp']);
-$b_time = strtotime($threads[$b]['start_stamp']);
-$result = $b_time - $a_time;
-return $result;
-});
-
-reset($threads);
-
-foreach($threads as $number => $thread) {
 
     // compute the name to display based on number and a potential contact name
     $display_name = $number;
-    if($thread['contact']) {
+    if($contact) {
         $name_parts = array();
-        if($thread['contact']['contact_name_given']) {
-            $name_parts[] = $thread['contact']['contact_name_given'];
+        if($contact['contact_name_given']) {
+            $name_parts[] = $contact['contact_name_given'];
         }
-        if($thread['contact']['contact_name_middle']) {
-            $name_parts[] = $thread['contact']['contact_name_middle'];
+        if($contact['contact_name_middle']) {
+            $name_parts[] = $contact['contact_name_middle'];
         }
-        if($thread['contact']['contact_name_family']) {
-            $name_parts[] = $thread['contact']['contact_name_family'];
+        if($contact['contact_name_family']) {
+            $name_parts[] = $contact['contact_name_family'];
         }
         if(sizeof($name_parts) > 0) {
             $display_name = implode(" ", $name_parts)." <small>(".$number.")</small>";
@@ -125,12 +120,11 @@ foreach($threads as $number => $thread) {
     echo "<tr><td>";
     echo "<a href='thread.php?number=".$number."&extension_uuid=".$extension['extension_uuid']."'>";
     echo "<span class='thread-name'>".$display_name."</span><br />";
-    echo "<span class='thread-last-message'>".$thread['message']."</span>";
-    echo "<span class='timestamp' data-timestamp='".$thread['start_stamp']."'></span>";
+    echo "<span class='thread-last-message'>".$last_message['message']."</span>";
+    echo "<span class='timestamp' data-timestamp='".$last_message['start_stamp']."'></span>";
     echo "</a>";
     echo "</td></tr>\n";
 }
-
 echo "</table>\n";
 ?>
 <script type="text/javascript">

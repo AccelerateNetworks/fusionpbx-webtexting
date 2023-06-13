@@ -58,8 +58,6 @@ $database = new database;
 $subscriptions = $database->select($sql, $parameters, 'all');
 unset($parameters);
 
-error_log("\nexecuted ".$sql."\n");
-
 $notification_state = "off";
 foreach($subscriptions as $subscription) {
     if($subscription['remote_identifier']) {
