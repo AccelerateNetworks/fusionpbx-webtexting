@@ -372,7 +372,7 @@ $opts = array(
     reconnect();
   }
 
-  const registerer = new SIP.Registerer(userAgent, {expires: 60});
+  const registerer = new SIP.Registerer(userAgent, {expires: 120});
   userAgent.start().then(() => {
     registerer.register();
     messageContainer.scrollTo(0, messageContainer.scrollHeight);

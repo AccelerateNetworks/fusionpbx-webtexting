@@ -22,7 +22,7 @@ function incoming_sms($from, $to, $body) {
     $parameters['to'] = $to;
     $destination = $db->select($sql, $parameters, 'row');
     unset($parameters);
-    error_log("routing to destination: ", print_r($destination, true));
+    error_log("routing to destination: ".print_r($destination, true));
     if(!$destination) {
         error_log("received message for number with no entry in webtexting_destinations: ".$to);
         return false;
@@ -57,23 +57,19 @@ function incoming_sms($from, $to, $body) {
     }
     unset($parameters);
 
-    // create the event socket connection and send the event socket command
-    // $fp = event_socket_create($_SESSION['event_socket_ip_address'], $_SESSION['event_socket_port'], $_SESSION['event_socket_password']);
-    // if (!$fp) {
-    //     error_log("Connection to Event Socket failed");
-    //     return false;
-    // }
-
-    $sip_profiles = array("webrtc"); // TODO: make this list configurable
+    $sip_profiles = array("websocket"); // TODO: make this list configurable
     $to_address = $extension."@".$domain_name;
+    $from_address = $from."@".$domain_name;
+
     foreach($sip_profiles as $sip_profile) {
         $event_headers = array(
+            "Event-Subclass" => "SMS::SEND_MESSAGE",
             "proto" => "sip",
             "dest_proto" => "sip",
             "from" => "sip:".$from,
             "from_user" => $from,
             "from_host" => $domain_name,
-            "full_from" => "sip:".$from."@".$domain_name,
+            "from_full" => "sip:".$from_address,
             "sip_profile" => $sip_profile,
             "to" => $to_address,
             "to_user" => $extension,
@@ -85,15 +81,14 @@ function incoming_sms($from, $to, $body) {
             "DP_MATCH" => $to_address, // what is this?
             "Content-Length" => strlen($body),
         );
-        $cmd = "sendevent CUSTOM SMS::SEND_MESSAGE\n";
+        $cmd = "sendevent CUSTOM\n";
         foreach($event_headers as $k=>$v) {
-            $cmd .= "$k: ".urlencode($v)."\n";
+            $cmd .= "$k: ".$v."\n";
         }
-        
+
         $cmd .= "\n".$body;
-        error_log("sending event to profile ".$sip_profile.": ".$cmd."\n");
+        error_log("sending sms event to profile ".$sip_profile."\n");
         $cmd_response = event_socket_request_cmd($cmd);
-        error_log("sending event returned response: ".print_r($cmd_response, true)."\n");
     }
 
     error_log("delivered inbound SMS");
