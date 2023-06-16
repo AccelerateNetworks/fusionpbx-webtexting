@@ -1,4 +1,7 @@
 <?php
+require_once 'vendor/autoload.php';
+use Minishlink\WebPush\VAPID;
+
 require_once "root.php";
 require_once "resources/require.php";
 require_once "resources/check_auth.php";
@@ -11,9 +14,13 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
     $database = new database;
     $vapid_public_key = $database->select($sql, null, 'column');
     if(!$vapid_public_key) {
-        error_log("no VAPID keys generated! Please go to https://web-push-codelab.glitch.me/ to generate some, then insert them into the database manually:\nINSERT INTO webtexting_settings (setting, value) VALUES ('vapid_public_key', 'xxx'), ('vapid_private_key', 'xxx');\n");
-        http_response_code(500);
-        die();
+        $sql = "INSERT INTO webtexting_settings (setting, value) VALUES ('vapid_public_key', :vapid_public_key), ('vapid_private_key', :vapid_private_key)";
+        $vapid_key = VAPID::createVapidKeys();
+        $vapid_public_key = $vapid_key['publicKey'];
+        $parameters['vapid_public_key'] = $vapid_key['publicKey'];
+        $parameters['vapid_private_key'] = $vapid_key['privateKey'];
+        $database->execute($sql, $parameters);
+        unset($parameters);
     }
 
     echo json_encode(array("vapid_key" => $vapid_public_key));

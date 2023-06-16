@@ -1,12 +1,12 @@
 # WebTexting
 
 Install notes:
-* must enable websockets on the SIP profile, must be on port 7443
-* must install [fork of fusionpbx-apps.git/sms](https://github.com/AccelerateNetworks/fusionpbx-sms-fork)
-  * must put https://github.com/fusionpbx/fusionpbx-apps/blob/master/sms/resources/templates/conf/chatplan/default.xml in /etc/freeswitch/chatplan/default.xml (overwrite existing)
-  * above is not documented anywhere that i can find, but appears to be required to install the stock sms app
+* enable websockets on the SIP profile, must be on the same host and port as the web UI. Recommended way is to enable insecure websockets (ws) and bind it to 127.0.0.1, then pass /ws through from nginx.
+* install chatplan: `ln -s /var/www/fusionpbx/app/webtexting/chatplan.xml /etc/freeswitch/chatplan/default.xml`
   * probably have to reloadxml after doing this
-  * our fork does not involve any changes to this file, it's fine to use upstream's
+* install lua script for outbound messages: `ln -s /var/www/fusionpbx/app/webtexting/lua /usr/share/freeswitch/scripts/app/webtexting`
+* to install dependencies: `composer install`
+* as with most FusionPBX apps, must run schema and menu upgrade after installation.
 
 ## Current limitations
 * Contacts are displayed to users who don't have contact_read_* permissions

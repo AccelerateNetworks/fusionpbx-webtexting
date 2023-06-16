@@ -204,8 +204,9 @@ if($contact) {
 <div class="thread">
   <div class="message-container">
     <?php
-    $sql = "SELECT * FROM v_sms_messages WHERE extension_uuid = :extension_uuid AND (from_number = :number OR to_number = :number) ORDER BY start_stamp DESC LIMIT 50";
+    $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND (from_number = :number OR to_number = :number) ORDER BY start_stamp DESC LIMIT 50";
     $parameters['extension_uuid'] = $extension['extension_uuid'];
+    $parameters['domain_uuid'] = $domain_uuid;
     $parameters['number'] = $number;
     $database = new database;
     $messages = $database->select($sql, $parameters, 'all');
@@ -372,7 +373,7 @@ $opts = array(
     reconnect();
   }
 
-  const registerer = new SIP.Registerer(userAgent, {expires: 120});
+  const registerer = new SIP.Registerer(userAgent, {expires: 30}); // re-register often because to avoid hitting (nginx) proxy timeouts
   userAgent.start().then(() => {
     registerer.register();
     messageContainer.scrollTo(0, messageContainer.scrollHeight);
