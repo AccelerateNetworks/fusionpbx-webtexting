@@ -19,6 +19,8 @@ function incoming_sms($from, $to, $body) {
     $domain_uuid = $destination['domain_uuid'];
     $domain_name = $destination['domain_name'];
 
+    store_message('incoming', $extension_uuid, $from, $to, $body, 'text/plain', array());
+
     // save the message to the db
     $sql = "INSERT INTO webtexting_messages (message_uuid, extension_uuid, domain_uuid, start_stamp, from_number, to_number, message, direction) VALUES (:message_uuid, :extension_uuid, :domain_uuid, NOW(), :from, :to, :body, 'inbound')";
     $parameters['message_uuid'] = uuid();
@@ -65,6 +67,10 @@ function incoming_mms($from, $to, $attachments, $additional_recipients) {
     $domain_name = $destination['domain_name'];
 
     error_log("additional recipients: ".print_r($additional_recipients, true)."\n");
+
+    $body = "TODO: CPIM builder";
+
+    store_message('incoming', $extension_uuid, $from, $to, $body, 'message/cpim', $additional_recipients);
 
     error_log("received mms but mms support not yet implemented\n");
     return false;
