@@ -17,7 +17,7 @@ final class CPIM
     /**
      * Construct a new CPIM
      */
-    private function __construct()
+    public function __construct()
     {
         $this->headers = array();
     }
@@ -83,13 +83,91 @@ final class CPIM
     }
 
     /**
-     * Get a list of attachments
+     * Format this object into a CPIM string
      * 
-     * @return array a list of files attached to this CPIM message
+     * @return string the CPIM object
      */
-    function getAttachments(): array
+    public function toString(): string
     {
-        return array(); // TODO: this should be a list of URLs
+        $xw = xmlwriter_open_memory();
+        xmlwriter_set_indent($xw, true);
+
+        xmlwriter_start_document($xw, '1.0', 'UTF-8');
+
+        xmlwriter_start_element($xw, 'file');
+
+        xmlwriter_start_attribute($xw, 'xmlns');
+        xmlwriter_text($xw, 'urn:gsma:params:xml:ns:rcs:rcs:fthttp');
+        xmlwriter_end_attribute($xw);
+
+        xmlwriter_start_attribute($xw, 'xmlns:am');
+        xmlwriter_text($xw, 'urn:gsma:params:xml:ns:rcs:rcs:rram');
+        xmlwriter_end_attribute($xw);
+
+        xmlwriter_start_element($xw, 'file-info');
+        xmlwriter_start_attribute($xw, 'type');
+        xmlwriter_text($xw, 'file');
+
+        if (isset($this->file_size)) {
+            xmlwriter_start_element($xw, 'file-size');
+            xmlwriter_text($xw, (string)$this->file_size);
+            xmlwriter_end_element($xw);
+        }
+
+        if (isset($this->file_name)) {
+            xmlwriter_start_element($xw, 'file-name');
+            xmlwriter_text($xw, $this->file_name);
+            xmlwriter_end_element($xw);
+        }
+
+        if (isset($this->file_content_type)) {
+            xmlwriter_start_element($xw, 'content-type');
+            xmlwriter_text($xw, $this->file_content_type);
+            xmlwriter_end_element($xw);
+        }
+
+        if (isset($this->file_url)) {
+            xmlwriter_start_element($xw, 'data');
+            xmlwriter_start_attribute($xw, 'url');
+            xmlwriter_text($xw, $this->file_url);
+            xmlwriter_end_element($xw);
+        }
+
+        xmlwriter_end_element($xw);
+
+        xmlwriter_end_element($xw);
+
+        $body = xmlwriter_output_memory($xw);
+
+
+        if (!array_key_exists('content-length', $this->headers)) {
+            $this->headers['content-length'] = strlen($body);
+        }
+
+        $contentHeaders = array("content-type", "content-length");
+
+        // header block 1
+        $headers1 = array();
+        foreach ($this->headers as $key=>$value) {
+            if (in_array($key, $contentHeaders)) {
+                continue;
+            }
+
+            $headers1[] = $key.": ".$value;
+        }
+
+        $headers2 = array();
+        foreach ($contentHeaders as $key) {
+            if (!array_key_exists($key, $this->headers)) {
+                continue;
+            }
+
+            $headers2[] = $key.": ".$this->headers[$key];
+        }
+
+        $out = implode("\n", $headers1)."\n\n".implode("\n", $headers2)."\n\n".$body;
+
+        return $out;
     }
 
     /**
