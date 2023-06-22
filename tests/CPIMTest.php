@@ -10,6 +10,7 @@ To: <sip:1009@acceleratenetworks.sip.callpipe.com>
 DateTime: 2023-05-10T22:48:05Z
 NS: imdn <urn:ietf:params:imdn>
 imdn.Message-ID: trpQpJEw9GKZ
+CC: <2024561414@acceleratenetworks.sip.callpipe.com>; <2065551212@acceleratenetworks.sip.callpipe.com>
 imdn.Disposition-Notification: positive-delivery, negative-delivery, display
 
 Content-Type: application/vnd.gsma.rcs-ft-http+xml
@@ -33,6 +34,8 @@ Content-Length: 408
         $this->assertSame("image/png", $cpim->file_content_type);
         $this->assertSame("finn.png", $cpim->file_name);
         $this->assertSame(286271, $cpim->file_size);
+
+        $this->assertSame(array("2024561414", "2065551212"), $cpim->getCC());
     }
 
     public function testGenerateCPIM(): void
@@ -44,7 +47,6 @@ Content-Length: 408
         $cpim->headers['NS'] = "imdn <urn:ietf:params:imdn>";
         $cpim->headers['imdn.Message-ID'] = "trpQpJEw9GKZ";
         $cpim->headers['imdn.Disposition-Notification'] = "positive-delivery, negative-delivery, display";
-        $cpim->headers['content-type'] = "application/vnd.gsma.rcs-ft-http+xml";
 
         $cpim->file_name = "finn.png";
         $cpim->file_size = 286271;

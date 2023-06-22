@@ -1,6 +1,12 @@
 <?php
 
-function incoming() {
+require_once "root.php";
+require_once "resources/require.php";
+
+require_once __DIR__."/../vendor/autoload.php";
+
+function incoming()
+{
     header("Content-Type: application/json");
     if($_SERVER['REQUEST_METHOD'] != "POST") {
         http_response_code(405);
@@ -29,9 +35,9 @@ function incoming() {
 
     $success = false;
     if($body->MessageType == "0") {
-        $success = incoming_sms($body->From, $body->To, $body->Content);
+        $success = Messages::IncomingSMS($body->From, $body->To, $body->Content);
     } else {
-        $success = incoming_mms($body->From, $body->To, $body->MediaURLs, $body->AdditionalRecipients);
+        $success = Messages::IncomingMMS($body->From, $body->To, $body->MediaURLs, $body->AdditionalRecipients);
     }
 
     if($success) {
@@ -42,11 +48,13 @@ function incoming() {
     }
 }
 
-function outgoing_sms(string $from, string $to, string $body) {
+function outgoing_sms(string $from, string $to, string $body)
+{
     _send(["to" => $to, "msisdn" => $from, "message" => $body]);
 }
 
-function outgoing_mms(string $from, string $to, array $attachments, array $additional_recipients) {
+function outgoing_mms(string $from, string $to, array $attachments, array $additional_recipients)
+{
     if(count($additional_recipients) > 0) {
         $to = $to.",".implode(",", $additional_recipients);
     }
@@ -54,16 +62,19 @@ function outgoing_mms(string $from, string $to, array $attachments, array $addit
     _send(["to" => $to, "msisdn" => $from, "mediaURLs" => $attachments]);
 }
 
-function _send(array $body) {
+function _send(array $body)
+{
     $ch = curl_init();
 
-    curl_setopt($ch, CURLOPT_URL,"https://sms.callpipe.com/message/send");
+    curl_setopt($ch, CURLOPT_URL, "https://sms.callpipe.com/message/send");
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    curl_setopt(
+        $ch, CURLOPT_HTTPHEADER, [
         "Authorization" => "Bearer ".$api_key,
         "Content-Type" => "application/json",
-    ]);
+        ]
+    );
 
     curl_exec($ch);
 }

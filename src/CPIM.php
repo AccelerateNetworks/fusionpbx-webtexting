@@ -144,6 +144,10 @@ final class CPIM
             $this->headers['content-length'] = strlen($body);
         }
 
+        if (!array_key_exists('content-type', $this->headers)) {
+            $this->headers['content-type'] = "application/vnd.gsma.rcs-ft-http+xml";
+        }
+
         $contentHeaders = array("content-type", "content-length");
 
         // header block 1
@@ -182,7 +186,15 @@ final class CPIM
             return array();
         }
 
-        return explode(";", $val);
+        $recipients = array();
+        foreach (explode(";", $val) as $recipient) {
+            $start = strpos($recipient, '<')+1;
+            $end = strpos($recipient, "@", $start);
+            $recipients[] = substr($recipient, $start, $end-$start);
+            error_log($recipient." (".$start."/".$end.")\n");
+        }
+
+        return $recipients;
     }
 
     /**

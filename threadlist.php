@@ -5,17 +5,17 @@ require_once "resources/check_auth.php";
 require_once "resources/header.php";
 require_once "resources/paging.php";
 
-foreach($_SESSION['user']['extension'] as $ext) {
-  if($ext['extension_uuid'] == $_GET['extension_uuid']) {
-    $extension = $ext;
-    break;
-  }
+foreach ($_SESSION['user']['extension'] as $ext) {
+    if ($ext['extension_uuid'] == $_GET['extension_uuid']) {
+        $extension = $ext;
+        break;
+    }
 }
   
-if(!$extension) {
-  echo "invalid extension, please <a href='index.php'>try again</a>";
-  require_once "footer.php";
-  die();
+if (!$extension) {
+    echo "invalid extension, please <a href='index.php'>try again</a>";
+    include_once "footer.php";
+    die();
 }
 
 $database = new database;
@@ -25,9 +25,9 @@ $parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $destination = $database->select($sql, $parameters, 'column');
 unset($parameters);
-if(!$destination) {
+if (!$destination) {
     echo "no destination for this extension";
-    require_once "footer.php";
+    include_once "footer.php";
     die();
 }
 ?>
@@ -62,10 +62,10 @@ if(!$destination) {
 </form>
 <?php
 echo "<div class='action_bar' id='action_bar'>\n";
-echo "	<div class='heading'><b>WebTexting</b> - ".$extension['outbound_caller_id_name']." (".$extension['outbound_caller_id_number'].")</div>\n";
+echo "	<div class='heading'><b>WebTexting</b> - ".$extension['outbound_caller_id_name']." (".$destination.")</div>\n";
 echo "	<div class='actions'>\n";
 if(sizeof($_SESSION['user']['extension']) > 1) {
-	echo button::create(['type'=>'button','label'=>"All Extensions",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'index.php']);
+    echo button::create(['type'=>'button','label'=>"All Extensions",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'index.php']);
 }
 echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'onclick' => 'toggleNotifications()']);
 echo button::create(['type'=>'button','icon'=>$_SESSION['theme']['button_icon_add'],'onclick'=>"modal_open('modal-new-thread','new-thread-number');"]);
@@ -78,18 +78,26 @@ $sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads W
 $parameters['local_number'] = $destination;
 $parameters['domain_uuid'] = $domain_uuid;
 $threads = $database->select($sql, $parameters, 'all');
-// echo "<pre>query ".$sql."\nparams: ".print_r($parameters, true)."\nresults: ".print_r($threads, true)."</pre>";
 unset($parameters);
 
 echo "<table>\n";
-foreach($threads as $thread) {
+foreach ($threads as $thread) {
     $number = $thread['remote_number'];
-    
+
+    $group_uuid = $thread['group_uuid'];
+
     // get the latest message from this thread
-    $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND (from_number = :number OR to_number = :number) ORDER BY start_stamp DESC LIMIT 1";
+    $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
+    if ($group_uuid != null) {
+        $sql .= "group_uuid = :group_uuid";
+        $parameters['group_uuid'] = $group_uuid;
+    } else {
+        $sql .= "(from_number = :number OR to_number = :number)";
+        $parameters['number'] = $number;
+    }
+    $sql .= " ORDER BY start_stamp DESC LIMIT 1";
     $parameters['extension_uuid'] = $extension['extension_uuid'];
     $parameters['domain_uuid'] = $domain_uuid;
-    $parameters['number'] = $number;
     $last_message = $database->select($sql, $parameters, 'row');
     unset($parameters);
 
@@ -100,25 +108,37 @@ foreach($threads as $thread) {
     unset($parameters);
 
     // compute the name to display based on number and a potential contact name
-    $display_name = $number;
-    if($contact) {
-        $name_parts = array();
-        if($contact['contact_name_given']) {
-            $name_parts[] = $contact['contact_name_given'];
-        }
-        if($contact['contact_name_middle']) {
-            $name_parts[] = $contact['contact_name_middle'];
-        }
-        if($contact['contact_name_family']) {
-            $name_parts[] = $contact['contact_name_family'];
-        }
-        if(sizeof($name_parts) > 0) {
-            $display_name = implode(" ", $name_parts)." <small>(".$number.")</small>";
+    $display_name = "";
+    if ($group_uuid != null) {
+        
+    } else {
+        $display_name = $number;
+        if ($contact) {
+            $name_parts = array();
+            if ($contact['contact_name_given']) {
+                $name_parts[] = $contact['contact_name_given'];
+            }
+            if ($contact['contact_name_middle']) {
+                $name_parts[] = $contact['contact_name_middle'];
+            }
+            if ($contact['contact_name_family']) {
+                $name_parts[] = $contact['contact_name_family'];
+            }
+            if (sizeof($name_parts) > 0) {
+                $display_name = implode(" ", $name_parts)." <small>(".$number.")</small>";
+            }
         }
     }
 
+    $link = "thread.php?extension_uuid=".$extension['extension_uuid']."&";
+    if ($group_uuid != null) {
+        $link .= "group=".$group_uuid;
+    } else {
+        $link .= "number=".$number;
+    }
+
     echo "<tr><td>";
-    echo "<a href='thread.php?number=".$number."&extension_uuid=".$extension['extension_uuid']."'>";
+    echo "<a href='".$link."'>";
     echo "<span class='thread-name'>".$display_name."</span><br />";
     echo "<span class='thread-last-message'>".$last_message['message']."</span>";
     echo "<span class='timestamp' data-timestamp='".$last_message['start_stamp']."'></span>";

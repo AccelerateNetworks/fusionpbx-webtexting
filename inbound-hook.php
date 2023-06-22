@@ -1,5 +1,5 @@
 <?php
-include __DIR__."/lib/incoming.php";
+include __DIR__."/vendor/autoload.php";
 
 $provider = $_GET['provider'];
 $provider_import_path = __DIR__."/providers/".$provider.".php";
@@ -8,5 +8,6 @@ if(!file_exists($provider_import_path)) {
     http_response_code(400);
     die();
 }
+require $provider_import_path;
 
 incoming();

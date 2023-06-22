@@ -1,5 +1,5 @@
 <?php
-if($_SERVER['REMOTE_ADDR'] != "127.0.0.1") {
+if ($_SERVER['REMOTE_ADDR'] != "127.0.0.1") {
     error_log("attempt to forge outbound message from ".$_SERVER['REMOTE_ADDR']);
     http_response_code(401);
     die();
@@ -7,10 +7,10 @@ if($_SERVER['REMOTE_ADDR'] != "127.0.0.1") {
 
 require_once "root.php";
 require_once "resources/require.php";
-require_once "lib/messages.php";
+require_once __DIR__."/vendor/autoload.php";
 
 $event = json_decode(file_get_contents('php://input'));
-if(!$event) {
+if (!$event) {
     error_log("failed to parse request body: ".$postbody);
     http_response_code(400);
     die();
@@ -27,7 +27,7 @@ $parameters['domain_name'] = $domain_name;
 $parameters['extension'] = $extension;
 $db = new database;
 $destination = $db->select($sql, $parameters, 'row');
-if(!$destination) {
+if (!$destination) {
     error_log("dropping outbound message from user with no configured destination: ".$extension."@".$domain_name);
     die();
 }
@@ -44,12 +44,12 @@ require __DIR__."/providers/".$provider.".php";
 
 switch($contentType) {
 case "text/plain":
-    store_message('outgoing', $extension_uuid, $domain_uuid, $from, $to, $body, $contentType, array());
+    Messages::AddMessage('outgoing', $extension_uuid, $domain_uuid, $from, $to, $body, $contentType, array());
     outgoing_sms($from, $to, $body);   
     break;
 case "message/cpim":
-    require __DIR__."/lib/cpim.php";
-    $cpim = new CPIMMessage($body);
+    $cpim = CPIM::fromString($body);
+    Messages::AddMessage('outgoing', $extension_uuid, $domain_uuid, $from, $to, $body, $contentType, $cpim->getCC());
     // store_message('outgoing', $extension_uuid, $domain_uuid, $from, $to, $body, $contentType, array());
     outgoing_mms($from, $to, $cpim->getAttachments(), $cpim->getCC());
     break;
