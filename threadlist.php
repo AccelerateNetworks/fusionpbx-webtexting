@@ -110,7 +110,16 @@ foreach ($threads as $thread) {
     // compute the name to display based on number and a potential contact name
     $display_name = "";
     if ($group_uuid != null) {
-        
+        $sql = "SELECT name, members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND group_uuid = :group_uuid";
+        $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['group_uuid'] = $group_uuid;
+        $group = $database->select($sql, $parameters, 'row');
+        unset($parameters);
+        if ($group['name'] != null) {
+            $display_name = $group['name'];
+        } else {
+            $display_name = $group['members'];
+        }
     } else {
         $display_name = $number;
         if ($contact) {
@@ -139,8 +148,8 @@ foreach ($threads as $thread) {
 
     echo "<tr><td>";
     echo "<a href='".$link."'>";
-    echo "<span class='thread-name'>".$display_name."</span><br />";
-    echo "<span class='thread-last-message'>".$last_message['message']."</span>";
+    echo "<span class='thread-name'>".htmlspecialchars($display_name)."</span><br />";
+    echo "<span class='thread-last-message'>".htmlspecialchars($last_message['message'])."</span>";
     echo "<span class='timestamp' data-timestamp='".$last_message['start_stamp']."'></span>";
     echo "</a>";
     echo "</td></tr>\n";

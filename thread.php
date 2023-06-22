@@ -149,7 +149,7 @@ if(!$extension) {
 <?php
 $number = $_GET['number'];
 echo "<div class='action_bar' id='action_bar'>\n";
-echo "	<div class='heading'><b>WebTexting</b> - ".$extension['outbound_caller_id_name']." (".$extension['outbound_caller_id_number'].")</div>";
+echo "	<div class='heading'><b>WebTexting</b> - ".htmlspecialchars($extension['outbound_caller_id_name'])." (".htmlspecialchars($extension['outbound_caller_id_number']).")</div>";
 echo "	<div class='actions'>\n";
 // echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'label' => '?', 'onclick' => 'toggleNotifications()']);
 echo button::create(['type'=>'button','label'=>"All Texts",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'threadlist.php?extension_uuid='.$extension['extension_uuid']]);
@@ -170,13 +170,13 @@ $display_name = $number;
 if($contact) {
     $name_parts = array();
     if($contact['contact_name_given']) {
-        $name_parts[] = $contact['contact_name_given'];
+        $name_parts[] = htmlspecialchars($contact['contact_name_given']);
     }
     if($contact['contact_name_middle']) {
-        $name_parts[] = $contact['contact_name_middle'];
+        $name_parts[] = htmlspecialchars($contact['contact_name_middle']);
     }
     if($contact['contact_name_family']) {
-        $name_parts[] = $contact['contact_name_family'];
+        $name_parts[] = htmlspecialchars($contact['contact_name_family']);
     }
     if(sizeof($name_parts) > 0) {
         $display_name = implode(" ", $name_parts);
@@ -215,7 +215,7 @@ if($contact) {
       $message = $messages[--$i];
       echo "<div class='message-wrapper'>";
       echo "<div class='message message-".$message['direction']."'>";
-      echo "<p class='message-body'>".$message['message']."</p>";
+      echo "<p class='message-body'>".htmlspecialchars($message['message'])."</p>";
       echo "<span class='timestamp' data-timestamp='".$message['start_stamp']."'></span>";
       echo "</div>";
       echo "</div>";

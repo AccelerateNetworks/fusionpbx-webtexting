@@ -172,6 +172,10 @@ $z++;
 $apps[$x]['db'][$y]['fields'][$z]['name'] = "members";
 $apps[$x]['db'][$y]['fields'][$z]['type'] = "text";
 $apps[$x]['db'][$y]['fields'][$z]['description']['en-us'] = "JSON-encoded list of group members";
+$z++;
+$apps[$x]['db'][$y]['fields'][$z]['name'] = "name";
+$apps[$x]['db'][$y]['fields'][$z]['type'] = "text";
+$apps[$x]['db'][$y]['fields'][$z]['description']['en-us'] = "user-configurable group name";
 
 $y++;
 $z=0;

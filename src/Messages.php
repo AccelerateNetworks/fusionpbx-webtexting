@@ -77,7 +77,7 @@ final class Messages
             $group_uuid = $db->select($sql, $parameters, 'column');
             if (!$group_uuid) {
                 $group_uuid = uuid();
-                $sql = "INSERT INTO webtexting_groups (group_uuid, domain_uuid, members) VALUES (:group_uuid, :domain_uuid, :members)";
+                $sql = "INSERT INTO webtexting_groups (group_uuid, domain_uuid, members, name) VALUES (:group_uuid, :domain_uuid, :members)";
                 $parameters['group_uuid'] = $group_uuid;
                 $db->execute($sql, $parameters);
             }
