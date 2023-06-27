@@ -205,7 +205,10 @@ if ($_GET['group']) {
 // }
 
 ?>
-<div class="thread-header">
+<div id="conversation">
+  Loading (javascript required)
+</div>
+<!-- <div class="thread-header">
   <?php echo $displayName; ?>
 </div>
 <div class="thread">
@@ -247,7 +250,7 @@ if ($_GET['group']) {
     <button class="btn btn-send" disabled><span class="fas fa-paper-plane fa-fw"></span></button>
   </div>
   <div class="statusbox">loading</div>
-</div>
+</div> -->
 
 <?php
 $sql = "SELECT v_extensions.extension, v_extensions.password FROM v_extensions, v_domains WHERE v_domains.domain_uuid = v_extensions.domain_uuid AND v_domains.domain_name = :domain_name AND v_extensions.extension_uuid = :extension_uuid";
@@ -267,8 +270,9 @@ $frontendOpts['password'] = $extensionDetails['password'];
   // sipjs
   const opts = <?php echo json_encode($frontendOpts); ?>;
 </script>
-<script src="lib/sip-0.21.2.min.js"></script>
-<script src="frontend/cpim.js"></script>
-<script src="thread.js"></script>
+<script src="js/webtexting-thread.umd.js"></script>
+<script>
+  WebTexting.mountConversation('#conversation');
+</script>
 <?php
 require_once "footer.php";

@@ -1,0 +1,16 @@
+{
+    "include": ["frontend/*"],
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./frontend/*"]
+      },
+      "lib": ["es2015"]
+    },
+    "references": [
+      {
+        "path": "./tsconfig.node.json"
+      }
+    ]
+  }
+  

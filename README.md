@@ -13,3 +13,7 @@ Install notes:
 * Contact edit button may be displayed to users who do not have contact edit permission (they will see a "permission denied" screen when they click)
 * Threads list does not update when new messages are received
 * Having a thread open registers a SIP client on the extension, calls to which will be ignored
+
+
+## Developing
+Frontend build requires a bunch of javascript stuff. To do it without installing a bunch of javascript stuff, install podman and use `build-frontend.sh`
