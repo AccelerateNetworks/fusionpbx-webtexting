@@ -19,4 +19,3 @@ function DigitalOceanSpacesCredentials() {
         return new RejectedPromise(new CredentialsException($msg));
     };
 }
-

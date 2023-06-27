@@ -5,17 +5,17 @@ require_once "resources/check_auth.php";
 require_once "resources/header.php";
 require_once "resources/paging.php";
 
-foreach($_SESSION['user']['extension'] as $ext) {
-  if($ext['extension_uuid'] == $_GET['extension_uuid']) {
-    $extension = $ext;
-    break;
-  }
+foreach ($_SESSION['user']['extension'] as $ext) {
+    if ($ext['extension_uuid'] == $_GET['extension_uuid']) {
+        $extension = $ext;
+        break;
+    }
 }
 
-if(!$extension) {
-  echo "invalid extension, please <a href='index.php'>try again</a>";
-  require_once "footer.php";
-  die();
+if (!$extension) {
+    echo "invalid extension, please <a href='index.php'>try again</a>";
+    include "footer.php";
+    die();
 }
 ?>
 <style type="text/css">
@@ -147,7 +147,6 @@ if(!$extension) {
 </style>
 
 <?php
-$number = $_GET['number'];
 echo "<div class='action_bar' id='action_bar'>\n";
 echo "	<div class='heading'><b>WebTexting</b> - ".htmlspecialchars($extension['outbound_caller_id_name'])." (".htmlspecialchars($extension['outbound_caller_id_number']).")</div>";
 echo "	<div class='actions'>\n";
@@ -158,67 +157,84 @@ echo "	<div style='clear: both;'></div>\n";
 echo "</div>\n";
 echo "<br />\n";
 
-// compute the name to display based on number and a potential contact name
-$sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
-$parameters['number'] = $number;
-$parameters['domain_uuid'] = $domain_uuid;
-$database = new database;
-$contact = $database->select($sql, $parameters, 'row');
-unset($parameters);
+$displayName = "";
+if ($_GET['group']) {
+    $frontendOpts['group_uuid'] = $_GET['group'];
+    $displayName = htmlspecialchars($_GET['group']);
+} else {
+    $frontendOpts['remote_number'] = $_GET['number'];
 
-$display_name = $number;
-if($contact) {
-    $name_parts = array();
-    if($contact['contact_name_given']) {
-        $name_parts[] = htmlspecialchars($contact['contact_name_given']);
-    }
-    if($contact['contact_name_middle']) {
-        $name_parts[] = htmlspecialchars($contact['contact_name_middle']);
-    }
-    if($contact['contact_name_family']) {
-        $name_parts[] = htmlspecialchars($contact['contact_name_family']);
-    }
-    if(sizeof($name_parts) > 0) {
-        $display_name = implode(" ", $name_parts);
-        $display_name .= " <small>";
-        if(permission_exists('contact_phone_edit')) {
-          $display_name .= "<a class='white' href='/app/contacts/contact_edit.php?id=".$contact['contact_uuid']."'><span class='fas fa-edit fa-fw'> </span></a> ";
+    // compute the name to display based on number and a potential contact name
+    $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
+    $parameters['number'] = $number;
+    $parameters['domain_uuid'] = $domain_uuid;
+    $database = new database;
+    $contact = $database->select($sql, $parameters, 'row');
+    unset($parameters);
+
+    $displayName = $number;
+    if ($contact) {
+        $nameParts = array();
+        if ($contact['contact_name_given']) {
+            $nameParts[] = htmlspecialchars($contact['contact_name_given']);
         }
-        $display_name .= "(".$number.")</small>";
-    } elseif(permission_exists('contact_phone_edit')) {
-      $display_name .= " <small><a class='white' href='/app/contacts/contact_edit.php?id=".$contact['contact_uuid']."'><span class='fas fa-edit fa-fw'> </span></a></small>";
+        if ($contact['contact_name_middle']) {
+            $nameParts[] = htmlspecialchars($contact['contact_name_middle']);
+        }
+        if ($contact['contact_name_family']) {
+            $nameParts[] = htmlspecialchars($contact['contact_name_family']);
+        }
+        if (sizeof($nameParts) > 0) {
+            $displayName = implode(" ", $nameParts);
+            $displayName .= " <small>";
+            if (permission_exists('contact_phone_edit')) {
+                $displayName .= "<a class='white' href='/app/contacts/contact_edit.php?id=".$contact['contact_uuid']."'><span class='fas fa-edit fa-fw'> </span></a> ";
+            }
+            $displayName .= "(".$number.")</small>";
+        } elseif (permission_exists('contact_phone_edit')) {
+            $displayName .= " <small><a class='white' href='/app/contacts/contact_edit.php?id=".$contact['contact_uuid']."'><span class='fas fa-edit fa-fw'> </span></a></small>";
+        }
     }
 }
 
 // The UX here is confusing to the point that I have disabled it, because we can't pre-file the contact number,
 // and if the user forgets to do that they just make a contact with no number. Solution would be to create a blank
 // contact with just a number and redirect to it's edit screen when this is clicked
-// if($display_name == $number && permission_exists('contact_phone_add')) {
-//   $display_name .= " <small><a class='white' href='/app/contacts/contact_edit.php'><span class='fas fa-edit fa-fw'> </span></a></small>";
+// if($displayName == $number && permission_exists('contact_phone_add')) {
+//   $displayName .= " <small><a class='white' href='/app/contacts/contact_edit.php'><span class='fas fa-edit fa-fw'> </span></a></small>";
 // }
 
 ?>
 <div class="thread-header">
-  <?php echo $display_name; ?>
+  <?php echo $displayName; ?>
 </div>
 <div class="thread">
   <div class="message-container">
     <?php
-    $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND (from_number = :number OR to_number = :number) ORDER BY start_stamp DESC LIMIT 50";
+    $database = new database;
+
+    $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
+    if ($_GET['group']) {
+        $sql .= "group_uuid = :group_uuid";
+        $parameters['group_uuid'] = $_GET['group'];
+    } else {
+        $sql .= "(from_number = :number OR to_number = :number) AND group_uuid IS NULL";
+        $parameters['number'] = $_GET['number'];
+    }
+    $sql .= " ORDER BY start_stamp DESC LIMIT 50";
     $parameters['extension_uuid'] = $extension['extension_uuid'];
     $parameters['domain_uuid'] = $domain_uuid;
-    $parameters['number'] = $number;
-    $database = new database;
     $messages = $database->select($sql, $parameters, 'all');
+
     $i = count($messages);
-    while($i) {
-      $message = $messages[--$i];
-      echo "<div class='message-wrapper'>";
-      echo "<div class='message message-".$message['direction']."'>";
-      echo "<p class='message-body'>".htmlspecialchars($message['message'])."</p>";
-      echo "<span class='timestamp' data-timestamp='".$message['start_stamp']."'></span>";
-      echo "</div>";
-      echo "</div>";
+    while ($i) {
+        $message = $messages[--$i];
+        echo "<div class='message-wrapper'>";
+        echo "<div class='message message-".$message['direction']."'>";
+        echo "<p class='message-body'>".htmlspecialchars($message['message'])."</p>";
+        echo "<span class='timestamp' data-timestamp='".$message['start_stamp']."'></span>";
+        echo "</div>";
+        echo "</div>";
     }
     unset($parameters);
     ?>
@@ -238,221 +254,21 @@ $sql = "SELECT v_extensions.extension, v_extensions.password FROM v_extensions, 
 $parameters['domain_name'] = $extension['user_context'];
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $database = new database;
-$extension_details = $database->select($sql, $parameters, 'row');
+$extensionDetails = $database->select($sql, $parameters, 'row');
 
-$opts = array(
-  "server" => $extension['user_context'],
-  "username" => $extension_details['extension'],
-  "password" => $extension_details['password'],
-  "remote_number" => $number,
-);
-
+$frontendOpts['server'] = $extension['user_context'];
+$frontendOpts['username'] = $extensionDetails['extension'];
+$frontendOpts['password'] = $extensionDetails['password'];
 ?>
-<script src="lib/sip-0.21.2.min.js"></script>
 <script type="text/javascript">
   // webpush
   window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'], "remote_identifier" => $number)); ?>;
 
-  const channel = new BroadcastChannel('message-pushes');
-  channel.onmessage = (event) => {
-    if(event.data.from == window.notification_data.remote_identifier) {
-      console.log("got message from service worker: ", event.data);
-      // pushMessage(event.data.body, "inbound");
-    }
-  };
-
-  const messageContainer = document.querySelector('.message-container');
-
-  function pushMessage(message, direction) {
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("message-wrapper");
-
-    const messageDiv = document.createElement("div");
-    messageDiv.classList.add("message");
-    messageDiv.classList.add("message-" + direction);
-
-    const messageBody = document.createElement('p');
-    messageBody.classList.add('message-body');
-    messageBody.textContent = message;
-    messageDiv.appendChild(messageBody);
-
-    const messageTimestamp = document.createElement('span');
-    messageTimestamp.classList.add('timestamp');
-    messageTimestamp.dataset.timestamp = moment.utc().format();
-    messageTimestamp.textContent = "a few seconds ago";
-    messageDiv.appendChild(messageTimestamp);
-
-    wrapper.appendChild(messageDiv);
-
-    messageContainer.appendChild(wrapper);
-    messageContainer.scrollTo(0, messageContainer.scrollHeight); // scroll message container to the bottom
-  }
-
   // sipjs
-  const opts = <?php echo json_encode($opts); ?>;
-
-  let backoff = 0;
-
-  // inbound
-  const uaOpts = {
-    uri: SIP.UserAgent.makeURI("sip:" + opts.username + "@" + opts.server),
-    authorizationUsername: opts.username,
-    authorizationPassword: opts.password,
-    transportOptions: {
-      server: "wss://" + window.location.hostname + "/ws",
-      headerProtocol: "WS",
-    },
-    delegate: {
-      onInvite: (invitation) => {
-        console.log("[INVITE]", invitation);
-      },
-      onNotify: (notify) => {
-        console.log("[NOTIFY]", notify);
-      },
-      onMessage: (message) => {
-        const m = message.incomingMessageRequest.message;
-        console.log("[MESSAGE]", m);
-        if(m.from.uri.user == opts.remote_number) {
-          pushMessage(m.body, 'inbound');
-        }
-      }
-    }
-  };
-
-  const userAgent = new SIP.UserAgent(uaOpts);
-  userAgent.stateChange.on((s) => console.log("ua state change: ", s))
-
-  function reconnect() {
-    let statusbox = document.querySelector('.statusbox');
-    if(backoff > 0) {
-      if(statusbox) {
-        statusbox.textContent = "reconnecting in " + Math.round(backoff) + " seconds";
-      }
-      setTimeout(() => {
-        console.log('reconnecting');
-        if(statusbox) {
-          statusbox.textContent = "reconnecting";
-        }
-        userAgent.reconnect().catch(reconnect);
-      }, backoff*1000);
-      if(backoff < 30) { // max backoff 30 seconds
-        backoff = backoff * 1.1;
-      }
-    } else {
-      if(statusbox) {
-        statusbox.textContent = "reconnecting";
-      }
-      backoff = 2;
-      console.log('reconnecting');
-      userAgent.reconnect().catch(reconnect);
-    }
-  }
-
-  userAgent.onTransportConnect = () => {
-    let btn = document.querySelector('.btn-send');
-    if(btn) {
-      btn.disabled = false;
-    }
-    let statusbox = document.querySelector('.statusbox');
-    if(statusbox) {
-      statusbox.textContent = "connected";
-      statusbox.classList.remove('error');
-    }
-
-    backoff = 0;
-  };
-  userAgent.onTransportDisconnect = (error) => {
-    let btn = document.querySelector('.btn-send');
-    if(btn) {
-      btn.disabled = true;
-    }
-    let statusbox = document.querySelector('.statusbox');
-    if(statusbox) {
-      statusbox.classList.add('error');
-    }
-    reconnect();
-  }
-
-  const registerer = new SIP.Registerer(userAgent, {expires: 30}); // re-register often because to avoid hitting (nginx) proxy timeouts
-  userAgent.start().then(() => {
-    registerer.register();
-    messageContainer.scrollTo(0, messageContainer.scrollHeight);
-    document.querySelector('.sendbox > textarea').focus()
-  }).catch((e) => {
-    console.error("error starting: ", e);
-    reconnect();
-  });
-
-  // outbound
-  const attached = new Array();
-  const remoteURI = SIP.UserAgent.makeURI("sip:" + opts.remote_number + "@" + opts.server);
-
-  function send() {
-    const message = document.querySelector(".textentry").value.trim();
-    if(message.length == 0 && attached.length == 0) {
-      document.querySelector('.sendbox > textarea').focus();
-      return;
-    }
-
-    console.log("sending ", message, " with ", attached.length, " attachment(s)");
-    pushMessage(message, 'outbound');
-    const messager = new SIP.Messager(userAgent, remoteURI, message);
-    document.querySelector(".textentry").value = "";
-    console.log(messager);
-    messager.message();
-  }
-
-  document.querySelector(".textentry").addEventListener("keypress", (e) => {
-    if(e.key == "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      send();
-      return false;
-    }
-  });
-
-  async function uploadAttachment(file, wrapper) {
-    const uploadTarget = await fetch("upload.php", {
-      method: "POST",
-      body: JSON.stringify({filename: file.name})
-    }).then(r => r.json());
-
-    console.log("uploading ", uploadTarget);
-    const resp = await fetch(uploadTarget.upload_url, {
-      method: "PUT",
-      body: await file.arrayBuffer(),
-    });
-
-    console.log("uploaded: ", resp);
-
-    return uploadTarget.path;
-  }
-
-  function attach() {
-    for(const file of this.files) {
-      const wrapper = document.createElement('div');
-      wrapper.classList.add('attachment-preview-wrapper')
-
-      const img = document.createElement('img');
-      img.classList.add('attachment-preview-img');
-      img.src = URL.createObjectURL(file);
-
-      const removeBtn = document.createElement('span');
-      removeBtn.classList.add('fas', 'fa-trash', 'fa-fw');
-
-      wrapper.appendChild(img);
-      wrapper.appendChild(removeBtn);
-      document.querySelector('.attachment-preview').appendChild(wrapper);
-
-      attached.push({
-        file: file,
-        preview: wrapper,
-        upload: uploadAttachment(file, wrapper),
-      });
-    }
-  }
-
-  document.querySelector(".btn-send").addEventListener("click", send);
-  document.querySelector("#attachment-upload").addEventListener("change", attach)
+  const opts = <?php echo json_encode($frontendOpts); ?>;
 </script>
+<script src="lib/sip-0.21.2.min.js"></script>
+<script src="frontend/cpim.js"></script>
+<script src="thread.js"></script>
 <?php
 require_once "footer.php";

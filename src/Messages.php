@@ -9,9 +9,12 @@ final class Messages
 
     public static function IncomingSMS(string $from, string $to, string $body)
     {
-        $destination = Messages::findDestination($to);
+        $destination = Destination::Get($to);
+        if ($destination == null) {
+            return false;
+        }
 
-        Messages::Incoming($destination, $from, $to, $body, "text/plain");
+        Messages::_incoming($destination, $from, $to, $body, "text/plain");
 
         return true;
     }
@@ -19,98 +22,125 @@ final class Messages
     /**
      * Called when a new MMS needs to be delivered through the system
      * 
-     * @param string $from                  the phone number the message is coming from
-     * @param string $to                    the phone number the message was sent to
-     * @param array  $attachments           a list of attachments to be sent
-     * @param array  $additional_recipients other numbers the message was sent to
+     * @param string $from                 the phone number the message is coming from
+     * @param string $to                   the phone number the message was sent to
+     * @param array  $attachments          a list of attachments to be sent
+     * @param array  $additionalRecipients other numbers the message was sent to
      * 
      * @return null
      */
-    public static function IncomingMMS($from, $to, $attachments, $additional_recipients)
+    public static function IncomingMMS(string $from, string $to, array $attachments, array $additionalRecipients)
     {
         $cpim = new CPIM();
 
-        $destination = Messages::findDestination($to);
-        $cpim->headers["From"] = "sip:".$from."@".$destination['domain_name'];
-        $cpim->headers["To"] = "sip:".$destination['extension']."@".$destination['domain_name'];
+        $destination = Destination::Get($to);
+        if ($destination == null) {
+            return false;
+        }
+
+        $cpim->headers["From"] = "sip:".$from."@".$destination->domainName;
+        $cpim->headers["To"] = "sip:".$destination->extension."@".$destination->domainName;
 
         $cc = array();
-        foreach ($additional_recipients as $number) {
-            $cc[] = "<".$number."@".$destination['domain_name'].">";
+        foreach ($additionalRecipients as $number) {
+            $cc[] = "<".$number."@".$destination->domainName.">";
         }
         $cpim->headers["CC"] = implode(", ", $cc);
 
-        Messages::Incoming($destination, $from, $to, $cpim->toString(), "message/cpim", $additional_recipients);
+        $groupUUID = Messages::_findGroup($destination->domainUUID, $from, $to, $additionalRecipients);
+        if ($groupUUID) {
+            $cpim->headers["Group-UUID"] = $groupUUID;
+        }
+
+        foreach ($attachments as $attachment) {
+            $c = clone $cpim;
+            $c->fileURL = $attachment;
+            Messages::_incoming($destination, $from, $to, $c, "message/cpim", $groupUUID);
+        }
+
+        return true;
     }
 
-    private static function Incoming(array $destination, string $from, string $to, string $body, string $contentType, $additionalRecipients=array())
+    private static function _incoming(Destination $destination, string $from, string $to, string|CPIM $body, string $contentType, $groupUUID=null)
     {
-        $extension = $destination['extension'];
-        $extension_uuid = $destination['extension_uuid'];
-        $domain_uuid = $destination['domain_uuid'];
+        $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
         // store message in the database
-        Messages::AddMessage('incoming', $extension_uuid, $domain_uuid, $from, $to, $body, $contentType, $additionalRecipients);
+        Messages::AddMessage('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
+
+        // generate a pre-signed download URL before delivering it to things that will download it
+        if ($body instanceof CPIM) {
+            $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
+            $bodyStr = $body->toString();
+        }
 
         // deliver the webpush notification
-        Messages::sendWebPush($domain_uuid, $extension_uuid, $from, $to, $body);
+        Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
      
         // deliver via SIP
-        Messages::SendSIP($domain_uuid, $extension, $from, $to, $body, $contentType);
-     
-        error_log("delivered inbound message");   
+        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $groupUUID);
     }
 
-    public static function AddMessage(string $direction, string $extension_uuid, string $domain_uuid, string $from, string $to, string $body, string $contentType, array $additionalRecipients)
+    private static function _findGroup(string $domainUUID, string $from, string $to, $additionalRecipients): ?string
     {
         $db = new database;
 
-        $group_uuid = null;
-        if (count($additionalRecipients) > 0) {
-            $members = $additionalRecipients;
-            $members[] = $to;
-            sort($members);
-
-            $sql = "SELECT group_uuid FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND members = :members LIMIT 1";
-            $parameters['domain_uuid'] = $domain_uuid;
-            $parameters['members'] = implode(",", $members);
-            $group_uuid = $db->select($sql, $parameters, 'column');
-            if (!$group_uuid) {
-                $group_uuid = uuid();
-                $sql = "INSERT INTO webtexting_groups (group_uuid, domain_uuid, members, name) VALUES (:group_uuid, :domain_uuid, :members)";
-                $parameters['group_uuid'] = $group_uuid;
-                $db->execute($sql, $parameters);
-            }
-            unset($parameters);
+        if (count($additionalRecipients) == 0) {
+            return null;
         }
 
+        $members = $additionalRecipients;
+        $members[] = $from;
+        $members[] = $to;
+        sort($members);
+
+        $sql = "SELECT group_uuid FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND members = :members LIMIT 1";
+        $parameters['domain_uuid'] = $domainUUID;
+        $parameters['members'] = implode(",", $members);
+        $groupUUID = $db->select($sql, $parameters, 'column');
+        if (!$groupUUID) {
+            $groupUUID = uuid();
+            $sql = "INSERT INTO webtexting_groups (group_uuid, domain_uuid, members) VALUES (:group_uuid, :domain_uuid, :members)";
+            $parameters['group_uuid'] = $groupUUID;
+            $db->execute($sql, $parameters);
+        }
+        unset($parameters);
+
+        return $groupUUID;        
+    }
+
+    public static function AddMessage(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, ?string $groupUUID)
+    {
+        $db = new database;
+
         // save the message to the db
-        $sql = "INSERT INTO webtexting_messages (message_uuid, extension_uuid, domain_uuid, start_stamp, from_number, to_number, group_uuid, message, direction) VALUES (:message_uuid, :extension_uuid, :domain_uuid, NOW(), :from, :to, :group_uuid, :body, :direction)";
+        $sql = "INSERT INTO webtexting_messages (message_uuid, extension_uuid, domain_uuid, start_stamp, from_number, to_number, group_uuid, message, content_type, direction) VALUES (:message_uuid, :extension_uuid, :domain_uuid, NOW(), :from, :to, :group_uuid, :body, :content_type, :direction)";
         $parameters['message_uuid'] = uuid();
-        $parameters['extension_uuid'] = $extension_uuid;
-        $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['extension_uuid'] = $extensionUUID;
+        $parameters['domain_uuid'] = $domainUUID;
         $parameters['from'] = $from;
         $parameters['to'] = $to;
-        $parameters['group_uuid'] = $group_uuid;
+        $parameters['group_uuid'] = $groupUUID;
         $parameters['body'] = $body;
+        $parameters['content_type'] = $contentType;
         $parameters['direction'] = $direction;
         $db->execute($sql, $parameters);
         unset($parameters);
 
         // bump the relevant thread
         $sql = "UPDATE webtexting_threads SET last_message = NOW() WHERE domain_uuid = :domain_uuid AND remote_number = :from AND local_number= :to AND group_uuid IS NULL RETURNING *";
-        if ($group_uuid != null) {
+        if ($groupUUID != null) {
             $sql = "UPDATE webtexting_threads SET last_message = NOW() WHERE domain_uuid = :domain_uuid AND group_uuid = :group_uuid AND local_number= :to RETURNING *";
-            $parameters['group_uuid'] = $group_uuid;
+            $parameters['group_uuid'] = $groupUUID;
         } else {
             $parameters['from'] = $from;
         }
-        $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['domain_uuid'] = $domainUUID;
         $parameters['to'] = $to;
         $thread = $db->select($sql, $parameters, 'row');
         if (!$thread) {
             $sql = "INSERT INTO webtexting_threads (domain_uuid, remote_number, local_number, last_message) VALUES (:domain_uuid, :from, :to, NOW())";
-            if ($group_uuid != null) {
+            if ($groupUUID != null) {
                 $sql = "INSERT INTO webtexting_threads (domain_uuid, group_uuid, local_number, last_message) VALUES (:domain_uuid, :group_uuid, :to, NOW())";
             }
             $db->execute($sql, $parameters);
@@ -118,48 +148,36 @@ final class Messages
         unset($parameters);
     }
 
-    private static function findDestination(string $to)
+    private static function _sendWebPush(string $domainUUID, string $extensionUUID, string $from, string $to, string $body, ?string $groupUUID)
     {
-        $sql = "SELECT v_extensions.extension_uuid, v_extensions.extension, v_domains.domain_uuid, v_domains.domain_name FROM webtexting_destinations,v_extensions, v_domains WHERE webtexting_destinations.phone_number = :to AND webtexting_destinations.domain_uuid = v_domains.domain_uuid AND webtexting_destinations.extension_uuid = v_extensions.extension_uuid";
-        $parameters['to'] = $to;
-        $db = new database;
-        $destination = $db->select($sql, $parameters, 'row');
-        unset($parameters);
-        if (!$destination) {
-            error_log("received message for number with no entry in webtexting_destinations: ".$to);
-            return false;
-        }
-    
-        return $destination;
-    }
-
-    private static function sendWebPush(string $domain_uuid, string $extension_uuid, string $from, string $to, string $body) {
         $sql = "SELECT v_contacts.contact_name_given, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
         $parameters['number'] = $from;
-        $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['domain_uuid'] = $domainUUID;
         $database = new database;
         $contact = $database->select($sql, $parameters, 'row');
         unset($parameters);
     
-        $display_name = $from;
-        if($contact) {
-            $display_name = $contact['contact_name_given']." ".$contact['contact_name_family'];
+        $displayName = $from;
+        if ($contact) {
+            $displayName = $contact['contact_name_given']." ".$contact['contact_name_family'];
         }
     
-        $payload = json_encode([
-            "display_name" => $display_name,
+        $payload = json_encode(
+            [
+            "display_name" => $displayName,
             "from" => $from,
             "to" => $to,
             "body" => $body
-        ]);
+            ]
+        );
     
         $sql = "SELECT webtexting_clients.* FROM webtexting_clients, webtexting_subscriptions, v_extensions WHERE ";
         $sql .= "v_extensions.extension_uuid = :extension_uuid AND v_extensions.domain_uuid = :domain_uuid AND ";
         $sql .= "webtexting_subscriptions.extension_uuid = v_extensions.extension_uuid AND ";
         $sql .= "(webtexting_subscriptions.remote_identifier = :remote_identifier or webtexting_subscriptions.remote_identifier IS NULL) AND ";
         $sql .= "webtexting_clients.client_uuid = webtexting_subscriptions.client_uuid";
-        $parameters['extension_uuid'] = $extension_uuid;
-        $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['extension_uuid'] = $extensionUUID;
+        $parameters['domain_uuid'] = $domainUUID;
         $parameters['remote_identifier'] = $from;
         $targets = $database->select($sql, $parameters, 'all');
         unset($parameters);
@@ -172,7 +190,7 @@ final class Messages
         $vapid = ['subject' => 'mailto:admin@example.com'];
     
         $sql = "SELECT * FROM webtexting_settings WHERE setting = 'vapid_public_key' OR setting = 'vapid_private_key'";
-        foreach($database->select($sql, null, 'all') as $key) {
+        foreach ($database->select($sql, null, 'all') as $key) {
             switch($key['setting']) {
             case 'vapid_public_key':
                 $vapid['publicKey'] = $key['value'];
@@ -187,13 +205,15 @@ final class Messages
     
         foreach ($targets as $target) {
             $webPush->queueNotification(
-                Subscription::create([
+                Subscription::create(
+                    [
                     'endpoint' => $target['endpoint'],
                     'keys' => [
                         'auth' => $target['auth'],
                         'p256dh' => $target['p256dh'],
                     ],
-                ]),
+                    ]
+                ),
                 $payload,
             );
         }
@@ -204,7 +224,7 @@ final class Messages
                 continue;
             }
     
-            if(!$report->isSubscriptionExpired()) {
+            if (!$report->isSubscriptionExpired()) {
                 error_log("unknown error from push endpoint: ".$report->getReason()."\n");
                 continue;
             }
@@ -222,39 +242,44 @@ final class Messages
         }
     }
     
-    private static function SendSIP(string $domain_name, string $extension, string $from, string $to, string $body, string $contentType) {
-        $sip_profiles = array("websocket"); // TODO: make this list configurable
-        $to_address = $extension."@".$domain_name;
-        $from_address = $from."@".$domain_name;
+    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $groupUUID=null)
+    {
+        $SIPProfiles = array("websocket"); // TODO: make this list configurable
+        $toAddress = $extension."@".$domainName;
+        $fromAddress = $from."@".$domainName;
     
-        foreach($sip_profiles as $sip_profile) {
-            $event_headers = array(
+        foreach ($SIPProfiles as $SIPProfile) {
+            $eventHeaders = array(
                 "Event-Subclass" => "SMS::SEND_MESSAGE",
                 "proto" => "sip",
                 "dest_proto" => "sip",
                 "from" => "sip:".$from,
                 "from_user" => $from,
-                "from_host" => $domain_name,
-                "from_full" => "sip:".$from_address,
-                "sip_profile" => $sip_profile,
-                "to" => $to_address,
+                "from_host" => $domainName,
+                "from_full" => "sip:".$fromAddress,
+                "sip_profile" => $SIPProfile,
+                "to" => $toAddress,
                 "to_user" => $extension,
-                "to_host" => $domain_name,
+                "to_host" => $domainName,
                 "subject" => "SIMPLE MESSAGE", // is this required? what is it? fusionpbx's sms app does this
                 "type" => $contentType,
                 "hint" => "the hint", // is this required? what is it? fusionpbx's sms app does this
                 "replying" => "true", // what is this?
-                "DP_MATCH" => $to_address, // what is this?
+                "DP_MATCH" => $toAddress, // what is this?
                 "Content-Length" => strlen($body),
             );
+            if ($groupUUID != null) {
+                $eventHeaders['x-group_uuid'] = $groupUUID;
+            }
+
             $cmd = "sendevent CUSTOM\n";
-            foreach($event_headers as $k=>$v) {
+            foreach ($eventHeaders as $k=>$v) {
                 $cmd .= "$k: ".$v."\n";
             }
     
             $cmd .= "\n".$body;
-            error_log("sending sms event to profile ".$sip_profile."\n");
-            $cmd_response = event_socket_request_cmd($cmd);
+
+            event_socket_request_cmd($cmd);
         }
     }
 }

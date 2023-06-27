@@ -9,10 +9,10 @@ declare(strict_types=1);
 final class CPIM
 {
     public array $headers;
-    public string $file_name;
-    public int $file_size;
-    public string $file_content_type;
-    public string $file_url;
+    public string $filename;
+    public int $fileSize;
+    public string $fileContentType;
+    public string $fileURL;
 
     /**
      * Construct a new CPIM
@@ -65,16 +65,16 @@ final class CPIM
         foreach ($body as $tag) {
             switch($tag['tag']) {
             case "FILE-SIZE":
-                $message->file_size = (int)$tag['value'];
-                break;
+                $message->fileSize = (int)$tag['value'];
+                fileContentType;
             case "FILE-NAME":
-                $message->file_name = $tag['value'];
+                $message->filename = $tag['value'];
                 break;
             case "CONTENT-TYPE":
-                $message->file_content_type = $tag['value'];
+                $message->fileContentType = $tag['value'];
                 break;
             case "DATA":
-                $message->file_url = $tag['attributes']['URL'];
+                $message->fileURL = $tag['attributes']['URL'];
                 break;
             }
         }
@@ -108,28 +108,28 @@ final class CPIM
         xmlwriter_start_attribute($xw, 'type');
         xmlwriter_text($xw, 'file');
 
-        if (isset($this->file_size)) {
-            xmlwriter_start_element($xw, 'file-size');
-            xmlwriter_text($xw, (string)$this->file_size);
+        if (isset($this->fileSize)) {
+            fileContentType($xw, 'file-size');
+            xmlwriter_text($xw, (string)$this->fileSize);
             xmlwriter_end_element($xw);
         }
 
-        if (isset($this->file_name)) {
+        if (isset($this->filename)) {
             xmlwriter_start_element($xw, 'file-name');
-            xmlwriter_text($xw, $this->file_name);
+            xmlwriter_text($xw, $this->filename);
             xmlwriter_end_element($xw);
         }
 
-        if (isset($this->file_content_type)) {
+        if (isset($this->fileContentType)) {
             xmlwriter_start_element($xw, 'content-type');
-            xmlwriter_text($xw, $this->file_content_type);
+            xmlwriter_text($xw, $this->fileContentType);
             xmlwriter_end_element($xw);
         }
 
-        if (isset($this->file_url)) {
+        if (isset($this->fileURL)) {
             xmlwriter_start_element($xw, 'data');
             xmlwriter_start_attribute($xw, 'url');
-            xmlwriter_text($xw, $this->file_url);
+            xmlwriter_text($xw, $this->fileURL);
             xmlwriter_end_element($xw);
         }
 
@@ -150,26 +150,25 @@ final class CPIM
 
         $contentHeaders = array("content-type", "content-length");
 
-        // header block 1
-        $headers1 = array();
+        $firstHeaderBlock = array();
         foreach ($this->headers as $key=>$value) {
             if (in_array($key, $contentHeaders)) {
                 continue;
             }
 
-            $headers1[] = $key.": ".$value;
+            $firstHeaderBlock[] = $key.": ".$value;
         }
 
-        $headers2 = array();
+        $secondHeaderBlock = array();
         foreach ($contentHeaders as $key) {
             if (!array_key_exists($key, $this->headers)) {
                 continue;
             }
 
-            $headers2[] = $key.": ".$this->headers[$key];
+            $secondHeaderBlock[] = $key.": ".$this->headers[$key];
         }
 
-        $out = implode("\n", $headers1)."\n\n".implode("\n", $headers2)."\n\n".$body;
+        $out = implode("\n", $firstHeaderBlock)."\n\n".implode("\n", $secondHeaderBlock)."\n\n".$body;
 
         return $out;
     }

@@ -8,7 +8,7 @@ require_once __DIR__."/../vendor/autoload.php";
 function incoming()
 {
     header("Content-Type: application/json");
-    if($_SERVER['REQUEST_METHOD'] != "POST") {
+    if ($_SERVER['REQUEST_METHOD'] != "POST") {
         http_response_code(405);
         echo json_encode(array("error" => "method not allowed"));
         die();
@@ -27,20 +27,20 @@ function incoming()
     // TODO: check inbound token
     $accelerate_inbound_token = "...";
 
-    if($body->ClientSecret != $accelerate_inbound_token) {
+    if ($body->ClientSecret != $accelerate_inbound_token) {
         http_response_code(401);
         echo json_encode(array("error" => "invalid client_secret"));
         die();
     }
 
     $success = false;
-    if($body->MessageType == "0") {
+    if ($body->MessageType == "0") {
         $success = Messages::IncomingSMS($body->From, $body->To, $body->Content);
     } else {
         $success = Messages::IncomingMMS($body->From, $body->To, $body->MediaURLs, $body->AdditionalRecipients);
     }
 
-    if($success) {
+    if ($success) {
         echo json_encode(array("success" => true));
     } else {
         http_response_code(500);

@@ -74,7 +74,7 @@ echo "	<div style='clear: both;'></div>\n";
 echo "</div>\n";
 echo "<table class='table'>\n";
 
-$sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message";
+$sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message DESC";
 $parameters['local_number'] = $destination;
 $parameters['domain_uuid'] = $domain_uuid;
 $threads = $database->select($sql, $parameters, 'all');
@@ -92,7 +92,7 @@ foreach ($threads as $thread) {
         $sql .= "group_uuid = :group_uuid";
         $parameters['group_uuid'] = $group_uuid;
     } else {
-        $sql .= "(from_number = :number OR to_number = :number)";
+        $sql .= "(from_number = :number OR to_number = :number) AND group_uuid IS NULL";
         $parameters['number'] = $number;
     }
     $sql .= " ORDER BY start_stamp DESC LIMIT 1";
@@ -146,10 +146,12 @@ foreach ($threads as $thread) {
         $link .= "number=".$number;
     }
 
+    $body_preview = $last_message['content_type'] == "text/plain" ? $last_message['message'] : "[media]";
+
     echo "<tr><td>";
     echo "<a href='".$link."'>";
     echo "<span class='thread-name'>".htmlspecialchars($display_name)."</span><br />";
-    echo "<span class='thread-last-message'>".htmlspecialchars($last_message['message'])."</span>";
+    echo "<span class='thread-last-message'>".htmlspecialchars($body_preview)."</span>";
     echo "<span class='timestamp' data-timestamp='".$last_message['start_stamp']."'></span>";
     echo "</a>";
     echo "</td></tr>\n";

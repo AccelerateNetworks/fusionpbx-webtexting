@@ -146,9 +146,14 @@ $apps[$x]['db'][$y]['fields'][$z]['name'] = "message";
 $apps[$x]['db'][$y]['fields'][$z]['type'] = "text";
 $apps[$x]['db'][$y]['fields'][$z]['description']['en-us'] = "";
 $z++;
+$apps[$x]['db'][$y]['fields'][$z]['name'] = "content_type";
+$apps[$x]['db'][$y]['fields'][$z]['type'] = "text";
+$apps[$x]['db'][$y]['fields'][$z]['description']['en-us'] = "";
+$z++;
 $apps[$x]['db'][$y]['fields'][$z]['name'] = "direction";
 $apps[$x]['db'][$y]['fields'][$z]['type'] = "text";
 $apps[$x]['db'][$y]['fields'][$z]['description']['en-us'] = "";
+
 
 $y++;
 $z=0;
