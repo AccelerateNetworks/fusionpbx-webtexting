@@ -29,7 +29,7 @@ if (!$extension) {
 
   .thread {
     max-width: 50em;
-    height: calc(100% - 120px);
+    height: 100%;
     margin: 0 auto;
     border-left: solid #999 2px;
     border-right: solid #999 2px;
@@ -68,9 +68,9 @@ if (!$extension) {
     margin-bottom: 0.5em;
   }
 
-	.message {
-		margin-top: 0.5em;
-		border: solid #aaa 1px;
+  .message {
+  	margin-top: 0.5em;
+  	border: solid #aaa 1px;
 		border-radius: 1em;
     padding-left: 0.75em;
     padding-right: 1em;
@@ -144,6 +144,10 @@ if (!$extension) {
     height: 100%;
     object-fit: contain;
   }
+
+  #conversation {
+    height: calc(100% - 100px);
+  }
 </style>
 
 <?php
@@ -197,17 +201,15 @@ if ($_GET['group']) {
     }
 }
 
-// The UX here is confusing to the point that I have disabled it, because we can't pre-file the contact number,
-// and if the user forgets to do that they just make a contact with no number. Solution would be to create a blank
-// contact with just a number and redirect to it's edit screen when this is clicked
+// The UX here is confusing to the point that I have disabled it, because we can't pre-fill the contact number,
+// and if the user forgets to fill it in manually they just make a contact with no number. Solution would be to
+// create a blank contact with just a number and redirect to it's edit screen when this is clicked
 // if($displayName == $number && permission_exists('contact_phone_add')) {
 //   $displayName .= " <small><a class='white' href='/app/contacts/contact_edit.php'><span class='fas fa-edit fa-fw'> </span></a></small>";
 // }
 
 ?>
-<div id="conversation">
-  Loading (javascript required)
-</div>
+<div id="conversation">Loading (javascript required)</div>
 <!-- <div class="thread-header">
   <?php echo $displayName; ?>
 </div>
@@ -262,6 +264,7 @@ $extensionDetails = $database->select($sql, $parameters, 'row');
 $frontendOpts['server'] = $extension['user_context'];
 $frontendOpts['username'] = $extensionDetails['extension'];
 $frontendOpts['password'] = $extensionDetails['password'];
+$frontendOpts['threadName'] = $displayName;
 ?>
 <script type="text/javascript">
   // webpush
@@ -270,9 +273,9 @@ $frontendOpts['password'] = $extensionDetails['password'];
   // sipjs
   const opts = <?php echo json_encode($frontendOpts); ?>;
 </script>
-<script src="js/webtexting-thread.umd.js"></script>
+<script src="js/webtexting.umd.js"></script>
 <script>
-  WebTexting.mountConversation('#conversation');
+  WebTexting.initializeThreadJS(opts);
 </script>
 <?php
 require_once "footer.php";

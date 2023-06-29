@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "moment": "^2.29.4",
-    "sip.js": "^0.21.2",
+    "sip.js": "https://github.com/radioprotector/SIP.js#feature/override-via-transport-header",
     "vue": "^3.3.4"
   },
   "devDependencies": {

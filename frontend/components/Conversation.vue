@@ -1,5 +1,6 @@
 <script lang="ts">
 import Message from './Message.vue';
+import { MessageData } from '../lib/MessageData';
 
 export default {
     data() {
@@ -18,15 +19,22 @@ export default {
             type: String,
         }
     },
+    methods: {
+        pushMessage(m: MessageData) {
+            this.messages.push(m)
+        },
+    },
+    mounted() {
+        console.log("conversation mounted", this);
+    }
 }
 </script>
 
 <template>
-    <main>
-        <div class="thread-header">{{  displayName }}</div>
-        <div class="thread">
+    <div class="thread-header">{{  displayName }}</div>
+    <div class="thread">
         <div class="message-container">
-            <Message v-for="message in messages" />
+            <Message :message="message" v-for="message in messages" />
         </div>
         <div class="attachment-preview"></div>
         <div class="sendbox">
@@ -36,22 +44,13 @@ export default {
             <button class="btn btn-send" disabled><span class="fas fa-paper-plane fa-fw"></span></button>
         </div>
         <div class="statusbox">loading</div>
-        </div>
-    </main>
+    </div>
 </template>
 
-<style>
-.container-fluid {
-    height: calc(100% - 108px);
-}
-
-#main_content {
-    height: calc(100% - 108px);
-}
-
+<!-- <style scoped>
 .thread {
     max-width: 50em;
-    height: calc(100% - 120px);
+    height: 100%;
     margin: 0 auto;
     border-left: solid #999 2px;
     border-right: solid #999 2px;
@@ -75,10 +74,6 @@ export default {
     border-top-left-radius: 0.5em;
     border-top-right-radius: 0.5em;
     font-weight: bold;
-}
-
-.white {
-    color: #fff;
 }
 
 .message-container {
@@ -168,4 +163,4 @@ export default {
     height: 100%;
     object-fit: contain;
 }
-</style>
+</style> -->

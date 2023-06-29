@@ -1,11 +1,14 @@
 {
-    "include": ["frontend/*"],
+    "include": ["frontend/*", "frontend/**/*", "node_modules/sip.js/src/**/*"],
     "compilerOptions": {
       "baseUrl": ".",
       "paths": {
         "@/*": ["./frontend/*"]
       },
-      "lib": ["es2015"]
+      "lib": ["es2017", "dom"],
+      "sourceMap": true,
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext",
     },
     "references": [
       {

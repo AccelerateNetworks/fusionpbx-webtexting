@@ -165,4 +165,5 @@ echo "</table>\n";
     }
 </script>
 <?php
+echo "<script type='text/javascript' src='webtexting.js'></script>";
 require_once "footer.php";
