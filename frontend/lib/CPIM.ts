@@ -1,4 +1,4 @@
-class CPIM {
+export class CPIM {
     headers: Record<string, string>;
     filename: string;
     fileSize: number;

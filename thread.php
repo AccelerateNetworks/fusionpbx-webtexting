@@ -265,6 +265,9 @@ $frontendOpts['server'] = $extension['user_context'];
 $frontendOpts['username'] = $extensionDetails['extension'];
 $frontendOpts['password'] = $extensionDetails['password'];
 $frontendOpts['threadName'] = $displayName;
+$frontendOpts["extensionUUID"] = $extension['extension_uuid'];
+$frontendOpts['remoteNumber'] = $_GET['number'];
+$frontendOpts['group'] = $_GET['group'];
 ?>
 <script type="text/javascript">
   // webpush

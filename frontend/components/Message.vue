@@ -1,5 +1,5 @@
 <script lang="ts">
-import { MessageData } from '../lib/MessageData';
+import { MessageData } from '../lib/state';
 import type { PropType } from 'vue'
 
 export default {
@@ -13,12 +13,10 @@ export default {
 </script>
 
 <template>
-    <main>
-        <div class="message-wrapper">
-            <div class="message message-{{ message.direction }}">
-                <p class="message-body">{{ message.body }}</p>
-                <!-- <span class="timestamp" :data-timestamp="{ message.timestamp }"></span> -->
-            </div>
+    <div class="message-wrapper">
+        <div class="message message-{{ message.direction }}">
+            <p class="message-body">{{ message.body }}</p>
+            <span class="timestamp">{{ message.timestamp.fromNow() }}</span>
         </div>
-    </main>
+    </div>
 </template>

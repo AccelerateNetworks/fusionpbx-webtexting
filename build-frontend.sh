@@ -11,14 +11,15 @@ podman run --rm -v $(pwd):/build/webtexting -w /build/webtexting -i webtexting-f
 set -exu
 yarnpkg install
 
-# build sip.js so the next step works. not needed when using sip.js packages from npm
-cd node_modules/sip.js
-yarnpkg install
-
-# these two commands are run by the "yarnpkg run build" but it explicitly invokes npm and we only have yarn, so we do this
-yarnpkg run generate-grammar
-yarnpkg run build-lib
-cd ../..
+if [[ ! -d node_modules/sip.js/lib/ ]]; then
+    # build sip.js so the next step works. not needed when using sip.js packages from npm
+    cd node_modules/sip.js
+    yarnpkg install
+    # these two commands are run by the "yarnpkg run build" but it explicitly invokes npm and we only have yarn, so we do this
+    yarnpkg run generate-grammar
+    yarnpkg run build-lib
+    cd ../..
+fi
 
 mkdir -p js # if js/ doesn't already exist it won't make it and it will dump the .js files right next to the .ts files and then it wont rebuild
 node_modules/.bin/vite build --emptyOutDir

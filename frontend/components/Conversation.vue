@@ -1,12 +1,10 @@
 <script lang="ts">
 import Message from './Message.vue';
-import { MessageData } from '../lib/MessageData';
+import { MessageData, state } from '../lib/state';
 
 export default {
     data() {
-        return {
-            messages: [],
-        }
+        return { state }
     },
     props: {
         remoteNumber: {
@@ -17,24 +15,17 @@ export default {
         },
         displayName: {
             type: String,
-        }
-    },
-    methods: {
-        pushMessage(m: MessageData) {
-            this.messages.push(m)
         },
     },
-    mounted() {
-        console.log("conversation mounted", this);
-    }
+    components: { Message },
 }
 </script>
 
 <template>
-    <div class="thread-header">{{  displayName }}</div>
+    <div class="thread-header">{{ displayName }}</div>
     <div class="thread">
         <div class="message-container">
-            <Message :message="message" v-for="message in messages" />
+            <Message :message="message" v-for="message in state.messages" />
         </div>
         <div class="attachment-preview"></div>
         <div class="sendbox">
@@ -43,7 +34,7 @@ export default {
             <input type="file" multiple id="attachment-upload" style="display: none;" />
             <button class="btn btn-send" disabled><span class="fas fa-paper-plane fa-fw"></span></button>
         </div>
-        <div class="statusbox">loading</div>
+        <div class="statusbox">{{ state.connectivityStatus }}</div>
     </div>
 </template>
 
