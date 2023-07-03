@@ -109,7 +109,7 @@ final class CPIM
         xmlwriter_text($xw, 'file');
 
         if (isset($this->fileSize)) {
-            fileContentType($xw, 'file-size');
+            xmlwriter_start_attribute($xw, 'file-size');
             xmlwriter_text($xw, (string)$this->fileSize);
             xmlwriter_end_element($xw);
         }

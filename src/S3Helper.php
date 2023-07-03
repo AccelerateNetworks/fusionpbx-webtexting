@@ -47,8 +47,21 @@ class S3Helper
             ]
         );
 
-        $request = $s3->createPresignedRequest($cmd, '+1 hour');
+        $request = $s3->createPresignedRequest($cmd, '+1 day');
         
         return $request->getUri();
+    }
+
+    public static function GetInfo(string $url)
+    {
+        $prefix = $_SESSION['webtexting']['mms_bucket_endpoint']['text']."/".$_SESSION['webtexting']['mms_bucket']['text']."/";
+        $objectKey = substr($url, strlen($prefix));
+
+        return S3Helper::_getS3Client()->HeadObject(
+            [
+                'Bucket' => $_SESSION['webtexting']['mms_bucket']['text'],
+                'Key' => $objectKey,
+            ]
+        );
     }
 }

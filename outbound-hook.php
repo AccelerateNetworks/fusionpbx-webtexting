@@ -16,11 +16,11 @@ if (!$event) {
     die();
 }
 
-$domain_name = $event->from_host;
-$extension = $event->from_user;
-$to = $event->to_user;
+$domain_name = $event->{'from_host'};
+$extension = $event->{'from_user'};
+$to = $event->{'to_user'};
 $contentType = $event->type;
-$body = $event->_body;
+$body = urldecode($event->_body);
 
 $sql = "SELECT webtexting_destinations.phone_number, v_domains.domain_uuid, v_extensions.extension_uuid FROM webtexting_destinations, v_domains, v_extensions WHERE v_domains.domain_name = :domain_name AND v_domains.domain_uuid = v_extensions.domain_uuid AND v_extensions.extension = :extension AND webtexting_destinations.extension_uuid = v_extensions.extension_uuid";
 $parameters['domain_name'] = $domain_name;
@@ -33,10 +33,10 @@ if (!$destination) {
 }
 unset($parameters);
 $from = $destination['phone_number'];
-$domain_uuid = $destination['domain_uuid'];
-$extension_uuid = $destination['extension_uuid'];
+$domainUUID = $destination['domain_uuid'];
+$extensionUUID = $destination['extension_uuid'];
 
-error_log("sending outbound message from $from ($extension@$domain_name) to $to: $body");
+// error_log("sending outbound message from $from ($extension@$domain_name) to $to: $body");
 
 $provider = "accelerate-networks"; // TODO: make this customizable
 
@@ -44,14 +44,24 @@ require __DIR__."/providers/".$provider.".php";
 
 switch($contentType) {
 case "text/plain":
-    Messages::AddMessage('outgoing', $extension_uuid, $domain_uuid, $from, $to, $body, $contentType, array());
+    Messages::AddMessage('outgoing', $extensionUUID, $domainUUID, $from, $to, $body, $contentType);
     outgoing_sms($from, $to, $body);   
     break;
 case "message/cpim":
     $cpim = CPIM::fromString($body);
-    Messages::AddMessage('outgoing', $extension_uuid, $domain_uuid, $from, $to, $body, $contentType, $cpim->getCC());
-    // store_message('outgoing', $extension_uuid, $domain_uuid, $from, $to, $body, $contentType, array());
-    outgoing_mms($from, $to, $cpim->getAttachments(), $cpim->getCC());
+    $groupUUID = $cpim->getHeader('Group-UUID');
+    if ($groupUUID) {
+        $to = Messages::findRecipients($domainUUID, $extensionUUID, $groupUUID);
+        if ($to == null) {
+            error_log("dropping message for unknown group: domain_uuid=".$domainUUID." extension_uuid=".$extensionUUID." group_uuid=".$groupUUID."\n");
+            die();
+        }
+
+        error_log("sending to: ".$to."\n");
+    }
+    Messages::AddMessage('outgoing', $extensionUUID, $domainUUID, $from, $to, $body, $contentType, $groupUUID);
+    $attachmentURL = S3Helper::GetDownloadURL($cpim->fileURL);
+    outgoing_mms($from, $to, array($attachmentURL));
     break;
 default:
     error_log("received an outbound message of unknown type: ".$contentType);

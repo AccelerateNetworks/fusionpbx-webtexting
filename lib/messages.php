@@ -9,13 +9,14 @@ function store_message(string $direction, string $extension_uuid, string $domain
         $members[] = $to;
         sort($members);
 
-        $sql = "SELECT group_uuid FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND members = :members LIMIT 1";
+        $sql = "SELECT group_uuid FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND members = :members LIMIT 1";
         $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['extension_uuid'] = $extension_uuid;
         $parameters['members'] = implode(",", $members);
         $group_uuid = $db->select($sql, $parameters, 'column');
         if (!$group_uuid) {
             $group_uuid = uuid();
-            $sql = "INSERT INTO webtexting_groups (group_uuid, domain_uuid, members) VALUES (:group_uuid, :domain_uuid, :members)";
+            $sql = "INSERT INTO webtexting_groups (group_uuid, domain_uuid, extension_uuid, members) VALUES (:group_uuid, :domain_uuid, extension_uuid, :members)";
             $parameters['group_uuid'] = $group_uuid;
             $db->execute($sql, $parameters);
         }

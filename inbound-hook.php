@@ -1,13 +1,13 @@
 <?php
-include __DIR__."/vendor/autoload.php";
+require __DIR__."/vendor/autoload.php";
 
 $provider = $_GET['provider'];
-$provider_import_path = __DIR__."/providers/".$provider.".php";
-if(!file_exists($provider_import_path)) {
+$providerImportPath = __DIR__."/providers/".$provider.".php";
+if (!file_exists($providerImportPath)) {
     error_log("rejecting incoming message for unknown provider: ".$provider);
     http_response_code(400);
     die();
 }
-require $provider_import_path;
+require $providerImportPath;
 
 incoming();

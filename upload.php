@@ -38,5 +38,5 @@ $request = $s3->createPresignedRequest($cmd, '+1 hour');
 
 echo json_encode(array(
     'upload_url' => $request->getUri(),
-    'path' => $uploadPath,
+    'path' => $_SESSION['webtexting']['mms_bucket_endpoint']['text']."/".$_SESSION['webtexting']['mms_bucket']['text']."/".$uploadPath,
 ));

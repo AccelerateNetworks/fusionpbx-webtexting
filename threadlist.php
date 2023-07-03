@@ -110,8 +110,9 @@ foreach ($threads as $thread) {
     // compute the name to display based on number and a potential contact name
     $display_name = "";
     if ($group_uuid != null) {
-        $sql = "SELECT name, members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND group_uuid = :group_uuid";
+        $sql = "SELECT name, members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND group_uuid = :group_uuid";
         $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['extension_uuid'] = $extension['extension_uuid'];
         $parameters['group_uuid'] = $group_uuid;
         $group = $database->select($sql, $parameters, 'row');
         unset($parameters);

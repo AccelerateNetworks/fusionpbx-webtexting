@@ -47,14 +47,22 @@ final class Messages
         }
         $cpim->headers["CC"] = implode(", ", $cc);
 
-        $groupUUID = Messages::_findGroup($destination->domainUUID, $from, $to, $additionalRecipients);
+        $groupUUID = Messages::_findGroup($destination, $from, $to, $additionalRecipients);
         if ($groupUUID) {
             $cpim->headers["Group-UUID"] = $groupUUID;
         }
 
         foreach ($attachments as $attachment) {
+            $info = S3Helper::GetInfo($attachment);
+
+            if ($info['ContentType'] == "application/smil") {
+                continue;
+            }
+
             $c = clone $cpim;
             $c->fileURL = $attachment;
+            $c->fileContentType = $info['ContentType'];
+            $c->fileSize = $info['ContentLength'];
             Messages::_incoming($destination, $from, $to, $c, "message/cpim", $groupUUID);
         }
 
@@ -81,7 +89,7 @@ final class Messages
         Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $groupUUID);
     }
 
-    private static function _findGroup(string $domainUUID, string $from, string $to, $additionalRecipients): ?string
+    private static function _findGroup(Destination $destination, string $from, string $to, $additionalRecipients): ?string
     {
         $db = new database;
 
@@ -94,13 +102,14 @@ final class Messages
         $members[] = $to;
         sort($members);
 
-        $sql = "SELECT group_uuid FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND members = :members LIMIT 1";
-        $parameters['domain_uuid'] = $domainUUID;
+        $sql = "SELECT group_uuid FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND members = :members LIMIT 1";
+        $parameters['domain_uuid'] = $destination->domainUUID;
+        $parameters['extension_uuid'] = $destination->extensionUUID;
         $parameters['members'] = implode(",", $members);
         $groupUUID = $db->select($sql, $parameters, 'column');
         if (!$groupUUID) {
             $groupUUID = uuid();
-            $sql = "INSERT INTO webtexting_groups (group_uuid, domain_uuid, members) VALUES (:group_uuid, :domain_uuid, :members)";
+            $sql = "INSERT INTO webtexting_groups (group_uuid, domain_uuid, extension_uuid, members) VALUES (:group_uuid, :domain_uuid, :extension_uuid, :members)";
             $parameters['group_uuid'] = $groupUUID;
             $db->execute($sql, $parameters);
         }
@@ -109,7 +118,25 @@ final class Messages
         return $groupUUID;        
     }
 
-    public static function AddMessage(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, ?string $groupUUID)
+    public static function findRecipients(string $domainUUID, string $extensionUUID, string $groupUUID): string
+    {
+        $sql = "SELECT members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND group_uuid = :group_uuid";
+        $parameters['domain_uuid'] = $domainUUID;
+        $parameters['extension_uuid'] = $extensionUUID;
+        $parameters['group_uuid'] = $groupUUID;
+        error_log("finding group members: ".print_r($parameters, true)."\n");
+        $db = new database;
+        $members = $db->select($sql, $parameters, 'column');
+        if (!$members) {
+            return null;
+        }
+
+        // TODO: drop own number from $members
+
+        return $members;
+    }
+
+    public static function AddMessage(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $groupUUID=null)
     {
         $db = new database;
 
