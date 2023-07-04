@@ -1,4 +1,4 @@
-async function uploadAttachment(file): Promise<string> {
+async function uploadAttachment(file: File): Promise<string> {
     const uploadTarget = await fetch("upload.php", {
         method: "POST",
         body: JSON.stringify({ filename: file.name })
@@ -12,7 +12,7 @@ async function uploadAttachment(file): Promise<string> {
 
     console.log("uploaded: ", resp);
 
-    return uploadTarget.path;
+    return uploadTarget.download_url;
 }
 
 async function uploadText(text: string): Promise<string> {
@@ -27,7 +27,7 @@ async function uploadText(text: string): Promise<string> {
     });
 
 
-    return uploadTarget.path;
+    return uploadTarget.download_url;
 }
 
 export { uploadText }

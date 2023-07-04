@@ -5,6 +5,7 @@ export class CPIM {
     fileContentType: string;
     fileURL: string;
     bodyText?: string;
+    previewURL: string;
 
     constructor(url?: string, contentType?: string) {
         this.headers = {};

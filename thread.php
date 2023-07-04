@@ -17,6 +17,12 @@ if (!$extension) {
     include "footer.php";
     die();
 }
+
+$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
+$parameters['domain_uuid'] = $domain_uuid;
+$parameters['extension_uuid'] = $extension['extension_uuid'];
+$database = new database;
+$ownNumber = $database->select($sql, $parameters, 'column');
 ?>
 <link rel="stylesheet" href="js/style.css" />
 <style type="text/css">
@@ -35,7 +41,7 @@ if (!$extension) {
 
 <?php
 echo "<div class='action_bar' id='action_bar'>\n";
-echo "	<div class='heading'><b>WebTexting</b> - ".htmlspecialchars($extension['outbound_caller_id_name'])." (".htmlspecialchars($extension['outbound_caller_id_number']).")</div>";
+echo "	<div class='heading'><b>WebTexting</b> - ".htmlspecialchars($extension['outbound_caller_id_name'])." (".htmlspecialchars($$ownNumber).")</div>";
 echo "	<div class='actions'>\n";
 // echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'label' => '?', 'onclick' => 'toggleNotifications()']);
 echo button::create(['type'=>'button','label'=>"All Texts",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'threadlist.php?extension_uuid='.$extension['extension_uuid']]);
@@ -55,7 +61,6 @@ if ($_GET['group']) {
     $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
     $parameters['number'] = $number;
     $parameters['domain_uuid'] = $domain_uuid;
-    $database = new database;
     $contact = $database->select($sql, $parameters, 'row');
     unset($parameters);
 
@@ -105,7 +110,7 @@ $frontendOpts['username'] = $extensionDetails['extension'];
 $frontendOpts['password'] = $extensionDetails['password'];
 $frontendOpts['threadName'] = $displayName;
 $frontendOpts["extensionUUID"] = $extension['extension_uuid'];
-$frontendOpts['ownNumber'] = $extension['outbound_caller_id_number']
+$frontendOpts['ownNumber'] = $ownNumber;
 ?>
 <script type="text/javascript">
   // webpush

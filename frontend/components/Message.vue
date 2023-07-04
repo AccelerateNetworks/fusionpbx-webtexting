@@ -51,7 +51,7 @@ export default {
                 case "image/png":
                 case "image/jpg":
                 case "image/jpeg":
-                    this.embedImage = this.message.cpim.fileURL;
+                    this.embedImage = this.message.cpim.previewURL || this.message.cpim.fileURL;
                     break;
                 default:
                     if (this.message.cpim.fileURL) {

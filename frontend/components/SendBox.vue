@@ -6,14 +6,20 @@ import moment from 'moment';
 
 type PendingAttachment = {
     file: File,
-    previewURL: URL,
+    previewURL: string,
+    progress: number,
+    upload: Promise<void>,
+    uploadedURL: string,
 }
 
 export default {
-    data() {
+    data(): {
+            enteredText: string,
+            pendingAttachments: PendingAttachment[],
+        } {
         return {
             enteredText: "",
-            pendingAttachment: null,
+            pendingAttachments: [],
         }
     },
     props: {
@@ -29,7 +35,7 @@ export default {
         }
     },
     methods: {
-        keypress(e) {
+        keypress(e: KeyboardEvent) {
             if (e.key == "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 this.send();
@@ -37,7 +43,7 @@ export default {
             }
         },
         async send() {
-            if (this.enteredText.length == 0 && this.pendingAttachment == null) {
+            if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
                 this.$refs.textbox.focus();
                 return;
             }
@@ -50,16 +56,20 @@ export default {
                 to: this.remoteNumber || this.ownNumber, // remoteNumber is null for groups but we still need a To field, so set it to our own number and strip it out server side
             }
 
-            if (this.pendingAttachment) {
-                const cpim = new CPIM();
-                cpim.fileURL = this.pendingAttachment.uploadedURL;
+            while(this.pendingAttachments.length > 0) {
+                const attachment = this.pendingAttachments.shift();
+                await attachment.upload;
 
+                console.log("sending attachment:", attachment);
+
+                const cpim = new CPIM(attachment.uploadedURL, attachment.file.type);
                 if (this.groupUUID) {
                     cpim.headers["Group-UUID"] = this.groupUUID;
                 }
+                cpim.previewURL = attachment.previewURL;
 
                 const m = message;
-                m.body = cpim.serialize();
+                m.cpim = cpim;
                 emitter.emit('outbound-message', m);
             }
 
@@ -84,27 +94,64 @@ export default {
                 }
                 console.log('emitting message', message);
                 emitter.emit('outbound-message', message);
+
+                this.enteredText = "";
             }
-
-            console.log("sent", this.enteredText, this.pendingAttachment ? "with" : "without", "attachment");
-            this.enteredText = "";
         },
-        onAttach() {
+        onAttach(e: Event) {
+            const target = e.target as HTMLInputElement;
+            for(const file of target.files) {
+                const a: PendingAttachment = {
+                    file: file,
+                    previewURL: URL.createObjectURL(file),
+                    progress: 0,
+                    upload: null,
+                    uploadedURL: null,
+                };
+                a.upload = this.uploadAttachment(a);
+                this.pendingAttachments.push(a);
+            }
+        },
+        removeAttachment(attachment: PendingAttachment) {
+            let position = this.pendingAttachments.indexOf(attachment);
+            console.log("removing attachment", position, attachment);
+            this.pendingAttachments.splice(position, 1);
+        },
+        async uploadAttachment(attachment: PendingAttachment): Promise<void> {
+            const uploadTarget = await fetch("upload.php", {
+                method: "POST",
+                body: JSON.stringify({ filename: attachment.file.name })
+            }).then(r => r.json());
 
+            attachment.uploadedURL = uploadTarget.download_url;
+
+            console.log("uploading ", uploadTarget);
+            const resp = await fetch(uploadTarget.upload_url, {
+                method: "PUT",
+                body: await attachment.file.arrayBuffer(),
+            });
+
+            attachment.progress = 100;
+
+            console.log("uploaded: ", resp);
         }
     }
 }
 </script>
 
 <template>
-    <div class="sendbox">
-        <div class="attachment-preview-wrapper" v-if="pendingAttachment != null">
-            <img :src="pendingAttachment.previewURL" v-if="pendingAttachment.previewURL" />
+    <div class="attachment-previews">
+        <div class="attachment-preview-wrapper" v-for="attachment in pendingAttachments">
+            <img :src="attachment.previewURL" v-if="attachment.previewURL" class="attachment-preview-img" />
+            <span class="fas fa-trash fa-fw remove-attachment-btn" v-on:click="removeAttachment(attachment)"></span>
+            <span class="attachment-upload-progress">{{ attachment.progress}}%</span>
         </div>
+    </div>
+    <div class="sendbox">
         <textarea class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText" ref="textbox"></textarea>
         <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
-        <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" />
-        <button class="btn btn-send" disabled><span class="fas fa-paper-plane fa-fw"></span></button>
+        <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />
+        <button class="btn btn-send" :disabled="pendingAttachments.length == 0 && enteredText.length == 0" v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
     </div>
 </template>
 
@@ -148,6 +195,12 @@ export default {
     color: #ff5555;
 }
 
+.attachment-previews {
+    display: flex;
+    flex-direction: row;
+    /* overflow-x: auto; */
+}
+
 .attachment-preview {
     display: flex;
     justify-content: left;
@@ -155,13 +208,29 @@ export default {
 }
 
 .attachment-preview-wrapper {
+    display: inline-block;
     height: 150px;
     width: 150px;
+    position: relative;
+    color: #fff;
+    text-shadow: black 0 0 15px;
 }
 
 .attachment-preview-img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+}
+
+.remove-attachment-btn {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+}
+
+.attachment-upload-progress {
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
 }
 </style>

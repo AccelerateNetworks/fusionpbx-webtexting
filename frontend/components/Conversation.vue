@@ -77,8 +77,8 @@ export default {
             const messageContainer = this.$refs.message_container;
             messageContainer.scrollTo(0, messageContainer.scrollHeight);
         },
-        onObserve(entities: IntersectionObserverEntity[]) {
-            entities.forEach((e) => {
+        onObserve(entries: IntersectionObserverEntry[]) {
+            entries.forEach((e) => {
                 switch (e.target) {
                     case this.$refs.bottom:
                         this.bottomVisible = e.isIntersecting;
@@ -128,7 +128,6 @@ export default {
             <Message :message="message" :key="message.id" v-for="(message, index) in state.messages" />
             <div class="message-wrapper" ref="bottom"></div>
         </div>
-        <div class="attachment-preview"></div>
         <SendBox :remoteNumber="remoteNumber" :groupUUID="groupUUID" :ownNumber="ownNumber" />
         <div class="statusbox">{{ state.connectivityStatus }}</div>
     </div>

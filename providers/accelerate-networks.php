@@ -72,5 +72,5 @@ function _send(array $body)
 
     error_log("got ".$res->getStatusCode()." ".$res->getReasonPhrase()."\n");
     $responseBody = json_decode($res->getBody()->getContents());
-    error_log(print_r($responseBody, true)."\n");
+    error_log("response body: ".print_r($responseBody, true)."\n");
 }

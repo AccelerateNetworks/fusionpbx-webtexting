@@ -5,7 +5,7 @@
       "paths": {
         "@/*": ["./frontend/*"]
       },
-      "lib": ["es2017", "dom"],
+      "lib": ["es2017", "DOM", "DOM.Iterable"],
       "sourceMap": true,
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
