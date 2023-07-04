@@ -51,7 +51,7 @@ case "message/cpim":
     $cpim = CPIM::fromString($body);
     $groupUUID = $cpim->getHeader('Group-UUID');
     if ($groupUUID) {
-        $to = Messages::findRecipients($domainUUID, $extensionUUID, $groupUUID);
+        $to = Messages::findRecipients($domainUUID, $extensionUUID, $from, $groupUUID);
         if ($to == null) {
             error_log("dropping message for unknown group: domain_uuid=".$domainUUID." extension_uuid=".$extensionUUID." group_uuid=".$groupUUID."\n");
             die();

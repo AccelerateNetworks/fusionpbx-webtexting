@@ -1,15 +1,20 @@
 <script lang="ts">
 import Message from './Message.vue';
-import { MessageData, state } from '../lib/state';
+import Backfill from './Backfill.vue';
+import { MessageData, emitter, state, } from '../lib/global';
 import { uploadText } from '../lib/upload';
 import { CPIM } from '../lib/CPIM';
 
 export default {
     data() {
         return {
+            bottomVisible: true,
+            topVisible: false,
+            backfillAvailable: true,
             state: state,
             enteredText: "",
             pendingAttachment: null,
+            atBottom: true,
         }
     },
     props: {
@@ -30,8 +35,41 @@ export default {
     },
     components: { Message },
     mounted() {
-        this.scrollToBottom()
-        this.emitter.on('scroll-to-bottom', this.scrollToBottom);
+        emitter.on('scroll-to-bottom', this.toBottom);
+
+        let observer = new IntersectionObserver(this.onObserve, {
+            root: this.$refs.message_container,
+            rootMargin: "0px",
+            threshold: 0.5,
+        });
+        observer.observe(this.$refs.top);
+        observer.observe(this.$refs.bottom);
+
+        emitter.on('backfill-complete', () => {
+            if (!this.backfillAvailable) {
+                console.log('conversation fully backfilled, refusing to attempt to backfill more');
+                return;
+            }
+
+            if (this.topVisible && this.bottomVisible) {
+                console.log('top and bottom of conversation visible, attempting to backfill immediately');
+                emitter.emit('backfill-requested');
+                return;
+            }
+
+            console.log('will backfill if top is still visible in 1 second');
+            setTimeout(() => {
+                if (this.topVisible) {
+                    emitter.emit('backfill-requested');
+                }
+            }, 5000);
+        });
+
+        emitter.on('conversation-fully-backfilled', () => {
+            console.log('preventing future backfilling attempts, this conversation has been fully backfilled');
+            this.backfillAvailable = false;
+        })
+
         console.log("Conversation.vue mounted with props:\nremoteNumber:", this.remoteNumber, "\ngroupUUID:", this.groupUUID, "\ndisplayName:", this.displayName, "\nownNumber:", this.ownNumber);
     },
     methods: {
@@ -40,11 +78,47 @@ export default {
             const messageContainer = this.$refs.message_container;
             messageContainer.scrollTo(0, messageContainer.scrollHeight);
         },
+        onObserve(entities: IntersectionObserverEntity[]) {
+            entities.forEach((e) => {
+                switch (e.target) {
+                    case this.$refs.bottom:
+                        this.bottomVisible = e.isIntersecting;
+                        if (e.isIntersecting) {
+                            this.atBottom = true;
+                            console.log(this.atBottom ? "enabling" : "disabling", "scrolling to bottom for new messages");
+                        }
+                        console.log("bottom is", e.isIntersecting ? "visible" : "hidden");
+                        break;
+                    case this.$refs.top:
+                        this.topVisible = e.isIntersecting;
+                        if (e.isIntersecting && this.backfillAvailable) {
+                            emitter.emit('backfill-requested');
+                        }
+                        console.log("top is", e.isIntersecting ? "visible" : "hidden");
+                        break;
+                    default:
+                        console.log("observed event on unknown target:", e);
+                }
+            })
+        },
+        onScroll() {
+            if(this.atBottom != this.bottomVisible) {
+                this.atBottom = this.bottomVisible;
+                console.log(this.atBottom ? "enabling" : "disabling", "scrolling to bottom for new messages");
+            }
+        },
         keypress(e) {
             if (e.key == "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 this.send();
                 return false;
+            }
+        },
+        toBottom() {
+            console.log("new message added to bottom. scrolling?", this.atBottom);
+            if (this.atBottom) {
+                const messageContainer = this.$refs.message_container;
+                messageContainer.scrollTo(0, messageContainer.scrollHeight);
             }
         },
         async send() {
@@ -53,7 +127,7 @@ export default {
                 return;
             }
 
-            const message: MessageData = {
+            let message: MessageData = {
                 direction: 'outgoing',
                 contentType: 'text/plain',
                 timestamp: moment(),
@@ -65,31 +139,36 @@ export default {
                 const cpim = new CPIM();
                 cpim.fileURL = attachment;
 
-                if(this.groupUUID) {
+                if (this.groupUUID) {
                     cpim.headers["Group-UUID"] = this.groupUUID;
                 }
 
                 const m = message;
                 m.body = cpim.serialize();
-                this.emitter.emit('outbound-message', m);
+                emitter.emit('outbound-message', m);
             }
 
             if (this.enteredText.length > 0) {
                 if (this.groupUUID) {
-                    const cpim = new CPIM();
-                    if(this.groupUUID) {
+                    const url = await uploadText(this.enteredText);
+                    const cpim = new CPIM(url, 'text/plain');
+                    cpim.bodyText = this.enteredText;
+
+                    if (this.groupUUID) {
                         cpim.headers["Group-UUID"] = this.groupUUID;
                     }
-                    cpim.fileURL = await uploadText(this.enteredText);
+
+                    console.log('outgoing cpim', cpim);
 
                     message.contentType = "message/cpim";
+                    message.cpim = cpim;
                     message.body = cpim.serialize();
                 } else {
                     message.contentType = "text/plain";
                     message.body = this.enteredText;
                 }
                 console.log('emitting message', message);
-                this.emitter.emit('outbound-message', message);
+                emitter.emit('outbound-message', message);
             }
 
             console.log("sent", this.enteredText, this.pendingAttachment ? "with" : "without", "attachment");
@@ -102,8 +181,10 @@ export default {
 <template>
     <div class="thread-header">{{ displayName }}</div>
     <div class="thread">
-        <div class="message-container" ref="message_container">
-            <Message :message="message" v-for="message in state.messages" />
+        <div class="message-container" ref="message_container" v-on:scroll="onScroll">
+            <Backfill ref="top" />
+            <Message :message="message" :key="message.id" v-for="(message, index) in state.messages" />
+            <div class="message-wrapper" ref="bottom"></div>
         </div>
         <div class="attachment-preview"></div>
         <div class="sendbox">

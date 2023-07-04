@@ -118,8 +118,9 @@ final class Messages
         return $groupUUID;        
     }
 
-    public static function findRecipients(string $domainUUID, string $extensionUUID, string $groupUUID): string
+    public static function findRecipients(string $domainUUID, string $extensionUUID, string $ourNumber, string $groupUUID): string
     {
+        error_log("finding recipients for group:\ndomainUUID=".$domainUUID."\nextensionUUID=".$extensionUUID."\nourNumber=".$ourNumber."\ngroupUUID=".$groupUUID."\n");
         $sql = "SELECT members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND group_uuid = :group_uuid";
         $parameters['domain_uuid'] = $domainUUID;
         $parameters['extension_uuid'] = $extensionUUID;
@@ -131,9 +132,11 @@ final class Messages
             return null;
         }
 
+        $membersArray = explode(",", $members);
+        $membersArray = array_diff($membersArray, array($ourNumber));
         // TODO: drop own number from $members
 
-        return $members;
+        return implode(",", $membersArray);
     }
 
     public static function AddMessage(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $groupUUID=null)

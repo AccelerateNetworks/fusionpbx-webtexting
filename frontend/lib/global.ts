@@ -1,11 +1,13 @@
 import { Moment } from 'moment';
 import { reactive } from 'vue'
 import { CPIM } from './CPIM';
+import mitt from 'mitt';
 
 type MessageData = {
     direction: string;
     contentType: string;
     timestamp: Moment;
+    id?: string;
     from: string;
     to: string;
     body?: string;
@@ -20,4 +22,6 @@ const state = reactive<{
     connectivityStatus: 'loading',
 });
 
-export { state, MessageData }
+const emitter = mitt();
+
+export { state, emitter, MessageData }

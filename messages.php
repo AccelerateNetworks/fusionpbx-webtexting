@@ -21,7 +21,7 @@ if (!$extension) {
 
 $database = new database;
 
-$sql = "SELECT content_type, direction, from_number, message, start_stamp, to_number, group_uuid FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
+$sql = "SELECT content_type, direction, from_number, message, start_stamp, to_number, group_uuid, message_uuid FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
 if ($_GET['group']) {
     $sql .= "group_uuid = :group_uuid";
     $parameters['group_uuid'] = $_GET['group'];
@@ -29,7 +29,11 @@ if ($_GET['group']) {
     $sql .= "(from_number = :number OR to_number = :number) AND group_uuid IS NULL";
     $parameters['number'] = $_GET['number'];
 }
-$sql .= " ORDER BY start_stamp DESC LIMIT 10";
+if ($_GET['older_than']) {
+    $sql .= " AND start_stamp < (SELECT start_stamp FROM webtexting_messages WHERE message_uuid = :older_than)";
+    $parameters['older_than'] = $_GET['older_than'];
+}
+$sql .= " ORDER BY start_stamp DESC LIMIT 30";
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $parameters['domain_uuid'] = $domain_uuid;
 $messages = $database->select($sql, $parameters, 'all');
@@ -42,7 +46,9 @@ foreach ($messages as $i => $message) {
 
     // generate a pre-signed download URL before delivering it to things that will download it
     $body = CPIM::fromString($message['message']);
-    $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
+    if ($body->fileURL) {
+        $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
+    }
     $messages[$i]['message'] = $body->toString();
 }
 

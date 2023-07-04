@@ -4,9 +4,17 @@ export class CPIM {
     fileSize: number;
     fileContentType: string;
     fileURL: string;
+    bodyText?: string;
 
-    constructor() {
+    constructor(url?: string, contentType?: string) {
         this.headers = {};
+        if(url) {
+            this.fileURL = url;
+        }
+
+        if(contentType) {
+            this.fileContentType = contentType;
+        }
     }
 
     static fromString(raw: string): CPIM {
@@ -59,6 +67,12 @@ export class CPIM {
             fileElement.appendChild(dataElement);
         }
 
+        if(this.fileContentType) {
+            const contentTypeElement = doc.createElement('content-type');
+            contentTypeElement.textContent = this.fileContentType;
+            fileElement.appendChild(contentTypeElement);
+        }
+
         doc.appendChild(fileElement);
 
         const body = new XMLSerializer().serializeToString(doc);
@@ -73,7 +87,7 @@ export class CPIM {
         serialized += 'Content-Length: '+body.length+'\n\n';
         serialized += body;
 
-        console.log("serialized CPIM:", serialized);
+        console.log("serialized CPIM", this, "->", serialized);
 
         return serialized;
     }

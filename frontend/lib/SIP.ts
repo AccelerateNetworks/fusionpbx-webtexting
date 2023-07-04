@@ -1,6 +1,6 @@
 import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI } from 'sip.js';
 import { CPIM } from './CPIM';
-import { state, MessageData } from './state';
+import { state, emitter, MessageData } from './global';
 import moment from 'moment';
 
 let backoff = 0;
@@ -23,7 +23,7 @@ function reconnect(userAgent: UserAgent) {
     }
 }
 
-function RunSIPConnection(username: string, password: string, server: string, emitter: any, remote_number?: string, group?: string) {
+function RunSIPConnection(username: string, password: string, server: string, remote_number?: string, group?: string) {
     const uaOpts: UserAgentOptions = {
         logBuiltinEnabled: false,
         logConfiguration: false,
@@ -114,11 +114,16 @@ function RunSIPConnection(username: string, password: string, server: string, em
     emitter.on('outbound-message', async (message: MessageData) => {
         console.log("outbound message:", message);
 
+        message.timestamp = moment();
+        const m = message;
+        state.messages.push(m);
+
+        if(message.cpim) {
+            message.body = message.cpim.serialize();
+        }
+
         const remoteURI = new URI('sip', message.to, server);
         const messager = new Messager(userAgent, remoteURI, message.body, message.contentType);
-
-        message.timestamp = moment();
-        state.messages.push(message);
 
         emitter.emit('scroll-to-bottom');
 

@@ -11,8 +11,8 @@ final class CPIM
     public array $headers;
     public string $filename;
     public int $fileSize;
-    public string $fileContentType;
-    public string $fileURL;
+    public string|null $fileContentType;
+    public string|null $fileURL;
 
     /**
      * Construct a new CPIM
@@ -61,6 +61,8 @@ final class CPIM
     
         $parser = xml_parser_create();
         xml_parse_into_struct($parser, $parts[2], $body);
+
+        $message->fileURL = null;
         
         foreach ($body as $tag) {
             switch($tag['tag']) {

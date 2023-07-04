@@ -10,7 +10,8 @@
     ],
     "require": {
         "aws/aws-sdk-php": "^3.269",
-        "minishlink/web-push": "^8.0"
+        "minishlink/web-push": "^8.0",
+        "guzzlehttp/guzzle": "^6.5.8 || ^7.4.5"
     },
     "require-dev": {
         "phpunit/phpunit": "^10"

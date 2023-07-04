@@ -17,6 +17,7 @@ export default defineConfig({
   root: "frontend",
   build: {
     outDir: '../js',
+    sourcemap: true,
     lib: {
       entry: resolve(__dirname, 'frontend/main.ts'),
       name: 'WebTexting',

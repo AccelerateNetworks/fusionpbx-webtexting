@@ -1,5 +1,5 @@
 <script lang="ts">
-import { MessageData } from '../lib/state';
+import { MessageData, emitter } from '../lib/global';
 import type { PropType } from 'vue'
 
 export default {
@@ -9,6 +9,9 @@ export default {
             embedImage: null,
             embedVideo: null,
             download: null,
+            timestampText: this.message.timestamp.fromNow(),
+            interval: null,
+            loaded: false,
         }
     },
     props: {
@@ -17,16 +20,33 @@ export default {
             required: true,
         },
     },
-    async mounted() {
-        if(this.message.body) {
-            this.text = this.message.body;
-            return;
+    methods: {
+        bumpTimestamp() {
+            this.timestampText = this.message.timestamp.fromNow();
+        },
+        emitLoaded() {
+            console.log('image loaded', this);
+            emitter.emit('scroll-to-bottom');
+        },
+    },
+    async updated() {
+        if (!this.loaded) {
+            emitter.emit('scroll-to-bottom');
+            this.loaded = true;
         }
+    },
+    async mounted() {
+        this.interval = setInterval(this.bumpTimestamp, 10000);
+        if (this.message.cpim) {
+            if (this.message.cpim.bodyText) {
+                this.text = this.message.cpim.bodyText;
+                return;
+            }
 
-        if(this.message.cpim) {
-            switch(this.message.cpim.fileContentType) {
+            switch (this.message.cpim.fileContentType) {
                 case "text/plain":
                     this.text = await this.message.cpim.getTextBody()
+                    this.message.cpim.bodyText = this.text;
                     break
                 case "image/png":
                 case "image/jpg":
@@ -34,12 +54,20 @@ export default {
                     this.embedImage = this.message.cpim.fileURL;
                     break;
                 default:
-                    this.download = this.message.cpim.fileURL;
-                    const u = new URL(this.message.cpim.fileURL);
-                    const pathParts = u.pathname.split('/');
+                    if (this.message.cpim.fileURL) {
+                        this.download = this.message.cpim.fileURL;
+                        const u = new URL(this.message.cpim.fileURL);
+                        const pathParts = u.pathname.split('/');
+                    }
                     break;
             }
-
+        } else if (this.message.body) {
+            this.text = this.message.body;
+        }
+    },
+    unmounted() {
+        if (this.interval) {
+            clearInterval(this.interval);
         }
     }
 }
@@ -47,18 +75,18 @@ export default {
 
 <template>
     <div class="message-wrapper">
-        <div class="author" :class="this.message.direction">{{  this.message.from }}</div>
+        <div class="author" :class="this.message.direction">{{ this.message.from }}</div>
         <div class="message" :class="this.message.direction">
             <p class="message-body" v-if="this.text">{{ this.text }}</p>
-            <p class="message-body" v-if="this.embedImage">
+            <p class="message-body" v-if="this.embedImage" ref="embed">
                 <a :href="embedImage" target="_blank">
-                    <img class="message-body-inline-media" :src="embedImage" />
+                    <img class="message-body-inline-media" :src="embedImage" v-on:load="emitLoaded" />
                 </a>
             </p>
             <p class="message-body" v-if="this.download">
                 <a :href="download" target="_blank">click to download</a>
             </p>
-            <span class="timestamp">{{ message.timestamp.fromNow() }}</span>
+            <span class="timestamp">{{ timestampText }}</span>
         </div>
     </div>
 </template>

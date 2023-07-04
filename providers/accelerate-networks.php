@@ -59,20 +59,18 @@ function outgoing_mms(string $from, string $to, array $attachments)
 
 function _send(array $body)
 {
-    $ch = curl_init();
-
-    $encodedBody = json_encode($body);
-
-    curl_setopt($ch, CURLOPT_URL, "https://sms.callpipe.com/message/send");
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedBody);
-    curl_setopt(
-        $ch, CURLOPT_HTTPHEADER, [
-        "Authorization" => "Bearer ".$api_key,
-        "Content-Type" => "application/json",
-        ]
+    $client = new GuzzleHttp\Client();
+    $res = $client->request(
+        'POST', "https://sms.callpipe.com/message/send", [
+            'headers' => [
+                'Authorization' => "Bearer ".$_SESSION['webtexting']['acceleratenetworks_api_key']['text'],
+            ],
+            'http_errors' => false,
+            'json' => $body,
+        ],
     );
 
-    error_log("sending message body: ".$encodedBody."\n");
-    curl_exec($ch);
+    error_log("got ".$res->getStatusCode()." ".$res->getReasonPhrase()."\n");
+    $responseBody = json_decode($res->getBody()->getContents());
+    error_log(print_r($responseBody, true)."\n");
 }
