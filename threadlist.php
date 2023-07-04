@@ -26,7 +26,7 @@ $parameters['extension_uuid'] = $extension['extension_uuid'];
 $destination = $database->select($sql, $parameters, 'column');
 unset($parameters);
 if (!$destination) {
-    echo "no destination for this extension";
+    echo "no SMS-enabled number for this extension";
     include_once "footer.php";
     die();
 }

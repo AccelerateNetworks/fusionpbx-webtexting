@@ -23,6 +23,7 @@ $parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $database = new database;
 $ownNumber = $database->select($sql, $parameters, 'column');
+unset($parameters);
 ?>
 <link rel="stylesheet" href="js/style.css" />
 <style type="text/css">
@@ -41,7 +42,7 @@ $ownNumber = $database->select($sql, $parameters, 'column');
 
 <?php
 echo "<div class='action_bar' id='action_bar'>\n";
-echo "	<div class='heading'><b>WebTexting</b> - ".htmlspecialchars($extension['outbound_caller_id_name'])." (".htmlspecialchars($$ownNumber).")</div>";
+echo "	<div class='heading'><b>WebTexting</b> - ".htmlspecialchars($extension['outbound_caller_id_name'])." (".htmlspecialchars($ownNumber).")</div>";
 echo "	<div class='actions'>\n";
 // echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'label' => '?', 'onclick' => 'toggleNotifications()']);
 echo button::create(['type'=>'button','label'=>"All Texts",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'threadlist.php?extension_uuid='.$extension['extension_uuid']]);
@@ -104,6 +105,7 @@ $parameters['domain_name'] = $extension['user_context'];
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $database = new database;
 $extensionDetails = $database->select($sql, $parameters, 'row');
+unset($parameters);
 
 $frontendOpts['server'] = $extension['user_context'];
 $frontendOpts['username'] = $extensionDetails['extension'];

@@ -55,6 +55,7 @@ function RunSIPConnection(username: string, password: string, server: string, re
                 switch (message.request.getHeader("Content-Type")) {
                     case "text/plain":
                         if (remote_number && message.request.from.uri.user != remote_number) {
+                            console.log("message not from current thread: " ,message.request.from.uri.user, "!=", remote_number)
                             return;
                         }
                         state.messages.push({
@@ -120,9 +121,10 @@ function RunSIPConnection(username: string, password: string, server: string, re
 
         if(message.cpim) {
             message.body = message.cpim.serialize();
+            message.contentType = 'message/cpim';
         }
 
-        const remoteURI = new URI('sip', message.to, server);
+        const remoteURI = new URI('sip', message.to || message.from, server);
         const messager = new Messager(userAgent, remoteURI, message.body, message.contentType);
 
         emitter.emit('scroll-to-bottom');

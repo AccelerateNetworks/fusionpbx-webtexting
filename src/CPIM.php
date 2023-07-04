@@ -56,11 +56,13 @@ final class CPIM
         $message = new self();
 
         $parts = explode("\n\n", $raw);
-        $message->_addHeaders($parts[0]);
-        $message->_addHeaders($parts[1]);
+        for($i = 0; $i < sizeof($parts)-2; $i++) {
+            $message->_addHeaders($parts[$i]);
+        }
+        $rawBody = $parts[sizeof($parts)-1];
     
         $parser = xml_parser_create();
-        xml_parse_into_struct($parser, $parts[2], $body);
+        xml_parse_into_struct($parser, $rawBody, $body);
 
         $message->fileURL = null;
         
@@ -205,7 +207,7 @@ final class CPIM
      * 
      * @return string the value of the specified header, or null if absent
      */
-    public function getHeader(string $header): string
+    public function getHeader(string $header): string|null
     {
         $header = strtolower($header);
         if (array_key_exists($header, $this->headers)) {

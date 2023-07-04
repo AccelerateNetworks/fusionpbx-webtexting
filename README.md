@@ -1,10 +1,20 @@
 # WebTexting
 
 Install notes:
-* enable websockets on the SIP profile, must be on the same host and port as the web UI. Recommended way is to enable insecure websockets (ws) and bind it to 127.0.0.1, then pass /ws through from nginx.
+* enable websockets on the SIP profile, must be on the same host and port as the web UI. Recommended way is to enable insecure websockets (ws) and bind it to 127.0.0.1, then pass /ws through from nginx:
+```
+location /ws {
+    proxy_pass http://127.0.0.1:7080;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+    proxy_set_header Host $host;
+}
+```
 * install chatplan: `ln -s /var/www/fusionpbx/app/webtexting/chatplan.xml /etc/freeswitch/chatplan/default.xml`
   * probably have to reloadxml after doing this
 * install lua script for outbound messages: `ln -s /var/www/fusionpbx/app/webtexting/lua /usr/share/freeswitch/scripts/app/webtexting`
+* ensure `mod_curl` is loaded (add to `/etc/freeswitch/autoload_configs/modules.conf.xml`)
 * to install dependencies: `composer install`
 * as with most FusionPBX apps, must run schema and menu upgrade after installation.
 
