@@ -134,6 +134,31 @@ export default {
             attachment.progress = 100;
 
             console.log("uploaded: ", resp);
+        },
+        onPaste(e: ClipboardEvent) {
+            var items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            console.log(JSON.stringify(items)); // will give you the mime types
+            for (const item of items) {
+                switch(item.type) {
+                    case "image/png":
+                    case "image/jpg":
+                        const file = item.getAsFile();
+                        const a: PendingAttachment = {
+                            file: file,
+                            previewURL: URL.createObjectURL(file),
+                            progress: 0,
+                            upload: null,
+                            uploadedURL: null,
+                        };
+                        a.upload = this.uploadAttachment(a);
+                        this.pendingAttachments.push(a);
+                        break;
+                    case "text/plain":
+                        continue;
+                    default:
+                        console.log("discarding clipboard data of unknown type:", item)
+                }
+            }
         }
     }
 }
@@ -148,7 +173,7 @@ export default {
         </div>
     </div>
     <div class="sendbox">
-        <textarea class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText" ref="textbox"></textarea>
+        <textarea class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste"></textarea>
         <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
         <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />
         <button class="btn btn-send" :disabled="pendingAttachments.length == 0 && enteredText.length == 0" v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
