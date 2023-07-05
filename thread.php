@@ -18,6 +18,30 @@ if (!$extension) {
     die();
 }
 
+if($_POST['action']) {
+  switch($_POST['action']) {
+    case "rename-group":
+      $sql = "UPDATE webtexting_groups SET name = :name WHERE group_uuid = :group_uuid AND extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid";
+      $parameters['name'] = $_POST['name'];
+      $parameters['group_uuid'] = $_POST['group'];
+      $parameters['extension_uuid'] = $_GET['extension_uuid'];
+      $parameters['domain_uuid'] = $domain_uuid;
+      if($database->execute($sql, $parameters)) {
+          message::add("group renamed");
+      } else {
+          message::add("error renaming group", 'negative');
+      }
+      unset($parameters);
+      break;
+    default:
+      message::add("unknown action ".$_POST['action']." requested, no action taken", 'negative');
+      break;
+  }
+  // redirect to the same page so the user's request to the page is a GET and refreshing doesn't re-run the action
+  header("Location: /app/webtexting/thread.php?extension_uuid=".$_GET['extension_uuid']."&group=".$_POST['group']);
+  die();
+}
+
 $sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];
@@ -68,13 +92,35 @@ if ($_GET['group']) {
       die();
     }
 
+    ?>
+
+    <form method='post'>
+      <input type="hidden" name="action" value="rename-group" />
+      <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
+      <input type="hidden" name="group" value="<?php echo $_GET['group']; ?>" />
+      <div id='modal-rename-group' class='modal-window'>
+        <div>
+            <span title="" class='modal-close' onclick="modal_close(); ">&times</span>
+            <span class='modal-title'>Rename Group</span>
+            <span class='modal-message'>New name: <input type="text" name="name" placeholder="My besties" value="<?php if($group['name']) {echo $group['name'];} ?>" /></span>
+            <span class='modal-actions'>
+                <button type='button' alt='Cancel' title='Cancel' onclick='modal_close();' class='btn btn-default' ><span class='fas fa-times fa-fw'></span><span class='button-label never pad'>Cancel</span></button>
+                <button type='submit' value='Ok' id='btn_ok' alt='ok' title='ok' onclick='modal_close();' class='btn btn-default' style='float: right; margin-left: 15px' ><span class='fas fa-check fa-fw'></span><span class='button-label never pad'>Start</span></button>
+            </span>
+        </div>
+      </div>
+      <input type='hidden' name='key_uuid' id='key_uuid'/>
+    </form>
+
+    <?php
+
     if ($group['name'] != null) {
-        $displayName = $group['name'];
-    } else {
-        $displayName = $group['members'];
+        $frontendOpts['threadName'] = $group['name'];
     }
+    $frontendOpts['groupMembers'] = explode(",", $group['members']);
 } else {
-    $frontendOpts['remoteNumber'] = $_GET['number'];
+    $number = $_GET['number'];
+    $frontendOpts['remoteNumber'] = $number;
 
     // compute the name to display based on number and a potential contact name
     $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
@@ -96,14 +142,12 @@ if ($_GET['group']) {
             $nameParts[] = htmlspecialchars($contact['contact_name_family']);
         }
         if (sizeof($nameParts) > 0) {
-            $displayName = implode(" ", $nameParts);
-            $displayName .= " <small>";
+            $frontendOpts['threadName'] = implode(" ", $nameParts);
             if (permission_exists('contact_phone_edit')) {
-                $displayName .= "<a class='white' href='/app/contacts/contact_edit.php?id=".$contact['contact_uuid']."'><span class='fas fa-edit fa-fw'> </span></a> ";
+                $frontendOpts['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
             }
-            $displayName .= "(".$number.")</small>";
         } elseif (permission_exists('contact_phone_edit')) {
-            $displayName .= " <small><a class='white' href='/app/contacts/contact_edit.php?id=".$contact['contact_uuid']."'><span class='fas fa-edit fa-fw'> </span></a></small>";
+          $frontendOpts['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
         }
     }
 }
@@ -128,7 +172,6 @@ unset($parameters);
 $frontendOpts['server'] = $extension['user_context'];
 $frontendOpts['username'] = $extensionDetails['extension'];
 $frontendOpts['password'] = $extensionDetails['password'];
-$frontendOpts['threadName'] = $displayName;
 $frontendOpts["extensionUUID"] = $extension['extension_uuid'];
 $frontendOpts['ownNumber'] = $ownNumber;
 ?>

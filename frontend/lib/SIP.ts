@@ -51,18 +51,18 @@ function RunSIPConnection(username: string, password: string, server: string, re
                     console.log("connectivity error:", err)
                 }
             },
-            onInvite: (invitation: Invitation) => {
-                console.log("[INVITE]", invitation);
-            },
-            onNotify: (notify: Notification) => {
-                console.log("[NOTIFY]", notify);
-            },
+            // onInvite: (invitation: Invitation) => {
+            //     console.log("[INVITE]", invitation);
+            // },
+            // onNotify: (notify: Notification) => {
+            //     console.log("[NOTIFY]", notify);
+            // },
             onMessage: async (message: Message) => {
                 console.log("[MESSAGE]", message);
                 switch (message.request.getHeader("Content-Type")) {
                     case "text/plain":
                         if (remote_number && message.request.from.uri.user != remote_number) {
-                            console.log("message not from current thread: " ,message.request.from.uri.user, "!=", remote_number)
+                            console.log("message not from current thread: ", message.request.from.uri.user, "!=", remote_number)
                             return;
                         }
                         state.messages.push({
@@ -80,8 +80,17 @@ function RunSIPConnection(username: string, password: string, server: string, re
                         let cpim = CPIM.fromString(message.request.body);
                         console.log("Received CPIM ", cpim);
 
-                        if (group && cpim.getHeader("group-uuid") != group) {
-                            return
+                        if (group) {
+                            if(cpim.getHeader("group-uuid") != group) {
+                                console.log("message is not for this group");
+                                return
+                            }
+                        } else if (cpim.getHeader("group-uuid")) {
+                            console.log("message is for a group, current thread is not a group")
+                            return;
+                        } else if (message.request.from.uri.user != remote_number) {
+                            console.log("message not from current thread: ", message.request.from.uri.user, "!=", remote_number)
+                            return;
                         }
 
                         console.log("adding new message to the thread from CPIM");
@@ -125,7 +134,7 @@ function RunSIPConnection(username: string, password: string, server: string, re
                 registerer.stateChange.addListener(async (data: RegistererState) => {
                     state.connected = data == RegistererState.Registered;
                     state.connectivityStatus = data;
-                    console.log("registerer state changed to", data, " connected:", state.connected, "registerer:", registerer);
+                    console.log("registerer state changed to", data, " connected?", state.connected);
                     switch(data) {
                         case RegistererState.Registered:
                             backoff = 0; // reset reconnect backoff timer
@@ -136,7 +145,6 @@ function RunSIPConnection(username: string, password: string, server: string, re
                             break;
                     }
                 });
-                console.log("registering with new registerer:", registerer);
                 await registerer.register();
                 emitter.emit('scroll-to-bottom');
                 break;

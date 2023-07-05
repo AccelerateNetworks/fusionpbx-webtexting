@@ -9,7 +9,9 @@ type Options = {
     username: string,
     password: string,
     server: string,
-    threadName: string,
+    threadName?: string,
+    contactEditLink?: string,
+    groupMembers?: string[],
     extensionUUID: string,
     ownNumber: string,
     remoteNumber?: string,
@@ -22,6 +24,8 @@ function initializeThreadJS(opts: Options) {
         groupUUID: opts.groupUUID,
         displayName: opts.threadName,
         ownNumber: opts.ownNumber,
+        contactEditLink: opts.contactEditLink,
+        groupMembers: opts.groupMembers,
     }
     const app = createApp(Conversation, props);
 

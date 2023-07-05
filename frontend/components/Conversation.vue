@@ -5,6 +5,21 @@ import { MessageData, emitter, state, } from '../lib/global';
 
 export default {
     data() {
+        let title = "";
+        if(this.displayName) {
+            title = this.displayName;
+        } else if(this.groupMembers) {
+            title = this.groupMembers.join(", ");
+        }
+
+        if(this.remoteNumber) {
+            if(title.length > 0) {
+                title += "(" + this.remoteNumber + ")";
+            } else {
+                title += this.remoteNumber;
+            }
+        }
+
         return {
             bottomVisible: true,
             topVisible: false,
@@ -13,6 +28,7 @@ export default {
             enteredText: "",
             pendingAttachment: null,
             atBottom: true,
+            title: title,
         }
     },
     props: {
@@ -24,11 +40,16 @@ export default {
         },
         displayName: {
             type: String,
-            required: true,
         },
         ownNumber: {
             type: String,
             required: true,
+        },
+        contactEditLink: {
+            type: String,
+        },
+        groupMembers: {
+            type: Array<String>,
         }
     },
     components: { Message, SendBox },
@@ -117,7 +138,15 @@ export default {
 </script>
 
 <template>
-    <div class="thread-header">{{ displayName }}</div>
+    <div class="thread-header">
+        {{ title }}
+        <a v-if="contactEditLink" :href="contactEditLink" class="white">
+            <span class='fas fa-edit fa-fw'> </span>
+        </a>
+        <a v-if="groupUUID" href="javascript: void(0);" class="white" onclick="modal_open('modal-rename-group');">
+            <span class='fas fa-edit fa-fw'> </span>
+        </a>
+    </div>
     <div class="thread">
         <div class="message-container" ref="message_container" v-on:scroll="onScroll">
             <Backfill ref="top" :backfillAvailable="backfillAvailable" />

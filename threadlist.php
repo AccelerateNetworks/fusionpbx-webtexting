@@ -101,12 +101,6 @@ foreach ($threads as $thread) {
     $last_message = $database->select($sql, $parameters, 'row');
     unset($parameters);
 
-    $sql = "SELECT v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
-    $parameters['number'] = $number;
-    $parameters['domain_uuid'] = $domain_uuid;
-    $contact = $database->select($sql, $parameters, 'row');
-    unset($parameters);
-
     // compute the name to display based on number and a potential contact name
     $display_name = "";
     if ($group_uuid != null) {
@@ -123,6 +117,13 @@ foreach ($threads as $thread) {
         }
     } else {
         $display_name = $number;
+
+        $sql = "SELECT v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
+        $parameters['number'] = $number;
+        $parameters['domain_uuid'] = $domain_uuid;
+        $contact = $database->select($sql, $parameters, 'row');
+        unset($parameters);
+
         if ($contact) {
             $name_parts = array();
             if ($contact['contact_name_given']) {
