@@ -22,6 +22,34 @@ switch($_POST['fix']) {
         AccelerateNetworks::RegisterInboundRouting($_POST['number'], $desiredWebhookURL);
         message::add("added SMS destination for ".$_POST['number']);
         break;
+    case "sms_enable":
+        $sql = "UPDATE webtexting_destinations SET phone_number = :phone_number WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid RETURNING *";
+        $parameters['phone_number'] = $_POST['phone_number'];
+        $parameters['extension_uuid'] = $_POST['extension_uuid'];
+        $parameters['domain_uuid'] = $domain_uuid;
+        if($database->select($sql, $parameters, 'row')) {
+            message::add("updated SMS for extension with number ".$_POST['phone_number']);
+        } else {
+            $sql = "INSERT INTO webtexting_destinations (phone_number, extension_uuid, domain_uuid) VALUES (:phone_number, :extension_uuid, :domain_uuid)";
+            if($database->execute($sql, $parameters)) {
+                message::add("enabled SMS for extension with number ".$_POST['phone_number']);
+            } else {
+                message::add("error updating SMS destination chatplan detail data ".$_POST['phone_number'], 'negative');
+            }
+        }
+        unset($parameters);
+        break;
+    case "sms_disable":
+        $sql = "DELETE FROM webtexting_destinations WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid";
+        $parameters['extension_uuid'] = $_POST['extension_uuid'];
+        $parameters['domain_uuid'] = $domain_uuid;
+        if($database->execute($sql, $parameters)) {
+            message::add("disabled SMS for extension");
+        } else {
+            message::add("error disabling SMS", 'negative');
+        }
+        unset($parameters);
+        break;
     default:
         if($_POST['fix']) {
             message::add("unknown fix: ".$_POST['fix'], 'negative');
@@ -41,12 +69,30 @@ switch($_POST['fix']) {
 </style>
 <?php
 
-function fixbutton(array $params) {
+function fixbutton(array $params, $label="update") {
     $out = "<form method='post'>";
     foreach($params as $k=>$v) {
-        $out .= "<input type='hidden' name='".$k."' value='".$v."' />";
+        $opts = $v;
+        if (is_string($v)) {
+            $opts = [
+                "type" => "hidden",
+                "value" => $v,
+            ];
+        }
+
+        $u = uuid();
+
+        if($opts['type'] != "hidden") {
+            $out .= "<label for='".$u."'>".$k.": ";
+        }
+
+        $out .= "<input type='".$opts['type']."' name='".$k."' value='".$opts['value']."' id='".$u."' />";
+
+        if($opts['type'] != "hidden") {
+            $out .= "</label><br />";
+        }
     }
-    $out .= $message.": <input type='submit' class='btn' value='fix' />";
+    $out .= "<input type='submit' class='btn' value='".$label."' />";
     $out .= "</form>";
     return $out;
 }
@@ -78,14 +124,31 @@ echo "</tr>";
 foreach($extensions as $extension) {
     echo "<tr>";    
     echo "<td>".$extension['extension']."</td>";
+    $sms_number = $extension['outbound_caller_id_number'];
     if($smsenabled_extensions[$extension['extension_uuid']]) {
         $sms_number = $smsenabled_extensions[$extension['extension_uuid']]['phone_number'];
-        echo "<td class='success'>".$sms_number."</td>";
+        echo "<td class='success'>";
     } else {
-        echo "<td>no</td>";
+        echo "<td>";
     }
+    echo fixbutton(
+        [
+            'fix' => 'sms_enable',
+            'extension_uuid' => $extension['extension_uuid'],
+            'phone_number' => [
+                'type' => 'text',
+                'value' => $sms_number,
+            ],
+        ]
+    );
 
-    if($sms_number) {
+    if($smsenabled_extensions[$extension['extension_uuid']]) {
+        echo "<br />";
+        echo fixbutton(['fix' => 'sms_disable', 'extension_uuid' => $extension['extension_uuid']], "disable SMS");
+    }
+    echo "</td>";
+
+    if($smsenabled_extensions[$extension['extension_uuid']]) {
         $inboundRouting = AccelerateNetworks::GetInboundSMSRouting($sms_number);
         $problems = array();
 
@@ -97,17 +160,23 @@ foreach($extensions as $extension) {
             $problems[] = "client secret incorrect";
         }
 
+        // check doesn't work because sms.callpipe.com returns a value without a international prefix, but webhook has international prefix so we need it too
+        // if ($inboundRouting->asDialed != $sms_number) {
+        //     $problems[] = "number formatting disagreement. theirs: ".$inboundRouting->asDialed." ours: ".$sms_number;
+        // }
+
         if(count($problems) > 0) {
             echo "<td class='error'><ul>";
             foreach($problems as $problem) {
                 echo "<li>".$problem."</li>";
             }
             echo "</ul>";
-            echo fixbutton(['fix' => 'inbound_webhook_url', 'number' => $sms_number]);
-            echo "</td>";
         } else {
-            echo "<td class='success'>configured</td>";
+            echo "<td class='success'>configured<br />";
         }
+
+        echo fixbutton(['fix' => 'inbound_webhook_url', 'number' => $sms_number]);
+        echo "</td>";
     } else {
         echo "<td>not routed</td>";
     }
