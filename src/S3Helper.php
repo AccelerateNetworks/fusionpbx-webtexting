@@ -64,4 +64,16 @@ class S3Helper
             ]
         );
     }
+
+    public static function GetUploadURL(string $uploadPath): string
+    {
+        $s3 = S3Helper::_getS3Client();
+        $cmd = $s3->getCommand('PutObject', [
+            'Bucket' => $_SESSION['webtexting']['mms_bucket']['text'],
+            'Key' => $uploadPath,
+        ]);
+        $request = $s3->createPresignedRequest($cmd, '+1 hour');
+
+        return $request->getUri();
+    }
 }

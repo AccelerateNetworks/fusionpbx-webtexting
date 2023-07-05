@@ -55,6 +55,24 @@ $displayName = "";
 if ($_GET['group']) {
     $frontendOpts['groupUUID'] = $_GET['group'];
     $displayName = htmlspecialchars($_GET['group']);
+
+    $sql = "SELECT name, members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND group_uuid = :group_uuid";
+    $parameters['domain_uuid'] = $domain_uuid;
+    $parameters['extension_uuid'] = $extension['extension_uuid'];
+    $parameters['group_uuid'] = $_GET['group'];
+    $group = $database->select($sql, $parameters, 'row');
+    unset($parameters);
+    if(!$group) {
+      echo "no such group";
+      include "footer.php";
+      die();
+    }
+
+    if ($group['name'] != null) {
+        $displayName = $group['name'];
+    } else {
+        $displayName = $group['members'];
+    }
 } else {
     $frontendOpts['remoteNumber'] = $_GET['number'];
 

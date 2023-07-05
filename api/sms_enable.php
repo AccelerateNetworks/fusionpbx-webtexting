@@ -51,7 +51,7 @@ function do_action($body) {
         unset($parameters);
     }
 
-    AccelerateNetworksRegisterInboundRouting($body->number);
+    AccelerateNetworks::RegisterInboundRouting($body->number);
 
     return array("success" => true);
 }

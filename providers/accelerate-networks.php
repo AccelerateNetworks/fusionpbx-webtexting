@@ -23,10 +23,7 @@ function incoming()
     // * AdditionalRecipients
     // * MediaURLs
 
-    // TODO: check inbound token
-    $accelerateInboundToken = "...";
-
-    if ($body->{'ClientSecret'} != $accelerateInboundToken) {
+    if ($body->{'ClientSecret'} != $_SESSION['webtexting']['acceleratenetworks_inbound_token']['text']) {
         http_response_code(401);
         echo json_encode(array("error" => "invalid client_secret"));
         die();

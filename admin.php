@@ -4,7 +4,7 @@ require_once "resources/require.php";
 require_once "resources/check_auth.php";
 require_once "resources/header.php";
 require_once "resources/paging.php";
-require_once __DIR__."/lib/acceleratenetworks.php";
+require_once __DIR__."/vendor/autoload.php";
 
 if(!if_group('superadmin')) {
     echo "access denied";
@@ -12,48 +12,15 @@ if(!if_group('superadmin')) {
     die();
 }
 
+
+$desiredWebhookURL = "https://".$_SESSION['domain_name']."/app/webtexting/inbound-hook.php?provider=accelerate-networks";
+
 $database = new database;
 
 switch($_POST['fix']) {
-    case "outbound_caller_id":
-        $sql = "UPDATE v_extensions SET outbound_caller_id_number = :outbound_caller_id WHERE extension_uuid = :extension AND domain_uuid = :domain_uuid";
-        $parameters['outbound_caller_id'] = $_POST['outbound_caller_id'];
-        $parameters['extension'] = $_POST['extension'];
-        $parameters['domain_uuid'] = $domain_uuid;
-        if($database->execute($sql, $parameters)) {
-            message::add("updated outbound caller ID for extension ".$_POST['extension']);
-        } else {
-            message::add("error updating outbound caller ID for extension ".$_POST['extension'], 'negative');
-        }
-        unset($parameters);
-        break;
-    case "update_sms_destination":
-        $sql = "UPDATE v_sms_destinations SET chatplan_detail_data = :chatplan_detail_data WHERE sms_destination_uuid = :destination AND domain_uuid = :domain_uuid";
-        $parameters['chatplan_detail_data'] = $_POST['chatplan_detail_data'];
-        $parameters['destination'] = $_POST['destination'];
-        $parameters['domain_uuid'] = $domain_uuid;
-        if($database->execute($sql, $parameters)) {
-            message::add("updated SMS destination chatplan detail data ".$_POST['destination']);
-        } else {
-            message::add("error updating SMS destination chatplan detail data ".$_POST['destination'], 'negative');
-        }
-        unset($parameters);
-        break;
-    case "create_sms_destination":
-        $sql = "INSERT INTO v_sms_destinations (sms_destination_uuid, domain_uuid, destination, carrier, enabled, chatplan_detail_data) VALUES (:sms_destination_uuid, :domain_uuid, :number, 'acceleratenetworks', true, :chatplan_detail_data)";
-        $parameters['sms_destination_uuid'] = uuid();
-        $parameters['domain_uuid'] = $domain_uuid;
-        $parameters['number'] = $_POST['number'];
-        $parameters['chatplan_detail_data'] = $_POST['chatplan_detail_data'];
-        if($database->execute($sql, $parameters)) {
-            message::add("added SMS destination for ".$_POST['number']);
-        } else {
-            message::add("error adding SMS destination for ".$_POST['number'], 'negative');
-        }
-        unset($parameters);
-        break;
-    case "upstream_routing":
-        AccelerateNetworksRegisterInboundRouting($_POST['number']);
+    case "inbound_webhook_url":
+        AccelerateNetworks::RegisterInboundRouting($_POST['number'], $desiredWebhookURL);
+        message::add("added SMS destination for ".$_POST['number']);
         break;
     default:
         if($_POST['fix']) {
@@ -74,7 +41,7 @@ switch($_POST['fix']) {
 </style>
 <?php
 
-function fixbutton(string $message, array $params) {
+function fixbutton(array $params) {
     $out = "<form method='post'>";
     foreach($params as $k=>$v) {
         $out .= "<input type='hidden' name='".$k."' value='".$v."' />";
@@ -95,102 +62,57 @@ $parameters['domain_uuid'] = $domain_uuid;
 $extensions = $database->select($sql, $parameters, 'all');
 unset($parameters);
 
-$sql = "SELECT * FROM v_sms_destinations WHERE domain_uuid = :domain_uuid";
+$sql = "SELECT extension_uuid, phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid";
 $parameters['domain_uuid'] = $domain_uuid;
 foreach($database->select($sql, $parameters, 'all') as $d) {
-    $sms_destinations[$d['destination']] = $d;
+    $smsenabled_extensions[$d['extension_uuid']] = $d;
 }
 unset($parameters);
-
-foreach(AccelerateNetworksGetAllInboundSMSRouting() as $d) {
-    $number = $d->asDialed;
-    $sms_destinations[$number]['messaging_data'] = $d;
-}
 
 echo "<table class='table'>\n";
 echo "<tr>";
 echo "<th>Extension</th>";
-echo "<th>Outbound Routing (Outbound Caller ID)</th>";
-echo "<th>Outbound Routing</th>";
+echo "<th>SMS-enabled</th>";
 echo "<th>Upstream Inbound Routing</th>";
 echo "</tr>";
 foreach($extensions as $extension) {
-    $number = $extension['outbound_caller_id_number'];
-    $trimmed_number = ltrim($number, "+1"); // trim any leading + or 1 characters
     echo "<tr>";    
     echo "<td>".$extension['extension']."</td>";
-    if($number == "") {
-        echo "<td class='error'>no outbound caller ID set</td>";
-    } else if($number == $trimmed_number) {
-        echo "<td class='success'>".$number."</td>";
+    if($smsenabled_extensions[$extension['extension_uuid']]) {
+        $sms_number = $smsenabled_extensions[$extension['extension_uuid']]['phone_number'];
+        echo "<td class='success'>".$sms_number."</td>";
     } else {
-        $fix = array(
-            'fix' => 'outbound_caller_id',
-            'extension' => $extension['extension_uuid'],
-            'outbound_caller_id' => $trimmed_number,
-        );
-        echo "<td class='error'>".fixbutton($number." -> ".$trimmed_number, $fix)."</td>";
+        echo "<td>no</td>";
     }
 
-    $sms_destination = $sms_destinations[$trimmed_number];
-    if($sms_destination && $sms_destination['sms_destination_uuid']) {
-        $destination_extenion = $sms_destination['chatplan_detail_data'];
-        if($destination_extenion == $extension['extension']) {
-            echo "<td class='success'>".$trimmed_number." -> ".$destination_extenion."</td>";
-        } else {
-            $fix = array(
-                'fix' => 'update_sms_destination',
-                'destination' => $sms_destination['sms_destination_uuid'],
-                'chatplan_detail_data' => $extension['extension'],
-            );
-            echo "<td class='error'>".fixbutton("SMS routes to wrong extension: ".$trimmed_number." -> ".$destination_extenion, $fix)."</td>";
-        }
-    } else if($trimmed_number) {
-        $fix = array(
-            'fix' => 'create_sms_destination',
-            'number' => $trimmed_number,
-            'chatplan_detail_data' => $extension['extension'],
-        );
-        echo "<td class='error'>".fixbutton("no SMS destination for ".$trimmed_number, $fix)."</td>";
-    } else {
-        echo "<td>-</td>";
-    }
+    if($sms_number) {
+        $inboundRouting = AccelerateNetworks::GetInboundSMSRouting($sms_number);
+        $problems = array();
 
-    $fix = array(
-        'fix' => 'upstream_routing',
-        'number' => $trimmed_number,
-    );
-    if($sms_destination['messaging_data']) {
-        $actualUrl = $sms_destination['messaging_data']->callbackUrl;
-        $desiredUrl = "https://".$_SESSION['domain_name']."/app/sms/hook/sms_hook_acceleratenetworks.php";
-
-        if($actualUrl != $desiredUrl) {
-            $errors[] = "callback URL incorrect: ".$actualUrl." -> ".$desiredUrl;
+        if($inboundRouting->callbackUrl != $desiredWebhookURL) {
+            $problems[] = "webhook URL is wrong: <code>".$inboundRouting->callbackUrl."</code> should be <code>".$desiredWebhookURL."</code>";
         }
 
-        $actualToken = $sms_destination['messaging_data']->clientSecret;
-        $desiredToken = $_SESSION['sms']['acceleratenetworks_inbound_token']['text'];
-        if($actualToken != $desiredToken) {
-            $errors[] = "token incorrect: ";
+        if ($inboundRouting->clientSecret != $_SESSION['webtexting']['acceleratenetworks_inbound_token']['text']) {
+            $problems[] = "client secret incorrect";
         }
 
-        if(sizeof($errors) > 0) {
+        if(count($problems) > 0) {
             echo "<td class='error'><ul>";
-            foreach($errors as $error) {
-                echo "<li>".$error."</li>";
+            foreach($problems as $problem) {
+                echo "<li>".$problem."</li>";
             }
             echo "</ul>";
-            echo fixbutton($trimmed_number." upstream routing", $fix);
+            echo fixbutton(['fix' => 'inbound_webhook_url', 'number' => $sms_number]);
             echo "</td>";
         } else {
-            echo "<td class='success'>inbound SMS routed correctly</td>";
+            echo "<td class='success'>configured</td>";
         }
-        unset($errors);
-    } else if($trimmed_number) {
-        echo "<td class='error'>".fixbutton($trimmed_number." not routed upstream", $fix)."</td>";
     } else {
-        echo "<td>-</td>";
+        echo "<td>not routed</td>";
     }
+
+    unset($sms_number);
     echo "</tr>";
 }
 
