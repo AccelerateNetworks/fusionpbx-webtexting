@@ -14,7 +14,7 @@ export default {
 
         if(this.remoteNumber) {
             if(title.length > 0) {
-                title += "(" + this.remoteNumber + ")";
+                title += " (" + this.remoteNumber + ")";
             } else {
                 title += this.remoteNumber;
             }
@@ -203,5 +203,9 @@ export default {
     max-width: 50em;
     margin: 0 auto;
     padding: 1em;
+}
+
+.white {
+    color: white;
 }
 </style>

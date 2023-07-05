@@ -136,7 +136,7 @@ foreach ($threads as $thread) {
                 $name_parts[] = $contact['contact_name_family'];
             }
             if (sizeof($name_parts) > 0) {
-                $display_name = implode(" ", $name_parts)." <small>(".$number.")</small>";
+                $display_name = implode(" ", $name_parts);
             }
         }
     }
