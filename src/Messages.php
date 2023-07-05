@@ -9,7 +9,7 @@ final class Messages
 
     public static function IncomingSMS(string $from, string $to, string $body)
     {
-        $destination = Destination::Get($to);
+        $destination = LocalNumber::Get($to);
         if ($destination == null) {
             return false;
         }
@@ -33,7 +33,7 @@ final class Messages
     {
         $cpim = new CPIM();
 
-        $destination = Destination::Get($to);
+        $destination = LocalNumber::Get($to);
         if ($destination == null) {
             return false;
         }
@@ -69,7 +69,7 @@ final class Messages
         return true;
     }
 
-    private static function _incoming(Destination $destination, string $from, string $to, string|CPIM $body, string $contentType, $groupUUID=null)
+    private static function _incoming(LocalNumber $destination, string $from, string $to, string|CPIM $body, string $contentType, $groupUUID=null)
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
@@ -84,12 +84,68 @@ final class Messages
 
         // deliver the webpush notification
         Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
-     
+
         // deliver via SIP
         Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $groupUUID);
     }
 
-    private static function _findGroup(Destination $destination, string $from, string $to, $additionalRecipients): ?string
+    public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body)
+    {
+        $source = LocalNumber::Get($from);
+        Messages::_outgoing($source, $to, $from, $body, "text/plain");
+    }
+
+    /**
+     * Called when a new outbound MMS needs to be delivered the system
+     *
+     * @param string $from                 the phone number the message is coming from
+     * @param string $to                   the phone number the message was sent to
+     * @param array  $attachments          a list of attachments to be sent
+     * @param array  $additionalRecipients other numbers the message was sent to
+     *
+     * @return null
+     */
+    public static function OutgoingMMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $attachment, string $groupUUID=null)
+    {
+        $cpim = new CPIM();
+
+        $source = LocalNumber::Get($from);
+        if ($source == null) {
+            return false;
+        }
+
+        $cpim->headers["From"] = "sip:".$from."@".$source->domainName;
+        $cpim->headers["To"] = "sip:".$source->extension."@".$source->domainName;
+
+        if ($groupUUID) {
+            $cpim->headers["Group-UUID"] = $groupUUID;
+        }
+
+        $info = S3Helper::GetInfo($attachment);
+        $cpim->fileURL = $attachment;
+        $cpim->fileContentType = $info['ContentType'];
+        $cpim->fileSize = $info['ContentLength'];
+        Messages::_outgoing($source, $from, $to, $cpim->toString(), "message/cpim", $groupUUID);
+
+        return true;
+    }
+
+    public static function _outgoing(LocalNumber $source, string $to, string $from, string|CPIM $body, string $contentType, $groupUUID=null)
+    {
+        $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
+
+        Messages::AddMessage('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType);
+
+        // generate a pre-signed download URL before delivering it to things that will download it
+        if ($body instanceof CPIM) {
+            $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
+            $bodyStr = $body->toString();
+        }
+
+        Messages::_sendSIP($source->domainName, $source->extension, $from, $to, $bodyStr, $contentType, $groupUUID);
+    }
+
+    private static function _findGroup(LocalNumber $localNumber, string $from, string $to, $additionalRecipients): ?string
     {
         $db = new database;
 
@@ -103,8 +159,8 @@ final class Messages
         sort($members);
 
         $sql = "SELECT group_uuid FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND members = :members LIMIT 1";
-        $parameters['domain_uuid'] = $destination->domainUUID;
-        $parameters['extension_uuid'] = $destination->extensionUUID;
+        $parameters['domain_uuid'] = $localNumber->domainUUID;
+        $parameters['extension_uuid'] = $localNumber->extensionUUID;
         $parameters['members'] = implode(",", $members);
         $groupUUID = $db->select($sql, $parameters, 'column');
         if (!$groupUUID) {
@@ -262,7 +318,7 @@ final class Messages
             error_log("got expiration from push endpoint, deleting subscription from database\n");
     
             $sql = "DELETE FROM webtexting_subscriptions USING webtexting_clients WHERE webtexting_subscriptions.client_uuid = webtexting_clients.client_uuid AND webtexting_clients.endpoint = :endpoint";
-            $parameters['endpoint'] = $result->subscription->endpoint;
+            $parameters['endpoint'] = $endpoint;
             $database->execute($sql, $parameters);
     
             $sql = "DELETE FROM webtexting_clients WHERE endpoint = :endpoint";

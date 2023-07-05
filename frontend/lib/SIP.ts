@@ -98,12 +98,21 @@ function RunSIPConnection(username: string, password: string, server: string, re
 
     console.log("initializing user agent with options:", uaOpts);
     const userAgent = new UserAgent(uaOpts);
+
+    userAgent.transport.onDisconnect = (err?: Error) => {
+        state.connectivityStatus = "disconnected";
+        if(err) {
+            console.log("connectivity error:", err)
+        }
+        reconnect(userAgent);
+    }
+
     userAgent.stateChange.addListener((s) => {
         console.log("ua state change:", s);
         state.connectivityStatus = s;
     });
 
-    const registerer = new Registerer(userAgent, { expires: 30 }); // re-register often because to avoid hitting (nginx) proxy timeouts
+    const registerer = new Registerer(userAgent, { expires: 300 }); // set this to lower than the nginx timeout, it's the closes thing to a keepalive ping we have
     userAgent.start().then(() => {
         registerer.register();
         emitter.emit('scroll-to-bottom');

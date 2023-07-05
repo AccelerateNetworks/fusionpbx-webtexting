@@ -44,7 +44,7 @@ require __DIR__."/providers/".$provider.".php";
 
 switch($contentType) {
 case "text/plain":
-    Messages::AddMessage('outgoing', $extensionUUID, $domainUUID, $from, $to, $body, $contentType);
+    Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $contentType);
     outgoing_sms($from, $to, $body);   
     break;
 case "message/cpim":
@@ -59,7 +59,7 @@ case "message/cpim":
 
         error_log("sending to: ".$to."\n");
     }
-    Messages::AddMessage('outgoing', $extensionUUID, $domainUUID, $from, $to, $body, $contentType, $groupUUID);
+    Messages::OutgoingMMS($extensionUUID, $domainUUID, $from, $to, $cpim->fileURL, $cpim->fileContentType, $groupUUID);
     $attachmentURL = S3Helper::GetDownloadURL($cpim->fileURL);
     outgoing_mms($from, $to, array($attachmentURL));
     break;

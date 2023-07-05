@@ -40,7 +40,6 @@ export default {
             rootMargin: "0px",
             threshold: 0.5,
         });
-        console.log("observing top", this.$refs.top);
         observer.observe(this.$refs.top);
         observer.observe(this.$refs.bottom);
 

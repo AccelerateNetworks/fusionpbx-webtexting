@@ -25,7 +25,6 @@ export default {
             this.timestampText = this.message.timestamp.fromNow();
         },
         emitLoaded() {
-            console.log('image loaded', this);
             emitter.emit('scroll-to-bottom');
         },
     },
