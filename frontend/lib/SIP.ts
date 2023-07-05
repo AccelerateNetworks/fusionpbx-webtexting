@@ -1,17 +1,24 @@
-import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI } from 'sip.js';
+import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState } from 'sip.js';
 import { CPIM } from './CPIM';
 import { state, emitter, MessageData } from './global';
 import moment from 'moment';
 
+// nginx timeout is 300 seconds. in testing we can set this to 300 seconds too
+// and it will renew a few seconds earlier, but I don't really want to risk it.
+// must re-register before the nginx read timeout because registration is the
+// closest thing we've got to a keepalive ping
+const registrationIntervalSeconds = 270;
+
 let backoff = 0;
 
 function reconnect(userAgent: UserAgent) {
+    state.connected = false;
     state.connectivityStatus = "reconnecting";
     if (backoff > 0) {
         state.connectivityStatus = "reconnecting in " + Math.round(backoff) + " seconds";
         setTimeout(() => {
             state.connectivityStatus = "reconnecting";
-            userAgent.reconnect().catch(reconnect);
+            userAgent.reconnect().catch(() => reconnect(userAgent));
         }, backoff * 1000);
         if (backoff < 30) { // max backoff 30 seconds
             backoff = backoff * 1.1;
@@ -19,7 +26,7 @@ function reconnect(userAgent: UserAgent) {
     } else {
         state.connectivityStatus = "reconnecting";
         backoff = 2;
-        userAgent.reconnect().catch(reconnect);
+        userAgent.reconnect().catch(() => reconnect(userAgent));
     }
 }
 
@@ -100,26 +107,74 @@ function RunSIPConnection(username: string, password: string, server: string, re
     const userAgent = new UserAgent(uaOpts);
 
     userAgent.transport.onDisconnect = (err?: Error) => {
-        state.connectivityStatus = "disconnected";
         if(err) {
             console.log("connectivity error:", err)
         }
-        reconnect(userAgent);
     }
 
-    userAgent.stateChange.addListener((s) => {
-        console.log("ua state change:", s);
-        state.connectivityStatus = s;
+    let registerer: Registerer = null;
+
+    userAgent.transport.stateChange.addListener(async (data: TransportState) => {
+        console.log("transport state changeed to", data, "registerer=", registerer);
+        switch(data) {
+            case TransportState.Connected:
+                if(registerer != null) {
+                    await registerer.dispose();
+                }
+                registerer = new Registerer(userAgent, { expires: registrationIntervalSeconds });
+                registerer.stateChange.addListener(async (data: RegistererState) => {
+                    state.connected = data == RegistererState.Registered;
+                    state.connectivityStatus = data;
+                    console.log("registerer state changed to", data, " connected:", state.connected, "registerer:", registerer);
+                    switch(data) {
+                        case RegistererState.Registered:
+                            backoff = 0; // reset reconnect backoff timer
+                            break;
+                        case RegistererState.Unregistered:
+                            let registerRequest = await registerer.register();
+                            console.log("sent register request:", registerRequest);
+                            break;
+                    }
+                });
+                console.log("registering with new registerer:", registerer);
+                await registerer.register();
+                emitter.emit('scroll-to-bottom');
+                break;
+            case TransportState.Connecting:
+                state.connected = false;
+                state.connectivityStatus = "connecting";
+                break;
+            case TransportState.Disconnecting:
+                break;
+            case TransportState.Disconnected:
+                if (backoff > 0) {
+                    let thisBackoff = backoff + Math.round(Math.random()*5); // add up to 5 seconds to the backoff
+                    state.connectivityStatus = "reconnecting in " + Math.ceil(thisBackoff) + " seconds";
+                    let interval = setInterval(() => {
+                        state.connectivityStatus = "reconnecting in " + Math.floor(thisBackoff--) + " seconds";
+                    }, 1000);
+                    setTimeout(() => {
+                        clearInterval(interval);
+                        state.connectivityStatus = "reconnecting";
+                        userAgent.reconnect();
+                    }, thisBackoff * 1000);
+                    if (backoff < 60) { // max backoff 60 seconds
+                        backoff = backoff * 1.1;
+                    }
+                } else {
+                    state.connectivityStatus = "reconnecting";
+                    backoff = 2;
+                    userAgent.reconnect();
+                }
+                break;
+        }
+    })
+
+    window.addEventListener("beforeunload", (e: BeforeUnloadEvent) => {
+        registerer.unregister();
     });
 
-    const registerer = new Registerer(userAgent, { expires: 300 }); // set this to lower than the nginx timeout, it's the closes thing to a keepalive ping we have
-    userAgent.start().then(() => {
-        registerer.register();
-        emitter.emit('scroll-to-bottom');
-    }).catch((e) => {
-        console.error("error starting: ", e);
-        reconnect(userAgent);
-    });
+    userAgent.start();
 
     emitter.on('outbound-message', async (message: MessageData) => {
         console.log("outbound message:", message);

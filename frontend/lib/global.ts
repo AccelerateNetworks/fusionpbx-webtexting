@@ -14,12 +14,16 @@ type MessageData = {
     cpim?: CPIM;
 }
 
-const state = reactive<{
+type GlobalState = {
     messages: MessageData[],
     connectivityStatus: String,
-}>({
+    connected: Boolean,
+};
+
+const state = reactive<GlobalState>({
     messages: [],
     connectivityStatus: 'loading',
+    connected: false,
 });
 
 const emitter = mitt();

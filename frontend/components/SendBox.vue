@@ -1,7 +1,7 @@
 <script lang="ts">
 import { uploadText } from '../lib/upload';
 import { CPIM } from '../lib/CPIM';
-import { MessageData, emitter } from '../lib/global';
+import { MessageData, GlobalState, emitter, state } from '../lib/global';
 import moment from 'moment';
 
 type PendingAttachment = {
@@ -16,10 +16,12 @@ export default {
     data(): {
             enteredText: string,
             pendingAttachments: PendingAttachment[],
+            state: GlobalState,
         } {
         return {
             enteredText: "",
             pendingAttachments: [],
+            state: state,
         }
     },
     props: {
@@ -38,7 +40,11 @@ export default {
         keypress(e: KeyboardEvent) {
             if (e.key == "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                this.send();
+                if(state.connected) {
+                    this.send();
+                } else {
+                    console.log("not connected, can't send message");
+                }
                 return false;
             }
         },
@@ -176,7 +182,7 @@ export default {
         <textarea class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste"></textarea>
         <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
         <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />
-        <button class="btn btn-send" :disabled="pendingAttachments.length == 0 && enteredText.length == 0" v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
+        <button class="btn btn-send" :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected" v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
     </div>
 </template>
 
