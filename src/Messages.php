@@ -121,7 +121,7 @@ final class Messages
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
-        Messages::AddMessage('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType);
+        Messages::AddMessage('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
         if ($body instanceof CPIM) {

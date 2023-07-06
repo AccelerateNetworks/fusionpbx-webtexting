@@ -51,6 +51,8 @@ case "text/plain":
 case "message/cpim":
     $cpim = CPIM::fromString($body);
     $groupUUID = $cpim->getHeader('Group-UUID');
+    Messages::OutgoingMMS($extensionUUID, $domainUUID, $from, $to, $cpim, $groupUUID, $dedupeID);
+
     if ($groupUUID) {
         $to = Messages::findRecipients($domainUUID, $extensionUUID, $from, $groupUUID);
         if ($to == null) {
@@ -60,9 +62,9 @@ case "message/cpim":
 
         error_log("sending to: ".$to."\n");
     }
-    Messages::OutgoingMMS($extensionUUID, $domainUUID, $from, $to, $cpim, $groupUUID, $dedupeID);
-    $attachmentURL = S3Helper::GetDownloadURL($cpim->fileURL);
-    outgoing_mms($from, $to, array($attachmentURL));
+
+    // $cpim->fileURL gets mutated by Messages::OutgoingMMS to include the auth query params
+    outgoing_mms($from, $to, array($cpim->fileURL));
     break;
 default:
     error_log("received an outbound message of unknown type: ".$contentType);
