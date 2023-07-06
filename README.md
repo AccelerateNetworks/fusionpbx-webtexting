@@ -18,6 +18,8 @@ location /ws {
 * ensure `mod_curl` is loaded (add to `/etc/freeswitch/autoload_configs/modules.conf.xml`)
 * to install dependencies: `composer install`
 * as with most FusionPBX apps, must run schema and menu upgrade after installation.
+* Build frontend: `./build-frontend.sh` uses podman to transpile the frontend javascript in a container, and produces files at `js/`.
+  This can be done remotely then copied into place. Must be re-run on updates.
 
 ## Current limitations
 * Contacts are displayed to users who don't have contact_read_* permissions
