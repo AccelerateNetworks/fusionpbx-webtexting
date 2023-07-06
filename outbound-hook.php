@@ -21,6 +21,7 @@ $extension = $event->{'from_user'};
 $to = $event->{'to_user'};
 $contentType = $event->type;
 $body = urldecode($event->_body);
+$dedupeID = $event->{'sip_h_X-Message-ID'};
 
 $sql = "SELECT webtexting_destinations.phone_number, v_domains.domain_uuid, v_extensions.extension_uuid FROM webtexting_destinations, v_domains, v_extensions WHERE v_domains.domain_name = :domain_name AND v_domains.domain_uuid = v_extensions.domain_uuid AND v_extensions.extension = :extension AND webtexting_destinations.extension_uuid = v_extensions.extension_uuid";
 $parameters['domain_name'] = $domain_name;
@@ -44,7 +45,7 @@ require __DIR__."/providers/".$provider.".php";
 
 switch($contentType) {
 case "text/plain":
-    Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $contentType);
+    Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $dedupeID);
     outgoing_sms($from, $to, $body);   
     break;
 case "message/cpim":
@@ -59,7 +60,7 @@ case "message/cpim":
 
         error_log("sending to: ".$to."\n");
     }
-    Messages::OutgoingMMS($extensionUUID, $domainUUID, $from, $to, $cpim->fileURL, $cpim->fileContentType, $groupUUID);
+    Messages::OutgoingMMS($extensionUUID, $domainUUID, $from, $to, $cpim, $groupUUID, $dedupeID);
     $attachmentURL = S3Helper::GetDownloadURL($cpim->fileURL);
     outgoing_mms($from, $to, array($attachmentURL));
     break;

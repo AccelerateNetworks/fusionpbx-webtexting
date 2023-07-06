@@ -12,6 +12,17 @@ type PendingAttachment = {
     uploadedURL: string,
 }
 
+// createRandomToken borrowed from sip.js, which does not export it :(
+// https://github.com/onsip/SIP.js/blob/main/src/core/messages/utils.ts#L85
+function createRandomToken(size: number, base = 32): string {
+  let token = "";
+  for (let i = 0; i < size; i++) {
+    const r: number = Math.floor(Math.random() * base);
+    token += r.toString(base);
+  }
+  return token;
+}
+
 export default {
     data(): {
             enteredText: string,
@@ -58,6 +69,7 @@ export default {
                 direction: 'outgoing',
                 contentType: 'text/plain',
                 timestamp: moment(),
+                id: createRandomToken(8),
                 from: this.ownNumber,
                 to: this.remoteNumber || this.ownNumber, // remoteNumber is null for groups but we still need a To field, so set it to our own number and strip it out server side
             }

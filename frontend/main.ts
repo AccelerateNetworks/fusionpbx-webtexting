@@ -37,7 +37,7 @@ function initializeThreadJS(opts: Options) {
     app.mount("#conversation");
 
     backfillMessages(opts.extensionUUID, opts.remoteNumber, opts.groupUUID);
-    RunSIPConnection(opts.username, opts.password, opts.server, opts.remoteNumber, opts.groupUUID);
+    RunSIPConnection(opts.username, opts.password, opts.server, opts.ownNumber, opts.remoteNumber, opts.groupUUID);
 
     emitter.on('backfill-requested', () => {
         backfillMessages(opts.extensionUUID, opts.remoteNumber, opts.groupUUID);

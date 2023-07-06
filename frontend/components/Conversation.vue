@@ -154,7 +154,7 @@ export default {
                 <div class="backfill" v-if="backfillAvailable">loading older messages</div>
             </div>
             <Message :message="message" :key="message.id" v-for="(message, index) in state.messages" />
-            <div class="message-wrapper" ref="bottom"></div>
+            <div class="message-wrapper" ref="bottom">&nbsp;</div>
         </div>
         <SendBox :remoteNumber="remoteNumber" :groupUUID="groupUUID" :ownNumber="ownNumber" />
         <div class="statusbox">{{ state.connectivityStatus }}</div>

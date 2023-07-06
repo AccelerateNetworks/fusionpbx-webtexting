@@ -74,7 +74,7 @@ final class Messages
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
         // store message in the database
-        Messages::AddMessage('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
+        $dedupeID = Messages::AddMessage('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
         if ($body instanceof CPIM) {
@@ -86,13 +86,13 @@ final class Messages
         Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
 
         // deliver via SIP
-        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $groupUUID);
+        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $dedupeID, $groupUUID);
     }
 
-    public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body)
+    public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $dedupeID=null)
     {
         $source = LocalNumber::Get($from);
-        Messages::_outgoing($source, $to, $from, $body, "text/plain");
+        Messages::_outgoing($source, $to, $from, $body, "text/plain", $dedupeID);
     }
 
     /**
@@ -105,32 +105,19 @@ final class Messages
      *
      * @return null
      */
-    public static function OutgoingMMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $attachment, string $groupUUID=null)
+    public static function OutgoingMMS(string $extensionUUID, string $domainUUID, string $from, string $to, CPIM $body, string $groupUUID=null, string $dedupeID=null)
     {
-        $cpim = new CPIM();
-
         $source = LocalNumber::Get($from);
         if ($source == null) {
             return false;
         }
 
-        $cpim->headers["From"] = "sip:".$from."@".$source->domainName;
-        $cpim->headers["To"] = "sip:".$source->extension."@".$source->domainName;
-
-        if ($groupUUID) {
-            $cpim->headers["Group-UUID"] = $groupUUID;
-        }
-
-        $info = S3Helper::GetInfo($attachment);
-        $cpim->fileURL = $attachment;
-        $cpim->fileContentType = $info['ContentType'];
-        $cpim->fileSize = $info['ContentLength'];
-        Messages::_outgoing($source, $from, $to, $cpim->toString(), "message/cpim", $groupUUID);
+        Messages::_outgoing($source, $to, $from, $body, "message/cpim", $dedupeID, $groupUUID);
 
         return true;
     }
 
-    public static function _outgoing(LocalNumber $source, string $to, string $from, string|CPIM $body, string $contentType, $groupUUID=null)
+    public static function _outgoing(LocalNumber $source, string $to, string $from, string|CPIM $body, string $contentType, string $dedupeID, string $groupUUID=null)
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
@@ -142,7 +129,7 @@ final class Messages
             $bodyStr = $body->toString();
         }
 
-        Messages::_sendSIP($source->domainName, $source->extension, $from, $to, $bodyStr, $contentType, $groupUUID);
+        Messages::_sendSIP($source->domainName, $source->extension, $from, $source->extension, $bodyStr, $contentType, $dedupeID, $groupUUID, $to);
     }
 
     private static function _findGroup(LocalNumber $localNumber, string $from, string $to, $additionalRecipients): ?string
@@ -195,13 +182,15 @@ final class Messages
         return implode(",", $membersArray);
     }
 
-    public static function AddMessage(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $groupUUID=null)
+    public static function AddMessage(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $groupUUID=null): string
     {
         $db = new database;
 
+        $messageUUID = uuid();
+
         // save the message to the db
         $sql = "INSERT INTO webtexting_messages (message_uuid, extension_uuid, domain_uuid, start_stamp, from_number, to_number, group_uuid, message, content_type, direction) VALUES (:message_uuid, :extension_uuid, :domain_uuid, NOW(), :from, :to, :group_uuid, :body, :content_type, :direction)";
-        $parameters['message_uuid'] = uuid();
+        $parameters['message_uuid'] = $messageUUID;
         $parameters['extension_uuid'] = $extensionUUID;
         $parameters['domain_uuid'] = $domainUUID;
         $parameters['from'] = $from;
@@ -232,6 +221,8 @@ final class Messages
             $db->execute($sql, $parameters);
         }
         unset($parameters);
+
+        return $messageUUID;
     }
 
     private static function _sendWebPush(string $domainUUID, string $extensionUUID, string $from, string $to, string $body, ?string $groupUUID)
@@ -328,7 +319,7 @@ final class Messages
         }
     }
     
-    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $groupUUID=null)
+    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, string $dedupeID, ?string $groupUUID=null, ?string $originalTo=null)
     {
         $SIPProfiles = array("websocket"); // TODO: make this list configurable
         $toAddress = $extension."@".$domainName;
@@ -352,10 +343,16 @@ final class Messages
                 "hint" => "the hint", // is this required? what is it? fusionpbx's sms app does this
                 "replying" => "true", // what is this?
                 "DP_MATCH" => $toAddress, // what is this?
+                "sip_h_X-Message-ID" => $dedupeID,
                 "Content-Length" => strlen($body),
             );
+
             if ($groupUUID != null) {
-                $eventHeaders['x-group_uuid'] = $groupUUID;
+                $eventHeaders['sip_h_X-Group-ID'] = $groupUUID;
+            }
+
+            if ($originalTo != null) {
+                $eventHeaders['sip_h_X-Original-To'] = $originalTo;
             }
 
             $cmd = "sendevent CUSTOM\n";

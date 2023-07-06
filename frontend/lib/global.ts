@@ -28,4 +28,21 @@ const state = reactive<GlobalState>({
 
 const emitter = mitt();
 
-export { state, emitter, MessageData }
+function addMessage(message: MessageData) {
+    if (message.id) {
+        for(let m of state.messages) {
+            if (m.id == message.id) {
+                console.log("not re-inserting message", message.id);
+                return;
+            }
+        }
+        console.log("inserting new message", message.id);
+    } else {
+        console.log("adding message with no ID!", message);
+    }
+
+    state.messages.push(message);
+    emitter.emit('scroll-to-bottom');
+}
+
+export { state, emitter, MessageData, GlobalState, addMessage }

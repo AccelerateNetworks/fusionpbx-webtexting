@@ -1,6 +1,6 @@
-import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState } from 'sip.js';
+import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions } from 'sip.js';
 import { CPIM } from './CPIM';
-import { state, emitter, MessageData } from './global';
+import { state, emitter, MessageData, addMessage } from './global';
 import moment from 'moment';
 
 // nginx timeout is 300 seconds. in testing we can set this to 300 seconds too
@@ -30,7 +30,7 @@ function reconnect(userAgent: UserAgent) {
     }
 }
 
-function RunSIPConnection(username: string, password: string, server: string, remote_number?: string, group?: string) {
+function RunSIPConnection(username: string, password: string, server: string, ownNumber: string, remote_number?: string, group?: string) {
     const uaOpts: UserAgentOptions = {
         logBuiltinEnabled: false,
         logConfiguration: false,
@@ -59,21 +59,36 @@ function RunSIPConnection(username: string, password: string, server: string, re
             // },
             onMessage: async (message: Message) => {
                 console.log("[MESSAGE]", message);
+
+                let direction = 'incoming';
+                let originalTo = message.request.getHeader("X-Original-To");
+                if (message.request.from.uri.user == ownNumber) {
+                    console.log("our own message mirrored back to us: ", message.request);
+                    direction = 'outgoing';
+                }
+
                 switch (message.request.getHeader("Content-Type")) {
                     case "text/plain":
-                        if (remote_number && message.request.from.uri.user != remote_number) {
-                            console.log("message not from current thread: ", message.request.from.uri.user, "!=", remote_number)
+                        if (!remote_number) {
+                            // text/plain messages cannot be sent to groups, they are always MMSs
+                            console.log("skipping non-group message");
                             return;
                         }
-                        state.messages.push({
-                            direction: 'incoming',
+
+                        if ((originalTo || message.request.from.uri.user) != remote_number) {
+                            console.log("message not from current thread: ", originalTo || message.request.from.uri.user, "!=", remote_number)
+                            return;
+                        }
+
+                        addMessage({
+                            direction: direction,
                             contentType: message.request.getHeader("Content-Type"),
                             timestamp: moment(),
                             from: message.request.from.uri.user,
-                            to: message.request.to.uri.user,
+                            to: originalTo,
                             body: message.request.body,
+                            id: message.request.getHeader("x-message-id"),
                         });
-                        emitter.emit('scroll-to-bottom');
                         break;
 
                     case "message/cpim":
@@ -88,21 +103,21 @@ function RunSIPConnection(username: string, password: string, server: string, re
                         } else if (cpim.getHeader("group-uuid")) {
                             console.log("message is for a group, current thread is not a group")
                             return;
-                        } else if (message.request.from.uri.user != remote_number) {
-                            console.log("message not from current thread: ", message.request.from.uri.user, "!=", remote_number)
+                        } else if ((originalTo || message.request.from.uri.user) != remote_number) {
+                            console.log("message not from current thread: ", originalTo || message.request.from.uri.user, "!=", remote_number)
                             return;
                         }
 
                         console.log("adding new message to the thread from CPIM");
-                        state.messages.push({
-                            direction: 'incoming',
+                        addMessage({
+                            direction: direction,
                             contentType: message.request.getHeader("Content-Type"),
                             timestamp: moment(),
                             from: message.request.from.uri.user,
                             to: message.request.to.uri.user,
                             cpim: cpim,
+                            id: message.request.getHeader("x-message-id"),
                         });
-                        emitter.emit('scroll-to-bottom');
                         break;
 
                     default:
@@ -189,7 +204,7 @@ function RunSIPConnection(username: string, password: string, server: string, re
 
         message.timestamp = moment();
         const m = message;
-        state.messages.push(m);
+        addMessage(m);
 
         if(message.cpim) {
             message.body = message.cpim.serialize();
@@ -197,7 +212,11 @@ function RunSIPConnection(username: string, password: string, server: string, re
         }
 
         const remoteURI = new URI('sip', message.to || message.from, server);
-        const messager = new Messager(userAgent, remoteURI, message.body, message.contentType);
+        let options: MessagerOptions = {extraHeaders: []};
+        if(message.id) {
+            options.extraHeaders.push("X-Message-ID: " + message.id);
+        }
+        const messager = new Messager(userAgent, remoteURI, message.body, message.contentType, options);
 
         emitter.emit('scroll-to-bottom');
 
