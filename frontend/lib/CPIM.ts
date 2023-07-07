@@ -27,7 +27,7 @@ export class CPIM {
 
         const parser = new DOMParser();
         const doc = parser.parseFromString(parts[2], "application/xml");
-        
+
         let fileSize = doc.querySelector('file-size');
         if(fileSize) {
             cpim.fileSize = Number(fileSize.textContent);
@@ -99,7 +99,7 @@ export class CPIM {
             if(parts.length < 2) {
                 continue;
             }
-            
+
             this.headers[parts[0].toLowerCase()] = parts[1].trim();
         }
     }

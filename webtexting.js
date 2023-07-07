@@ -1,3 +1,7 @@
+/**
+ * webtexting.js: mostly used for subscribing to webpush notifications
+ */
+
 // update displayed relative time in all class='timestamp' elements every 5 seconds
 function updateTimestamps() {
     document.querySelectorAll('.timestamp').forEach((e) => {
