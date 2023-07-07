@@ -160,10 +160,9 @@ foreach($extensions as $extension) {
             $problems[] = "client secret incorrect";
         }
 
-        // check doesn't work because sms.callpipe.com returns a value without a international prefix, but webhook has international prefix so we need it too
-        // if ($inboundRouting->asDialed != $sms_number) {
-        //     $problems[] = "number formatting disagreement. theirs: ".$inboundRouting->asDialed." ours: ".$sms_number;
-        // }
+        if ($inboundRouting->asDialed != $sms_number) {
+            $problems[] = "number formatting disagreement. theirs: ".$inboundRouting->asDialed." ours: ".$sms_number;
+        }
 
         if(count($problems) > 0) {
             echo "<td class='error'><ul>";
