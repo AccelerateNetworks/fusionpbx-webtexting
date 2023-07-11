@@ -149,19 +149,24 @@ foreach($extensions as $extension) {
     echo "</td>";
 
     if($smsenabled_extensions[$extension['extension_uuid']]) {
-        $inboundRouting = AccelerateNetworks::GetInboundSMSRouting($sms_number);
         $problems = array();
 
-        if($inboundRouting->callbackUrl != $desiredWebhookURL) {
-            $problems[] = "webhook URL is wrong: <code>".$inboundRouting->callbackUrl."</code> should be <code>".$desiredWebhookURL."</code>";
-        }
+        try {
+            $inboundRouting = AccelerateNetworks::GetInboundSMSRouting($sms_number);
 
-        if ($inboundRouting->clientSecret != $_SESSION['webtexting']['acceleratenetworks_inbound_token']['text']) {
-            $problems[] = "client secret incorrect";
-        }
+            if($inboundRouting->callbackUrl != $desiredWebhookURL) {
+                $problems[] = "webhook URL is wrong: <code>".$inboundRouting->callbackUrl."</code> should be <code>".$desiredWebhookURL."</code>";
+            }
 
-        if ($inboundRouting->asDialed != $sms_number) {
-            $problems[] = "number formatting disagreement. theirs: ".$inboundRouting->asDialed." ours: ".$sms_number;
+            if ($inboundRouting->clientSecret != $_SESSION['webtexting']['acceleratenetworks_inbound_token']['text']) {
+                $problems[] = "client secret incorrect";
+            }
+
+            if ($inboundRouting->asDialed != $sms_number) {
+                $problems[] = "number formatting disagreement. theirs: ".$inboundRouting->asDialed." ours: ".$sms_number;
+            }
+        } catch(Exception $e) {
+            $problems[] = $e->__toString();
         }
 
         if(count($problems) > 0) {
