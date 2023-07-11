@@ -69,7 +69,7 @@ final class Messages
         return true;
     }
 
-    private static function _incoming(LocalNumber $destination, string $from, string $to, string|CPIM $body, string $contentType, $groupUUID=null)
+    private static function _incoming(LocalNumber $destination, string $from, string $to, $body, string $contentType, $groupUUID=null)
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
@@ -117,7 +117,7 @@ final class Messages
         return true;
     }
 
-    public static function _outgoing(LocalNumber $source, string $to, string $from, string|CPIM $body, string $contentType, string $dedupeID, string $groupUUID=null)
+    public static function _outgoing(LocalNumber $source, string $to, string $from, $body, string $contentType, string $dedupeID, string $groupUUID=null)
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
