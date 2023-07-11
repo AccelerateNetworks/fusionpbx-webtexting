@@ -165,6 +165,10 @@ foreach($extensions as $extension) {
             if ($inboundRouting->asDialed != $sms_number) {
                 $problems[] = "number formatting disagreement. theirs: ".$inboundRouting->asDialed." ours: ".$sms_number;
             }
+
+            if (defined($inboundRouting->registeredUpstream) && !$inboundRouting->registeredUpstream) {
+                $problems[] = "not routed by upstream carrier: ".$inboundRouting->upstreamStatusDescription;
+            }
         } catch(GuzzleHttp\Exception\ClientException $e) {
             $problems[] = GuzzleHttp\Psr7\Message::toString($e->getResponse());
         }
