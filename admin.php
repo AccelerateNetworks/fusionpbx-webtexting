@@ -165,8 +165,8 @@ foreach($extensions as $extension) {
             if ($inboundRouting->asDialed != $sms_number) {
                 $problems[] = "number formatting disagreement. theirs: ".$inboundRouting->asDialed." ours: ".$sms_number;
             }
-        } catch(Exception $e) {
-            $problems[] = $e->__toString();
+        } catch(GuzzleHttp\Exception\ClientException $e) {
+            $problems[] = GuzzleHttp\Psr7\Message::toString($e->getResponse());
         }
 
         if(count($problems) > 0) {
