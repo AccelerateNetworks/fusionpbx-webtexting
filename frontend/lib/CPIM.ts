@@ -104,7 +104,7 @@ export class CPIM {
         }
     }
 
-    public async getTextBody(): Promise<string|null> {
+    public async getTextBody() {
         if(this.fileContentType != "text/plain") {
             return null;
         }
@@ -113,7 +113,7 @@ export class CPIM {
         return await response.text()
     }
 
-    public getHeader(header: string): string|null {
+    public getHeader(header: string) {
         const key = header.toLowerCase();
         return this.headers[key];
     }

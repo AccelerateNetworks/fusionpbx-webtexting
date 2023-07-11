@@ -11,8 +11,8 @@ final class CPIM
     public array $headers;
     public string $filename;
     public int $fileSize;
-    public string|null $fileContentType;
-    public string|null $fileURL;
+    public $fileContentType;
+    public $fileURL;
 
     /**
      * Construct a new CPIM
@@ -207,7 +207,7 @@ final class CPIM
      * 
      * @return string the value of the specified header, or null if absent
      */
-    public function getHeader(string $header): string|null
+    public function getHeader(string $header)
     {
         $header = strtolower($header);
         if (array_key_exists($header, $this->headers)) {
