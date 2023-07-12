@@ -119,7 +119,7 @@ echo "<table class='table'>\n";
 echo "<tr>";
 echo "<th>Extension</th>";
 echo "<th>SMS-enabled</th>";
-echo "<th>Upstream Inbound Routing</th>";
+echo "<th>Inbound Routing</th>";
 echo "</tr>";
 foreach($extensions as $extension) {
     echo "<tr>";    

@@ -59,19 +59,20 @@ export default {
                 return false;
             }
         },
-        async send() {
-            if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
-                this.$refs.textbox.focus();
-                return;
-            }
-
-            let message: MessageData = {
+        getMessageData(): MessageData {
+            return {
                 direction: 'outgoing',
                 contentType: 'text/plain',
                 timestamp: moment(),
                 id: createRandomToken(8),
                 from: this.ownNumber,
                 to: this.remoteNumber || this.ownNumber, // remoteNumber is null for groups but we still need a To field, so set it to our own number and strip it out server side
+            }
+        },
+        async send() {
+            if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
+                this.$refs.textbox.focus();
+                return;
             }
 
             while(this.pendingAttachments.length > 0) {
@@ -86,12 +87,14 @@ export default {
                 }
                 cpim.previewURL = attachment.previewURL;
 
-                const m = message;
-                m.cpim = cpim;
-                emitter.emit('outbound-message', m);
+                let message = this.getMessageData();
+                message.cpim = cpim;
+                console.log('emitting message', message);
+                emitter.emit('outbound-message', message);
             }
 
             if (this.enteredText.length > 0) {
+                let message = this.getMessageData();
                 if (this.groupUUID) {
                     const url = await uploadText(this.enteredText);
                     const cpim = new CPIM(url, 'text/plain');
