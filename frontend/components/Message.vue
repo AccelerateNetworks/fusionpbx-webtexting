@@ -9,7 +9,7 @@ export default {
             embedImage: null,
             embedVideo: null,
             download: null,
-            timestampText: this.message.timestamp.fromNow(),
+            timestampText: "-",
             interval: null,
             loaded: false,
         }
@@ -35,6 +35,7 @@ export default {
         }
     },
     async mounted() {
+        this.bumpTimestamp();
         this.interval = setInterval(this.bumpTimestamp, 10000);
         if (this.message.cpim) {
             if (this.message.cpim.bodyText) {
@@ -85,7 +86,7 @@ export default {
             <p class="message-body" v-if="this.download">
                 <a :href="download" target="_blank">click to download</a>
             </p>
-            <span class="timestamp">{{ timestampText }}</span>
+            <span class="ts">{{ timestampText }}</span>
         </div>
     </div>
 </template>
@@ -114,7 +115,7 @@ export default {
     text-align: right;
 }
 
-.timestamp {
+.ts {
     font-size: 7pt;
 }
 
