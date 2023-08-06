@@ -190,7 +190,7 @@ final class Messages
 
         $local_number = $from;
         $remote_number = $to;
-        if($direction == "inbound") {
+        if($direction == "incoming") {
             $local_number = $to;
             $remote_number = $from;
         }

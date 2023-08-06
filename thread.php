@@ -42,6 +42,11 @@ if($_POST['action']) {
   die();
 }
 
+if($_GET['number'] && strlen($_GET['number']) == 10) {
+  // 10 digit numbers get prefixed with a 1
+  header("Location: /app/webtexting/thread.php?extension_uuid=".$_GET['extension_uuid']."&number=1".$_GET['number']);
+}
+
 $sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];
