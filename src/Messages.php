@@ -200,8 +200,8 @@ final class Messages
         $parameters['message_uuid'] = $messageUUID;
         $parameters['extension_uuid'] = $extensionUUID;
         $parameters['domain_uuid'] = $domainUUID;
-        $parameters['local_number'] = $local_number;
-        $parameters['remote_number'] = $remote_number;
+        $parameters['from'] = $from;
+        $parameters['to'] = $to;
         $parameters['group_uuid'] = $groupUUID;
         $parameters['body'] = $body;
         $parameters['content_type'] = $contentType;
