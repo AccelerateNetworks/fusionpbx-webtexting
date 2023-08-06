@@ -74,7 +74,15 @@ echo "	<div style='clear: both;'></div>\n";
 echo "</div>\n";
 echo "<table class='table'>\n";
 
-$sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message DESC";
+$page = 0;
+$page_size = 25;
+$sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message DESC LIMIT ".$page_size;
+if($_GET['page']) {
+    $sql .= " OFFSET :page";
+    $page = intval($_GET['page']);
+    $parameters['page'] = $page*$page_size;
+}
+
 $parameters['local_number'] = $destination;
 $parameters['domain_uuid'] = $domain_uuid;
 $threads = $database->select($sql, $parameters, 'all');
@@ -159,6 +167,14 @@ foreach ($threads as $thread) {
     echo "</td></tr>\n";
 }
 echo "</table>\n";
+
+if($page > 0) {
+    echo button::create(['type'=>'button', 'label'=>'newer messages', 'link'=>"threadlist.php?extension_uuid=".urlencode($extension['extension_uuid'])."&page=".$page-1]);
+}
+
+if(count($threads) == $page_size) {
+    echo button::create(['type'=>'button', 'label'=>'older messages', 'link'=>"threadlist.php?extension_uuid=".urlencode($extension['extension_uuid'])."&page=".$page+1]);
+}
 ?>
 <script type="text/javascript">
     window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
