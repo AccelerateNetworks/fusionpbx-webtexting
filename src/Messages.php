@@ -188,13 +188,20 @@ final class Messages
 
         $messageUUID = uuid();
 
+        $local_number = $from;
+        $remote_number = $to;
+        if($direction == "inbound") {
+            $local_number = $to;
+            $remote_number = $from;
+        }
+
         // save the message to the db
         $sql = "INSERT INTO webtexting_messages (message_uuid, extension_uuid, domain_uuid, start_stamp, from_number, to_number, group_uuid, message, content_type, direction) VALUES (:message_uuid, :extension_uuid, :domain_uuid, NOW(), :from, :to, :group_uuid, :body, :content_type, :direction)";
         $parameters['message_uuid'] = $messageUUID;
         $parameters['extension_uuid'] = $extensionUUID;
         $parameters['domain_uuid'] = $domainUUID;
-        $parameters['from'] = $from;
-        $parameters['to'] = $to;
+        $parameters['local_number'] = $local_number;
+        $parameters['remote_number'] = $remote_number;
         $parameters['group_uuid'] = $groupUUID;
         $parameters['body'] = $body;
         $parameters['content_type'] = $contentType;
@@ -203,20 +210,20 @@ final class Messages
         unset($parameters);
 
         // bump the relevant thread
-        $sql = "UPDATE webtexting_threads SET last_message = NOW() WHERE domain_uuid = :domain_uuid AND remote_number = :from AND local_number= :to AND group_uuid IS NULL RETURNING *";
+        $sql = "UPDATE webtexting_threads SET last_message = NOW() WHERE domain_uuid = :domain_uuid AND remote_number = :remote_number AND local_number= :local_number AND group_uuid IS NULL RETURNING *";
         if ($groupUUID != null) {
-            $sql = "UPDATE webtexting_threads SET last_message = NOW() WHERE domain_uuid = :domain_uuid AND group_uuid = :group_uuid AND local_number= :to RETURNING *";
+            $sql = "UPDATE webtexting_threads SET last_message = NOW() WHERE domain_uuid = :domain_uuid AND group_uuid = :group_uuid AND local_number= :local_number RETURNING *";
             $parameters['group_uuid'] = $groupUUID;
         } else {
-            $parameters['from'] = $from;
+            $parameters['remote_number'] = $remote_number;
         }
         $parameters['domain_uuid'] = $domainUUID;
-        $parameters['to'] = $to;
+        $parameters['local_number'] = $local_number;
         $thread = $db->select($sql, $parameters, 'row');
         if (!$thread) {
-            $sql = "INSERT INTO webtexting_threads (domain_uuid, remote_number, local_number, last_message) VALUES (:domain_uuid, :from, :to, NOW())";
+            $sql = "INSERT INTO webtexting_threads (domain_uuid, remote_number, local_number, last_message) VALUES (:domain_uuid, :remote_number, :local_number, NOW())";
             if ($groupUUID != null) {
-                $sql = "INSERT INTO webtexting_threads (domain_uuid, group_uuid, local_number, last_message) VALUES (:domain_uuid, :group_uuid, :to, NOW())";
+                $sql = "INSERT INTO webtexting_threads (domain_uuid, group_uuid, local_number, last_message) VALUES (:domain_uuid, :group_uuid, :local_number, NOW())";
             }
             $db->execute($sql, $parameters);
         }
