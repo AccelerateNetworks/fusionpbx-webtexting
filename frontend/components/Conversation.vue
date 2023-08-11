@@ -157,7 +157,7 @@ export default {
             <div class="message-wrapper" ref="bottom">&nbsp;</div>
         </div>
         <SendBox :remoteNumber="remoteNumber" :groupUUID="groupUUID" :ownNumber="ownNumber" />
-        <div class="statusbox">{{ state.connectivityStatus }}</div>
+        <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ remoteNumber }}</div>
     </div>
 </template>
 

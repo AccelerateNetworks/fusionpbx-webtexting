@@ -44,6 +44,18 @@ if (!$destination) {
 .thread-last-message {
     color: #000;
 }
+td {
+    border: solid black;
+    border-radius: 1em;
+    padding: 0.25em;
+    margin-bottom: 0.5em;
+    min-height: calc(50px + 1em);
+}
+table {
+    border-spacing: 1em;
+    width: 100%;
+}
+
 </style>
 <form method='get' action="thread.php" onsubmit="clean_number()">
 <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
@@ -183,4 +195,7 @@ if(count($threads) == $page_size) {
     }
 </script>
 <?php
+if (if_group("superadmin")) {
+    echo "<br /><a href='githook.php'>Check for app updates</a> | <a href='admin.php'>Number Administration</a><br />\n";
+}
 require_once "footer.php";
