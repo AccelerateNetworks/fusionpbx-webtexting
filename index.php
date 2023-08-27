@@ -36,4 +36,8 @@ foreach($_SESSION['user']['extension'] as $extension) {
 
 echo "</table>";
 
+if (if_group("superadmin")) {
+    echo "<br /><a href='githook.php'>Check for app updates</a> | <a href='admin.php'>Number Administration</a><br />\n";
+}
+
 require_once "footer.php";
