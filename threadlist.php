@@ -139,13 +139,13 @@ foreach ($threads as $thread) {
         if ($contact) {
             $name_parts = array();
             if ($contact['contact_organization']) {
-                $nameParts[] = $contact['contact_organization'];
+                $name_parts[] = $contact['contact_organization'];
             }
             if ($contact['contact_title']) {
-                $nameParts[] = $contact['contact_title'];
+                $name_parts[] = $contact['contact_title'];
             }
             if ($contact['contact_name_prefix']) {
-              $nameParts[] = $contact['contact_name_prefix'];
+                $name_parts[] = $contact['contact_name_prefix'];
             }
             if ($contact['contact_name_given']) {
                 $name_parts[] = $contact['contact_name_given'];
@@ -157,10 +157,10 @@ foreach ($threads as $thread) {
                 $name_parts[] = $contact['contact_name_family'];
             }
             if ($contact['contact_nickname']) {
-                $nameParts[] = $contact['contact_nickname'];
+                $name_parts[] = $contact['contact_nickname'];
             }
             if ($contact['contact_role']) {
-                $nameParts[] = $contact['contact_role'];
+                $name_parts[] = $contact['contact_role'];
             }
             if (sizeof($name_parts) > 0) {
                 $display_name = implode(" ", $name_parts);
