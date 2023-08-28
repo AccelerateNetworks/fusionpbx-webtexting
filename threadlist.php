@@ -187,8 +187,8 @@ foreach ($threads as $thread) {
 
     echo "<tr><td>";
     echo "<a href='".$link."'>";
-    echo "<span class='thread-name'>".$display_name)."</span><br />";
-    echo "<span class='thread-last-message'>".$body_preview)."</span>";
+    echo "<span class='thread-name'>".$display_name."</span><br />";
+    echo "<span class='thread-last-message'>".$body_preview."</span>";
     echo "<span class='timestamp' data-timestamp='".$last_message['start_stamp']."'></span>";
     echo "</a>";
     echo "</td></tr>\n";
