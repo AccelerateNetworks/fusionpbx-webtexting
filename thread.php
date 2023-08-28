@@ -128,7 +128,7 @@ if ($_GET['group']) {
     $frontendOpts['remoteNumber'] = $number;
 
     // compute the name to display based on number and a potential contact name
-    $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
+    $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_organization, v_contacts.contact_name_given, v_contacts.contact_name_prefix, v_contacts.contact_name_middle, v_contacts.contact_name_family, v_contacts.contact_nickname, v_contacts.contact_title, v_contacts.contact_role FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
     $parameters['number'] = $number;
     $parameters['domain_uuid'] = $domain_uuid;
     $contact = $database->select($sql, $parameters, 'row');
@@ -137,6 +137,15 @@ if ($_GET['group']) {
     $displayName = $number;
     if ($contact) {
         $nameParts = array();
+        if ($contact['contact_organization']) {
+            $nameParts[] = htmlspecialchars($contact['contact_organization']);
+        }
+        if ($contact['contact_title']) {
+            $nameParts[] = htmlspecialchars($contact['contact_title']);
+        }
+        if ($contact['contact_name_prefix']) {
+          $nameParts[] = htmlspecialchars($contact['contact_name_prefix']);
+        }
         if ($contact['contact_name_given']) {
             $nameParts[] = htmlspecialchars($contact['contact_name_given']);
         }
@@ -145,6 +154,12 @@ if ($_GET['group']) {
         }
         if ($contact['contact_name_family']) {
             $nameParts[] = htmlspecialchars($contact['contact_name_family']);
+        }
+        if ($contact['contact_nickname']) {
+            $nameParts[] = htmlspecialchars($contact['contact_nickname']);
+        }
+        if ($contact['contact_role']) {
+            $nameParts[] = htmlspecialchars($contact['contact_role']);
         }
         if (sizeof($nameParts) > 0) {
             $frontendOpts['threadName'] = implode(" ", $nameParts);
