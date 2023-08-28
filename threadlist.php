@@ -54,6 +54,7 @@ td {
 table {
     border-spacing: 1em;
     width: 100%;
+    table-layout: fixed;
 }
 
 </style>
