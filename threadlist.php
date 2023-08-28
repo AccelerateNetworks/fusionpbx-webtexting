@@ -147,13 +147,13 @@ foreach ($threads as $thread) {
         if ($contact) {
             $name_parts = array();
             if ($contact['contact_organization']) {
-                $nameParts[] = htmlspecialchars($contact['contact_organization']);
+                $nameParts[] = $contact['contact_organization'];
             }
             if ($contact['contact_title']) {
-                $nameParts[] = htmlspecialchars($contact['contact_title']);
+                $nameParts[] = $contact['contact_title'];
             }
             if ($contact['contact_name_prefix']) {
-              $nameParts[] = htmlspecialchars($contact['contact_name_prefix']);
+              $nameParts[] = $contact['contact_name_prefix'];
             }
             if ($contact['contact_name_given']) {
                 $name_parts[] = $contact['contact_name_given'];
@@ -165,10 +165,10 @@ foreach ($threads as $thread) {
                 $name_parts[] = $contact['contact_name_family'];
             }
             if ($contact['contact_nickname']) {
-                $nameParts[] = htmlspecialchars($contact['contact_nickname']);
+                $nameParts[] = $contact['contact_nickname'];
             }
             if ($contact['contact_role']) {
-                $nameParts[] = htmlspecialchars($contact['contact_role']);
+                $nameParts[] = $contact['contact_role'];
             }
             if (sizeof($name_parts) > 0) {
                 $display_name = implode(" ", $name_parts);
@@ -187,8 +187,8 @@ foreach ($threads as $thread) {
 
     echo "<tr><td>";
     echo "<a href='".$link."'>";
-    echo "<span class='thread-name'>".htmlspecialchars($display_name)."</span><br />";
-    echo "<span class='thread-last-message'>".htmlspecialchars($body_preview)."</span>";
+    echo "<span class='thread-name'>".$display_name)."</span><br />";
+    echo "<span class='thread-last-message'>".$body_preview)."</span>";
     echo "<span class='timestamp' data-timestamp='".$last_message['start_stamp']."'></span>";
     echo "</a>";
     echo "</td></tr>\n";
