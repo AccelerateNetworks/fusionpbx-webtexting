@@ -194,10 +194,13 @@ export default {
         </div>
     </div>
     <div class="sendbox">
-        <textarea class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste"></textarea>
+        <textarea maxlength="160" class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste" ></textarea>
         <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
         <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />
         <button class="btn btn-send" :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected" v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
+    </div>
+    <div class="char-counter-box">
+        <div class="char-counter-display">{{ enteredText.length }} / 160</div>
     </div>
 </template>
 
@@ -206,6 +209,21 @@ export default {
     display: flex;
     margin-bottom: 0.5em;
     background-color: #eee;
+}
+
+.char-counter-box{
+    display: grid;
+    align-content: center;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+}
+
+.char-counter-display{
+    align-content: center;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
 }
 
 .textentry {
