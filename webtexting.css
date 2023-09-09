@@ -40,6 +40,15 @@ padding-bottom: 0.25em;
 width: fit-content
 }
 
+.message.incoming {
+    float: right;
+    border-radius: 25% 10%;
+}
+
+.message.outgoing{
+    border-radius: 10% 25%;
+}
+
 .message-inbound {
     float: right;
 }
@@ -63,4 +72,12 @@ max-width: fit-content;
 
 .textentry:focus {
 outline: none; /* hide the browser's extra focus outline */
+}
+
+
+.message .incoming{
+    border-radius: 10% 25%
+}
+.message .outgoing{
+    border-radius: 25% 10%
 }

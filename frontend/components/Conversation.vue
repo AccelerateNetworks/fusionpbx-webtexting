@@ -138,6 +138,9 @@ export default {
 </script>
 
 <template>
+    <link rel="stylesheet" href="./frontend/components/MessageStyle.css">
+    <link rel="stylesheet" href="./frontend/components/SendBoxStyle.css">
+    <link rel="stylesheet" href="./frontend/components/ConversationStyle.css">
     <div class="thread-header">
         {{ title }}
         <a v-if="contactEditLink" :href="contactEditLink" class="white">
@@ -157,55 +160,7 @@ export default {
             <div class="message-wrapper" ref="bottom">&nbsp;</div>
         </div>
         <SendBox :remoteNumber="remoteNumber" :groupUUID="groupUUID" :ownNumber="ownNumber" />
-        <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ remoteNumber }}</div>
+        <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ ownNumber }}</div>
     </div>
 </template>
 
-<style scoped>
-.thread {
-    max-width: 50em;
-    height: 100%;
-    margin: 0 auto;
-    border-left: solid #999 2px;
-    border-right: solid #999 2px;
-    border-bottom: solid #999 2px;
-    border-bottom-left-radius: 0.5em;
-    border-bottom-right-radius: 0.5em;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-
-    /* stupid hack to get the text entry box to display inside the bounds of the thread */
-    display: flex;
-    flex-direction: column;
-}
-
-.thread-header {
-    max-width: 50em;
-    margin: 0 auto;
-    padding: 1em;
-    background-color: rgba(0, 0, 0, 0.90);
-    color: #fff;
-    border-top-left-radius: 0.5em;
-    border-top-right-radius: 0.5em;
-    font-weight: bold;
-}
-
-.message-container {
-    display: flex;
-    flex-flow: column;
-    justify-content: flex-start;
-    height: 100%;
-    overflow: scroll;
-    margin-bottom: 0.5em;
-}
-
-.backfill {
-    max-width: 50em;
-    margin: 0 auto;
-    padding: 1em;
-}
-
-.white {
-    color: white;
-}
-</style>
