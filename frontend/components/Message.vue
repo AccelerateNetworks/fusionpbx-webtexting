@@ -19,6 +19,10 @@ export default {
             type: Object as PropType<MessageData>,
             required: true,
         },
+        lastSender:{
+            type: String,
+            requried:false,
+        }
     },
     methods: {
         bumpTimestamp() {
@@ -75,7 +79,7 @@ export default {
 
 <template>
     <div class="message-wrapper">
-        <div class="author" :class="this.message.direction">{{ this.message.from }}</div>
+        <div class="author" :class="this.message.direction">{{ this.lastSender== this.message.from ? "" : this.message.from}}</div>
         <div class="message" :class="this.message.direction">
             <p class="message-body" v-if="this.text">{{ this.text }}</p>
             <p class="message-body" v-if="this.embedImage" ref="embed">
