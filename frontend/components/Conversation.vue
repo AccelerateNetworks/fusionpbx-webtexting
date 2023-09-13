@@ -156,8 +156,7 @@ export default {
             <div ref="top">
                 <div class="backfill" v-if="backfillAvailable">loading older messages</div>
             </div>
-            <Message :message="message" :key="message.id" :prevSender="index-1>=0 ? state.messages[index-1].from : -1"
-            :lastSender="index-1>=0 ? state.messages[index-1].from : -1" v-for="(message, index) in state.messages"/>
+            <Message :message="message" :key="message.id" :lastSender="index-1>=0 ? state.messages[index-1].from : -1" v-for="(message, index) in state.messages"/>
             <div class="message-wrapper" ref="bottom">&nbsp;</div>
         </div>
         <SendBox :remoteNumber="remoteNumber" :groupUUID="groupUUID" :ownNumber="ownNumber" />
