@@ -32,9 +32,9 @@ location /ws {
 ## Developing
 Frontend build requires a bunch of javascript stuff. To do it without installing a bunch of javascript stuff, install podman and use `build-frontend.sh`
 ## Debugger
-TO add a debugger to the project you'll need to set one up.
+To add a debugger to the project you'll need to set one up.
 if you're using VS Code you'll want to download the PHP Debug extension https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug
-to get started with xdebug you'll want to isntall xdebug.
+to get started with xdebug you'll want to install xdebug.
 I highly recommend you make a simple test.php file, put a phpinfo(); statement in there, then copy the output and paste it into the Xdebug installation wizard (https://xdebug.org/wizard.php). 
 It will analyze it and give you tailored installation instructions for your environment.
 
