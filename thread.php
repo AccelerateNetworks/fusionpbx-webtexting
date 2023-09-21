@@ -194,6 +194,7 @@ $frontendOpts['username'] = $extensionDetails['extension'];
 $frontendOpts['password'] = $extensionDetails['password'];
 $frontendOpts["extensionUUID"] = $extension['extension_uuid'];
 $frontendOpts['ownNumber'] = $ownNumber;
+//echo $frontendOpts;
 ?>
 <script type="text/javascript">
   // webpush

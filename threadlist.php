@@ -102,6 +102,33 @@ $threads = $database->select($sql, $parameters, 'all');
 unset($parameters);
 
 echo "<table>\n";
+//for each thread get the last message and render a preview template
+//threads is the thing we need to make available to threadlist.vue to populate every ThreadPreview.vue
+//where do we need to go for the rest of the frontendopts 
+
+//these two query blocks are ripped from thread.php
+//the intent is that I use these to get comfortable with delivering the vue app then i remove these
+$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
+$parameters['domain_uuid'] = $domain_uuid;
+$parameters['extension_uuid'] = $extension['extension_uuid'];
+$database = new database;
+$ownNumber = $database->select($sql, $parameters, 'column');
+unset($parameters);
+
+$sql = "SELECT v_extensions.extension, v_extensions.password FROM v_extensions, v_domains WHERE v_domains.domain_uuid = v_extensions.domain_uuid AND v_domains.domain_name = :domain_name AND v_extensions.extension_uuid = :extension_uuid";
+$parameters['domain_name'] = $extension['user_context'];
+$parameters['extension_uuid'] = $extension['extension_uuid'];
+$database = new database;
+$extensionDetails = $database->select($sql, $parameters, 'row');
+unset($parameters);
+
+$frontendOpts['server'] = $extension['user_context'];
+$frontendOpts['username'] = $extensionDetails['extension'];
+$frontendOpts['password'] = $extensionDetails['password'];
+$frontendOpts["extensionUUID"] = $extension['extension_uuid'];
+$frontendOpts['ownNumber'] = $ownNumber;
+
+//echo $frontendOpts;
 foreach ($threads as $thread) {
     $number = $thread['remote_number'];
 
@@ -183,7 +210,7 @@ foreach ($threads as $thread) {
     } else {
         $link .= "number=".$number;
     }
-
+    //Thread preview area this area marked for refactoring
     $body_preview = $last_message['content_type'] == "text/plain" ? $last_message['message'] : "[media]";
 
     echo "<tr><td>";
@@ -205,7 +232,8 @@ if(count($threads) == $page_size) {
 }
 ?>
 <script type="text/javascript">
-    window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
+      window.notification_data = <?php echo json_encode($threads); ?>;
+    //window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
     function clean_number() { // clean any non-digits out of the phone number box
         document.querySelector("#new-thread-number").value = document.querySelector("#new-thread-number").value.replace(/[^\d+]/g, "");
     }

@@ -3,6 +3,10 @@ import { reactive } from 'vue'
 import { CPIM } from './CPIM';
 import mitt from 'mitt';
 
+type ConversationData = {
+    messages: MessageData[];
+}
+
 type MessageData = {
     direction: string;
     contentType: string;

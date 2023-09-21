@@ -33,11 +33,11 @@ margin-bottom: 0.5em;
     margin-top: 0.5em;
     border: solid #aaa 1px;
     border-radius: 1em;
-padding-left: 0.75em;
-padding-right: 1em;
-padding-top: 0.25em;
-padding-bottom: 0.25em;
-width: fit-content
+    padding-left: 0.75em;
+    padding-right: 1em;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+    width: fit-content
 }
 
 .message.incoming {

@@ -1,7 +1,7 @@
 <script lang="ts">
-import { uploadText } from '../lib/upload';
-import { CPIM } from '../lib/CPIM';
-import { MessageData, GlobalState, emitter, state } from '../lib/global';
+import { uploadText } from '../../lib/upload';
+import { CPIM } from '../../lib/CPIM';
+import { MessageData, GlobalState, emitter, state } from '../../lib/global';
 import moment from 'moment';
 
 type PendingAttachment = {
@@ -203,3 +203,97 @@ export default {
         <div class="char-counter-display">{{ enteredText.length }} / 160</div>
     </div>
 </template>
+<style>
+
+.sendbox {
+    display: flex;
+    margin-bottom: 0.5em;
+    background-color: #eee;
+}
+
+.char-counter-box{
+    display: grid;
+    align-content: center;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+}
+
+.char-counter-display{
+    align-content: center;
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+}
+
+.textentry {
+    border: 0;
+    background-color: inherit;
+    resize: none;
+    /* prevent the user from resizing the text box */
+    flex-grow: 1;
+}
+
+.btn-attach {
+    padding: 0;
+    margin: auto 0;
+}
+
+.btn-send {
+    flex-grow: 1;
+    max-width: fit-content;
+    margin: auto 0;
+}
+
+.textentry:focus {
+    outline: none;
+    /* hide the browser's extra focus outline */
+}
+
+.statusbox {
+    font-size: 7pt;
+    text-align: right;
+}
+
+.statusbox .error {
+    color: #ff5555;
+}
+
+.attachment-previews {
+    display: flex;
+    flex-direction: row;
+    /* overflow-x: auto; */
+}
+
+.attachment-preview {
+    display: flex;
+    justify-content: left;
+    background-color: #eee;
+}
+
+.attachment-preview-wrapper {
+    display: inline-block;
+    height: 150px;
+    width: 150px;
+    position: relative;
+    color: #fff;
+    text-shadow: black 0 0 15px;
+}
+
+.attachment-preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.remove-attachment-btn {
+    position: absolute;
+    top: 1em;
+    right: 1em;
+}
+
+.attachment-upload-progress {
+    position: absolute;
+    bottom: 1em;
+    right: 1em;
+}</style>

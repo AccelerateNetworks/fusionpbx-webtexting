@@ -1,5 +1,5 @@
 <script lang="ts">
-import { MessageData, emitter } from '../lib/global';
+import { MessageData, emitter } from '../../lib/global';
 import type { PropType } from 'vue'
 
 export default {
@@ -19,9 +19,9 @@ export default {
             type: Object as PropType<MessageData>,
             required: true,
         },
-        lastSender:{
+        lastSender: {
             type: String,
-            requried:false,
+            requried: false,
         }
     },
     methods: {
@@ -79,7 +79,8 @@ export default {
 
 <template>
     <div class="message-wrapper">
-        <div class="author" :class="this.message.direction">{{ this.lastSender== this.message.from ? "" : this.message.from}}</div>
+        <div class="author" :class="this.message.direction">{{ this.lastSender == this.message.from ? "" :
+            this.message.from }}</div>
         <div class="message" :class="this.message.direction">
             <p class="message-body" v-if="this.text">{{ this.text }}</p>
             <p class="message-body" v-if="this.embedImage" ref="embed">
@@ -94,3 +95,48 @@ export default {
         </div>
     </div>
 </template>
+<style>
+.message-wrapper {
+    margin-top: 0.5em;
+}
+
+.message {
+    border: solid #aaa 1px;
+    border-radius: 1em;
+    padding-left: 0.75em;
+    padding-right: 1em;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+    width: fit-content;
+    max-width: 75%;
+}
+
+.message.incoming {
+    float: right;
+    border-radius: 1em 1em 0 1em;
+    background-color: #3178B1;
+    color: #fff;
+}
+
+.message.outgoing{
+    border-radius: 1em 1em 1em 0;
+    background-color: #BB6025;
+    color: #fff;
+}
+
+.author.incoming {
+    text-align: right;
+}
+
+.ts {
+    font-size: 7pt;
+}
+
+.message-body {
+    margin: 0;
+}
+
+.message-body-inline-media {
+    max-width: 100%;
+    border-radius: 0.5em;
+}</style>
