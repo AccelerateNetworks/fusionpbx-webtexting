@@ -17,7 +17,7 @@ type MessageData = {
     body?: string;
     cpim?: CPIM;
 }
-
+//what do we do when we need to add a thread to threadlist
 type GlobalState = {
     messages: MessageData[],
     connectivityStatus: String,

@@ -2,7 +2,7 @@
 import Conversation from '../conversation/Conversation.vue';
 import { MessageData } from '../../lib/global';
 
-type ThreadPreviewInterface = {
+export type ThreadPreviewInterface = {
     displayName: {
         type: String,
     },
@@ -73,13 +73,17 @@ export default {
 </script>
 
 <template>
-    <tr>
-        <td>
+    <div class='tr_replace'>
+        <div class='td_preview'>
             <a :href="this.link">
                 <span class='thread-name'>{{ this.displayName }}</span><br />
                 <span class='thread-last-message'>{{ this.bodyPreview }}</span>
                 <span class='timestamp' :data-timestamp="this.timestamp"></span>
             </a>
-        </td>
-    </tr>\n
+        </div>
+    </div>
 </template>
+
+<style>
+
+</style>

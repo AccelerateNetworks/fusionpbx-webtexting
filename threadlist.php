@@ -31,33 +31,6 @@ if (!$destination) {
     die();
 }
 ?>
-<style type="text/css">
-.timestamp {
-    color: #999;
-    font-size: 8pt;
-    padding-left: 0.5em;
-}
-.thread-name {
-    font-size: 12pt;
-    color: #000;
-}
-.thread-last-message {
-    color: #000;
-}
-td {
-    border: solid black;
-    border-radius: 1em;
-    padding: 0.25em;
-    margin-bottom: 0.5em;
-    min-height: calc(50px + 1em);
-}
-table {
-    border-spacing: 1em;
-    width: 100%;
-    table-layout: fixed;
-}
-
-</style>
 <form method='get' action="thread.php" onsubmit="clean_number()">
 <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
 <div id='modal-new-thread' class='modal-window'>
@@ -74,19 +47,6 @@ table {
 <input type='hidden' name='key_uuid' id='key_uuid'/>
 </form>
 <?php
-echo "<div class='action_bar' id='action_bar'>\n";
-echo "	<div class='heading'><b>WebTexting</b> - ".$extension['outbound_caller_id_name']." (".$destination.")</div>\n";
-echo "	<div class='actions'>\n";
-if(sizeof($_SESSION['user']['extension']) > 1) {
-    echo button::create(['type'=>'button','label'=>"All Extensions",'icon'=>$_SESSION['theme']['button_icon_back'],'id'=>'btn_back','style'=>'margin-right: 15px;','link'=>'index.php']);
-}
-echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'onclick' => 'toggleNotifications()']);
-echo button::create(['type'=>'button','icon'=>$_SESSION['theme']['button_icon_add'],'onclick'=>"modal_open('modal-new-thread','new-thread-number');"]);
-echo "	</div>\n";
-echo "	<div style='clear: both;'></div>\n";
-echo "</div>\n";
-echo "<table class='table'>\n";
-
 $page = 0;
 $page_size = 25;
 $sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message DESC LIMIT ".$page_size;
@@ -101,7 +61,6 @@ $parameters['domain_uuid'] = $domain_uuid;
 $threads = $database->select($sql, $parameters, 'all');
 unset($parameters);
 
-echo "<table>\n";
 //for each thread get the last message and render a preview template
 //threads is the thing we need to make available to threadlist.vue to populate every ThreadPreview.vue
 //where do we need to go for the rest of the frontendopts 
@@ -127,116 +86,148 @@ $frontendOpts['username'] = $extensionDetails['extension'];
 $frontendOpts['password'] = $extensionDetails['password'];
 $frontendOpts["extensionUUID"] = $extension['extension_uuid'];
 $frontendOpts['ownNumber'] = $ownNumber;
-
+echo "<div id='TEST_DIV_FOR_TESTING_WEBTEXTING'></div>";
 //echo $frontendOpts;
-foreach ($threads as $thread) {
-    $number = $thread['remote_number'];
+// foreach ($threads as $thread) {
+//     $number = $thread['remote_number'];
 
-    $group_uuid = $thread['group_uuid'];
+//     $group_uuid = $thread['group_uuid'];
 
-    // get the latest message from this thread
-    $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
-    if ($group_uuid != null) {
-        $sql .= "group_uuid = :group_uuid";
-        $parameters['group_uuid'] = $group_uuid;
-    } else {
-        $sql .= "(from_number = :number OR to_number = :number) AND group_uuid IS NULL";
-        $parameters['number'] = $number;
-    }
-    $sql .= " ORDER BY start_stamp DESC LIMIT 1";
-    $parameters['extension_uuid'] = $extension['extension_uuid'];
-    $parameters['domain_uuid'] = $domain_uuid;
-    $last_message = $database->select($sql, $parameters, 'row');
-    unset($parameters);
+//     // get the latest message from this thread
+//     $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
+//     if ($group_uuid != null) {
+//         $sql .= "group_uuid = :group_uuid";
+//         $parameters['group_uuid'] = $group_uuid;
+//     } else {
+//         $sql .= "(from_number = :number OR to_number = :number) AND group_uuid IS NULL";
+//         $parameters['number'] = $number;
+//     }
+//     $sql .= " ORDER BY start_stamp DESC LIMIT 1";
+//     $parameters['extension_uuid'] = $extension['extension_uuid'];
+//     $parameters['domain_uuid'] = $domain_uuid;
+//     $last_message = $database->select($sql, $parameters, 'row');
+//     unset($parameters);
 
-    // compute the name to display based on number and a potential contact name
-    $display_name = "";
-    if ($group_uuid != null) {
-        $sql = "SELECT name, members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND group_uuid = :group_uuid";
-        $parameters['domain_uuid'] = $domain_uuid;
-        $parameters['extension_uuid'] = $extension['extension_uuid'];
-        $parameters['group_uuid'] = $group_uuid;
-        $group = $database->select($sql, $parameters, 'row');
-        unset($parameters);
-        if ($group['name'] != null) {
-            $display_name = $group['name'];
-        } else {
-            $display_name = $group['members'];
-        }
-    } else {
-        $display_name = $number;
+//     // compute the name to display based on number and a potential contact name
+//     $display_name = "";
+//     if ($group_uuid != null) {
+//         $sql = "SELECT name, members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND group_uuid = :group_uuid";
+//         $parameters['domain_uuid'] = $domain_uuid;
+//         $parameters['extension_uuid'] = $extension['extension_uuid'];
+//         $parameters['group_uuid'] = $group_uuid;
+//         $group = $database->select($sql, $parameters, 'row');
+//         unset($parameters);
+//         if ($group['name'] != null) {
+//             $display_name = $group['name'];
+//         } else {
+//             $display_name = $group['members'];
+//         }
+//     } else {
+//         $display_name = $number;
 
-        $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_organization, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family, v_contacts.contact_nickname, v_contacts.contact_title, v_contacts.contact_role FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
-        $parameters['number'] = $number;
-        $parameters['domain_uuid'] = $domain_uuid;
-        $contact = $database->select($sql, $parameters, 'row');
-        unset($parameters);
+//         $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_organization, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family, v_contacts.contact_nickname, v_contacts.contact_title, v_contacts.contact_role FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
+//         $parameters['number'] = $number;
+//         $parameters['domain_uuid'] = $domain_uuid;
+//         $contact = $database->select($sql, $parameters, 'row');
+//         unset($parameters);
 
-        if ($contact) {
-            $name_parts = array();
-            if ($contact['contact_organization']) {
-                $name_parts[] = $contact['contact_organization'];
-            }
-            if ($contact['contact_title']) {
-                $name_parts[] = $contact['contact_title'];
-            }
-            if ($contact['contact_name_prefix']) {
-                $name_parts[] = $contact['contact_name_prefix'];
-            }
-            if ($contact['contact_name_given']) {
-                $name_parts[] = $contact['contact_name_given'];
-            }
-            if ($contact['contact_name_middle']) {
-                $name_parts[] = $contact['contact_name_middle'];
-            }
-            if ($contact['contact_name_family']) {
-                $name_parts[] = $contact['contact_name_family'];
-            }
-            if ($contact['contact_nickname']) {
-                $name_parts[] = $contact['contact_nickname'];
-            }
-            if ($contact['contact_role']) {
-                $name_parts[] = $contact['contact_role'];
-            }
-            if (sizeof($name_parts) > 0) {
-                $display_name = implode(" ", $name_parts);
-            }
-        }
-    }
+//         if ($contact) {
+//             $name_parts = array();
+//             if ($contact['contact_organization']) {
+//                 $name_parts[] = $contact['contact_organization'];
+//             }
+//             if ($contact['contact_title']) {
+//                 $name_parts[] = $contact['contact_title'];
+//             }
+//             if ($contact['contact_name_prefix']) {
+//                 $name_parts[] = $contact['contact_name_prefix'];
+//             }
+//             if ($contact['contact_name_given']) {
+//                 $name_parts[] = $contact['contact_name_given'];
+//             }
+//             if ($contact['contact_name_middle']) {
+//                 $name_parts[] = $contact['contact_name_middle'];
+//             }
+//             if ($contact['contact_name_family']) {
+//                 $name_parts[] = $contact['contact_name_family'];
+//             }
+//             if ($contact['contact_nickname']) {
+//                 $name_parts[] = $contact['contact_nickname'];
+//             }
+//             if ($contact['contact_role']) {
+//                 $name_parts[] = $contact['contact_role'];
+//             }
+//             if (sizeof($name_parts) > 0) {
+//                 $display_name = implode(" ", $name_parts);
+//             }
+//         }
+//     }
+//     $frontendOpts['server'] = $extension['user_context'];
+// $frontendOpts['username'] = $extensionDetails['extension'];
+// $frontendOpts['password'] = $extensionDetails['password'];
+// $frontendOpts["extensionUUID"] = $extension['extension_uuid'];
+// $frontendOpts['ownNumber'] = $ownNumber;
 
-    $link = "thread.php?extension_uuid=".$extension['extension_uuid']."&";
-    if ($group_uuid != null) {
-        $link .= "group=".$group_uuid;
-    } else {
-        $link .= "number=".$number;
-    }
-    //Thread preview area this area marked for refactoring
-    $body_preview = $last_message['content_type'] == "text/plain" ? $last_message['message'] : "[media]";
+//     $link = "thread.php?extension_uuid=".$extension['extension_uuid']."&";
+//     if ($group_uuid != null) {
+//         $link .= "group=".$group_uuid;
+//     } else {
+//         $link .= "number=".$number;
+//     }
+//     //Thread preview area 
+//     //this area marked for refactoring
+//     $body_preview = $last_message['content_type'] == "text/plain" ? $last_message['message'] : "[media]";
 
-    echo "<tr><td>";
-    echo "<a href='".$link."'>";
-    echo "<span class='thread-name'>".$display_name."</span><br />";
-    echo "<span class='thread-last-message'>".$body_preview."</span>";
-    echo "<span class='timestamp' data-timestamp='".$last_message['start_stamp']."'></span>";
-    echo "</a>";
-    echo "</td></tr>\n";
-}
-echo "</table>\n";
+//     echo "<tr><td>";
+//     echo "<a href='".$link."'>";
+//     echo "<span class='thread-name'>".$display_name."</span><br />";
+//     echo "<span class='thread-last-message'>".$body_preview."</span>";
+//     echo "<span class='timestamp' data-timestamp='".$last_message['start_stamp']."'></span>";
+//     echo "</a>";
+//     echo "</td></tr>\n";
+// }
+// echo "</table>\n";
+// echo "</div>";
+// if($page > 0) {
+//     echo button::create(['type'=>'button', 'label'=>'newer messages', 'link'=>"threadlist.php?extension_uuid=".urlencode($extension['extension_uuid'])."&page=".$page-1]);
+// }
 
-if($page > 0) {
-    echo button::create(['type'=>'button', 'label'=>'newer messages', 'link'=>"threadlist.php?extension_uuid=".urlencode($extension['extension_uuid'])."&page=".$page-1]);
-}
-
-if(count($threads) == $page_size) {
-    echo button::create(['type'=>'button', 'label'=>'older messages', 'link'=>"threadlist.php?extension_uuid=".urlencode($extension['extension_uuid'])."&page=".$page+1]);
-}
+// if(count($threads) == $page_size) {
+//     echo button::create(['type'=>'button', 'label'=>'older messages', 'link'=>"threadlist.php?extension_uuid=".urlencode($extension['extension_uuid'])."&page=".$page+1]);
+// }
 ?>
+
+<script src="js/webtexting.umd.js"></script>
 <script type="text/javascript">
-      window.notification_data = <?php echo json_encode($threads); ?>;
-    //window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
+      //window.notification_data = <?php echo json_encode($threads); ?>;
+    window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
     function clean_number() { // clean any non-digits out of the phone number box
         document.querySelector("#new-thread-number").value = document.querySelector("#new-thread-number").value.replace(/[^\d+]/g, "");
     }
-</script>
+    </script>
 <?php
 require_once "footer.php";
+?>
+<link rel="stylesheet" href="js/style.css" />
+<script type="text/javascript">
+WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); ?>);
+</script>
+
+<style type="text/css">
+
+
+#WEB_TEXT_ROOT {
+    display:grid;
+    grid-template-columns: 30% 1fr;
+    grid-template-rows: auto;
+}
+
+
+
+
+    
+
+
+
+
+</style>

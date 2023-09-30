@@ -1,4 +1,5 @@
-import { createApp } from 'vue';
+import {  createApp } from 'vue';
+import router from './routes';
 import { RunSIPConnection } from './lib/SIP';
 import Conversation from './components/conversation/Conversation.vue'; //remove once initializeThreadListJS works
 import ThreadList from './components/ThreadList/ThreadList.vue';
@@ -7,7 +8,7 @@ import { backfillMessages } from './lib/backfill';
 import { emitter } from './lib/global';
 
 // these are passed to initializeThreadJS from php when initializeThreadJS() is called in thread.php
-type Options = {
+type ThreadOptions = {
     username: string,
     password: string,
     server: string,
@@ -25,7 +26,7 @@ type ThreadListOptions = {
     server: string,
     extensionUUID: string,
     ownNumber: string,
-    threads?: Options[],
+    threads?: ThreadOptions[],
 }
 
 type WebTextingContainerOptions = {
@@ -34,7 +35,7 @@ type WebTextingContainerOptions = {
     server: string,
     extensionUUID: string,
     ownNumber: string,
-    threads?: Options[],
+    threads?: ThreadOptions[],
     threadName?: string,
     contactEditLink?: string,
     groupMembers?: string[],
@@ -42,46 +43,47 @@ type WebTextingContainerOptions = {
     groupUUID?: string,
 }
 //this is the function used to initalize and deliver the vue app when configured for 1 conversation
-function initializeThreadJS(opts: Options) {
-    const props = {
-        remoteNumber: opts.remoteNumber,
-        groupUUID: opts.groupUUID,
-        displayName: opts.threadName,
-        ownNumber: opts.ownNumber,
-        contactEditLink: opts.contactEditLink,
-        groupMembers: opts.groupMembers,
-    }
-    const app = createApp(Conversation, props);
+// function initializeThreadJS(opts: ThreadOptions) {
+//     const props = {
+//         remoteNumber: opts.remoteNumber,
+//         groupUUID: opts.groupUUID,
+//         displayName: opts.threadName,
+//         ownNumber: opts.ownNumber,
+//         contactEditLink: opts.contactEditLink,
+//         groupMembers: opts.groupMembers,
+//     }
+//     const app = createApp(Conversation, props);
 
-    app.config.errorHandler = (err, instance, info) => {
-        console.log("error from within vue:", info, err, instance);
-        console.error(err);
-    }
+//     app.config.errorHandler = (err, instance, info) => {
+//         console.log("error from within vue:", info, err, instance);
+//         console.error(err);
+//     }
 
-    app.mount("#conversation");
+//     app.mount("#conversation");
 
-    backfillMessages(opts.extensionUUID, opts.remoteNumber, opts.groupUUID);
-    RunSIPConnection(opts.username, opts.password, opts.server, opts.ownNumber, opts.remoteNumber, opts.groupUUID);
+//     backfillMessages(opts.extensionUUID, opts.remoteNumber, opts.groupUUID);
+//     RunSIPConnection(opts.username, opts.password, opts.server, opts.ownNumber, opts.remoteNumber, opts.groupUUID);
 
-    emitter.on('backfill-requested', () => {
-        backfillMessages(opts.extensionUUID, opts.remoteNumber, opts.groupUUID);
-    })
-}
+//     emitter.on('backfill-requested', () => {
+//         backfillMessages(opts.extensionUUID, opts.remoteNumber, opts.groupUUID);
+//     })
+// }
 /* This is going to be where we build and mount the app once it's been configured to run from ThreadLists worklow
 */
-function initializeWebTextingContainerJS(opts: ThreadListOptions){
+export const initializeWebTextingContainer = function initializeWebTextingContainerJS(opts: WebTextingContainerOptions){
     //how do we want to pass props into threaadlist.
     //in theory threads has to be parsed and sent to each conversation component but is that state or props
     const props={
         ownNumber: opts.ownNumber,
     }
     const app = createApp(WebTextingContainer, props);
-
+    
     app.config.errorHandler = (err, instance, info) => {
         console.log("error from within vue:", info, err, instance);
         console.error(err);
     }
-    app.mount("#WEB_TEXT_ROOT");
+    app.use(router);
+    app.mount("#TEST_DIV_FOR_TESTING_WEBTEXTING");
 
     //i think this is stuff that will have to get ported over to threads instead of messages
 
@@ -99,4 +101,3 @@ function initializeWebTextingContainerJS(opts: ThreadListOptions){
     })
 }
 
-export { initializeThreadJS };

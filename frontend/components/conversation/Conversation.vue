@@ -138,7 +138,7 @@ export default {
 </script>
 
 <template>
-   
+<div class="thread-container">
     <div class="thread-header">
         {{ title }}
         <a v-if="contactEditLink" :href="contactEditLink" class="white">
@@ -160,11 +160,21 @@ export default {
         <SendBox :remoteNumber="remoteNumber" :groupUUID="groupUUID" :ownNumber="ownNumber" />
         <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ ownNumber }}</div>
     </div>
+</div>
 </template>
+
 <style>
 
+#conversation{
+    grid-column-start: 2;
+    grid-column-end: 2;
+}
+
+/* these are for conversation which we are sidestepping for now */
+
+
 .thread {
-    height: 100%;
+    height:80vh;
     margin: 0 auto;
     border-left: solid #999 2px;
     border-right: solid #999 2px;
@@ -190,11 +200,12 @@ export default {
 }
 
 .message-container {
+    height: 100%;
+    overflow-y: auto;
     display: flex;
     flex-flow: column;
     justify-content: flex-start;
     height: 100%;
-    overflow: scroll;
     margin-bottom: 0.5em;
 }
 
@@ -207,5 +218,46 @@ export default {
 .white {
     color: white;
 }
-</style>
 
+td:active{
+    background-color:#3178B1;
+    color:white;
+}
+td:hover{
+    background-color: aliceblue;
+}
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+    
+.timestamp {
+    color: #999;
+    font-size: 8pt;
+    padding-left: 0.5em;
+}
+.thread-name {
+    font-size: 12pt;
+    color: #000;
+}
+.thread-name:active{
+    color:white;
+}
+.thread-last-message {
+    color: #000;
+}
+.thread-last-message:active {
+    color: #fff;
+}
+td {
+    border: solid black;
+    border-radius: 1em;
+    padding: 0.25em;
+    margin-bottom: 0.5em;
+    min-height: calc(50px + 1em);
+}
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+</style>

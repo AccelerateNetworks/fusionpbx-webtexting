@@ -96,6 +96,7 @@ export default {
     </div>
 </template>
 <style>
+/*MESSAGE STYLE*/
 .message-wrapper {
     margin-top: 0.5em;
 }
@@ -139,4 +140,8 @@ export default {
 .message-body-inline-media {
     max-width: 100%;
     border-radius: 0.5em;
-}</style>
+}
+
+/* MESSAGE STYLES */
+
+</style>

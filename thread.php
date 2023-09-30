@@ -202,7 +202,7 @@ $frontendOpts['ownNumber'] = $ownNumber;
 </script>
 <script src="js/webtexting.umd.js"></script>
 <script>
-  WebTexting.initializeThreadJS(<?php echo json_encode($frontendOpts); ?>);
+  //WebTexting.initializeThreadJS(<?php echo json_encode($frontendOpts); ?>);
 </script>
 <?php
 require_once "footer.php";

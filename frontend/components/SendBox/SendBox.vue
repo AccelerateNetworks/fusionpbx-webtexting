@@ -186,6 +186,7 @@ export default {
 </script>
 
 <template>
+    <div class="sendbox-container">
     <div class="attachment-previews">
         <div class="attachment-preview-wrapper" v-for="attachment in pendingAttachments">
             <img :src="attachment.previewURL" v-if="attachment.previewURL" class="attachment-preview-img" />
@@ -202,8 +203,12 @@ export default {
     <div class="char-counter-box">
         <div class="char-counter-display">{{ enteredText.length }} / 160</div>
     </div>
+</div>
+
 </template>
-<style>
+
+<style scoped>
+/*SENDBOX STYLES */
 
 .sendbox {
     display: flex;
