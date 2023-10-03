@@ -260,4 +260,10 @@ table {
     width: 100%;
     table-layout: fixed;
 }
+@media screen and (width <=700px){
+    #conversation{ 
+        display: none;
+    }
+
+}
 </style>

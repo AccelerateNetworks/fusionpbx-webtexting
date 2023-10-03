@@ -199,7 +199,6 @@ echo "<div id='TEST_DIV_FOR_TESTING_WEBTEXTING'></div>";
 
 <script src="js/webtexting.umd.js"></script>
 <script type="text/javascript">
-      //window.notification_data = <?php echo json_encode($threads); ?>;
     window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
     function clean_number() { // clean any non-digits out of the phone number box
         document.querySelector("#new-thread-number").value = document.querySelector("#new-thread-number").value.replace(/[^\d+]/g, "");
@@ -221,7 +220,13 @@ WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); 
     grid-template-columns: 30% 1fr;
     grid-template-rows: auto;
 }
+@media screen and (width <= 700px) {
+    #WEB_TEXT_ROOT{
+    grid-template-columns:100%;
+    grid-template-rows:80vh;
+    }
 
+}
 
 
 

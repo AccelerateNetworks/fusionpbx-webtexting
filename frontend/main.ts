@@ -1,4 +1,5 @@
 import {  createApp } from 'vue';
+import {createWebHistory, createRouter} from 'vue-router';
 import router from './routes';
 import { RunSIPConnection } from './lib/SIP';
 import Conversation from './components/conversation/Conversation.vue'; //remove once initializeThreadListJS works
@@ -82,6 +83,22 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
         console.log("error from within vue:", info, err, instance);
         console.error(err);
     }
+
+    const router = createRouter({
+        history: createWebHistory("/app/webtexting/"),
+        routes:[
+            {
+                path:"/threadlist.php",
+                name:"Home",
+                component:WebTextingContainer
+            },
+            {
+                path:"/thread.php",
+                name:"ThreadView",
+                component: WebTextingContainer
+            }
+        ]
+    })
     app.use(router);
     app.mount("#TEST_DIV_FOR_TESTING_WEBTEXTING");
 

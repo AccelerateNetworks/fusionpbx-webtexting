@@ -1,15 +1,21 @@
-<script lang="ts">
+<script lang="ts" >
 import { MessageData, emitter, state, } from '../../lib/global';
 import ThreadPreview from '../ThreadPreview/ThreadPreview.vue';
+import { RouterLink } from 'vue-router';
 
 // type ThreadListInterface = {
     
 //     username: String,
 // }
-export default {
-    props: {
+
+
+export default{
+    props:{
         username: String,
     },
+    components:{ThreadPreview}
+}
+
 
     /*
         get the user extension this is handled in threadlist.php
@@ -32,7 +38,7 @@ export default {
     <input type='hidden' name='key_uuid' id='key_uuid'/>
     </form>
     */
-}
+
 </script>
 
 <style>
@@ -77,7 +83,15 @@ export default {
     table-layout: fixed;
 }
 
+@media screen  and (width <=700) {
+    div.action_bar{
+        top: 0px;
+    }
+}
+
 </style>
+
+
 
 <template>
     
@@ -89,7 +103,7 @@ export default {
 
 
         <div class='action_bar' id='action_bar'>
-            <div class='heading'><b>WebTexting</b> this.props.username  </div>
+            <div class='heading'><b>WebTexting</b> {{username}}  </div>
             <div class='actions'>
             </div>
             <div style='clear: both;'></div>
@@ -97,24 +111,23 @@ export default {
         <div class='table'>
             <!-- <ThreadPreview  v-for="preview in this.threads" /> -->
             <div class="preview_list_container">
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161"><span class="thread-name">12063801161</span><br><span class="thread-last-message">Test </span><span class="timestamp" data-timestamp="2023-09-13 21:39:05.45867">9 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">dan ryan</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Franklin</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Oogway</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Pope</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Poe</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Tai Lung</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Roshi</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Goku</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161"><span class="thread-name">12063801161</span><br><span class="thread-last-message">Test </span><span class="timestamp" data-timestamp="2023-09-13 21:39:05.45867">9 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">dan ryan</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Franklin</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Oogway</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Pope</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Poe</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Tai Lung</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Roshi</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
-                <div class='tr_replace'><div  class=td_preview><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">Goku</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">dan ryan</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Franklin</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Oogway</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Pope</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Poe</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Tai Lung</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Roshi</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Goku</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161"> <span class="thread-name">12063801161</span><br><span class="thread-last-message">Test </span><span class="timestamp" data-timestamp="2023-09-13 21:39:05.45867">9 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">dan ryan</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Franklin</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Oogway</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Pope</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Poe</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Tai Lung</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Roshi</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
+                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Goku</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
                 </div>
             </div>
     </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
 import ThreadList from '../ThreadList/ThreadList.vue'
+import { useRoute } from 'vue-router';
 import { MessageData } from '../../lib/global';
 
 export default {
@@ -36,9 +37,11 @@ export default {
 <!-- This container should default to threadlist on the left and blank space on the right.
 The blank space should notify the user that they can select a thread to display that thread in the threadContainer -->
 <template>
+    <Router-View>
+
     <div id="WEB_TEXT_ROOT">
         <link type="text/css" href="../../../js/style.css">
-        <ThreadList />
+        <ThreadList username='Steve'/>
         <!-- <div class="threadlist_container"> 
                     <div class='action_bar' id='action_bar'>
                         <div class='heading'><b>WebTexting</b>  this.props.username  </div>
@@ -54,7 +57,7 @@ The blank space should notify the user that they can select a thread to display 
                     </table> -->
         <!-- </div> -->
         <div id="conversation" data-v-app="">
-            <div class="thread-header">12063801161 <!----><!----></div>
+            <div class="thread-header">12063801161 <!----> as {{this.$route.query.number ? this.$route.query.number : this.$route.query.extension_uuid}}<!----></div>
             <div class="thread">
                 <div class="message-container">
                     <backfill backfillavailable="false"></backfill>
@@ -170,6 +173,7 @@ The blank space should notify the user that they can select a thread to display 
             </div>
         </div>
     </div>
+    </Router-View>
 </template>
 
 <style scoped>
