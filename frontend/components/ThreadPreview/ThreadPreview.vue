@@ -1,6 +1,7 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
-import { MessageData } from '../../lib/global';
+import { MessageData } from '../../lib/global'
+import { RouterLink } from 'vue-router';
 
 export type ThreadPreviewInterface = {
     displayName: {
@@ -34,9 +35,7 @@ export type ThreadPreviewInterface = {
 }
 
 export default {
-    data() {
-
-    },
+    name:'ThreadPreview',
     props: {
         displayName: {
             type: String,
@@ -75,11 +74,11 @@ export default {
 <template>
     <div class='tr_replace'>
         <div class='td_preview'>
-            <a :href="this.link">
+            <router-link :to="this.link">
                 <span class='thread-name'>{{ this.displayName }}</span><br />
-                <span class='thread-last-message'>{{ this.bodyPreview }}</span>
+                <span class='thread-last-message'>{{ this.bodyPreview }}</span><br/>
                 <span class='timestamp' :data-timestamp="this.timestamp"></span>
-            </a>
+            </router-link>
         </div>
     </div>
 </template>

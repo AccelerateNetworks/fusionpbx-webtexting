@@ -27,6 +27,7 @@ export default {
     methods: {
         bumpTimestamp() {
             this.timestampText = this.message.timestamp.fromNow();
+
         },
         emitLoaded() {
             emitter.emit('scroll-to-bottom');
@@ -67,6 +68,9 @@ export default {
             }
         } else if (this.message.body) {
             this.text = this.message.body;
+        }
+        else if (this.message.message){
+            this.text = this.message.message;
         }
     },
     unmounted() {
@@ -113,20 +117,24 @@ export default {
 }
 
 .message.incoming {
-    float: right;
+    float: left;
     border-radius: 1em 1em 0 1em;
-    background-color: #3178B1;
-    color: #fff;
-}
-
-.message.outgoing{
-    border-radius: 1em 1em 1em 0;
     background-color: #BB6025;
     color: #fff;
 }
 
+.message.outgoing{
+    float:right;
+    border-radius: 1em 1em 1em 0;
+    background-color: #3178B1;
+    color: #fff;
+}
+
 .author.incoming {
-    text-align: right;
+    text-align: left;
+}
+.author.outgoing{
+    text-align:right;
 }
 
 .ts {

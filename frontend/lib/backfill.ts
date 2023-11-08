@@ -28,14 +28,14 @@ let active = false;
 
 export async function backfillMessages(extensionUUID: string, remoteNumber?: string, group?: string) {
     if (active) {
-        console.log("skipping duplicate backfill request");
+        //console.log("skipping duplicate backfill request");
         return;
     }
 
     active = true;
     try {
         let params: backfillQuery = { extension_uuid: extensionUUID };
-
+        let key = remoteNumber ? remoteNumber : group;
         if (remoteNumber) {
             params.number = remoteNumber;
         }
@@ -43,19 +43,31 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         if (group) {
             params.group = group;
         }
-
-        if (state.messages.length > 0 && state.messages[0].id) {
-            params.older_than = state.messages[0].id;
+        //console.log(`backfilling conversations array, ${state.conversations}`)
+        //console.log(`backfill key: ${key}`)
+        //if state.conversations[key] exists we have already backfilled at least once
+        const stateMessages = state.conversations[key];
+        if(stateMessages){
+            if (stateMessages.length > 0 && stateMessages[0].id) {
+                params.older_than = stateMessages[0].id;
+            }
+            console.log(stateMessages[0])
+            console.log(stateMessages[stateMessages.length-1])
         }
+        else{
 
+        }
+        
+        console.log(params)
         const response: BackfillResponse = await fetch('/app/webtexting/messages.php?' + new URLSearchParams(params).toString()).then(r => r.json());
-
+        
         console.log("received", response.messages.length, "message from backlog");
         for (let i = 0; i < response.messages.length; i++) {
             let m = response.messages[i];
+            //console.log(m)
             switch (m.content_type) {
                 case "text/plain":
-                    insertMessageInHistory({
+                    insertMessageInHistory(remoteNumber,{
                         direction: m.direction,
                         contentType: m.content_type,
                         timestamp: moment.utc(m.start_stamp),
@@ -66,7 +78,13 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                     });
                     break;
                 case "message/cpim":
-                    insertMessageInHistory({
+                    if(group){
+                        key = group;
+                    }
+                    else{
+                        key = remoteNumber;
+                    }
+                    insertMessageInHistory(key,{
                         direction: m.direction,
                         contentType: m.content_type,
                         timestamp: moment.utc(m.start_stamp),
@@ -92,19 +110,30 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
     }
 }
 
-function insertMessageInHistory(message: MessageData) {
-    for (let i = 0; i < state.messages.length; i++) {
-        if (state.messages[i].id == message.id) {
-            state.messages[i] = message;
-            return;
-        }
-
-        if (state.messages[i].timestamp.isAfter(message.timestamp)) {
-            state.messages.splice(i, 0, message);
-            return;
+export function insertMessageInHistory(key:string, message: MessageData) {
+    //console.log(`insertMessageInHistory message parameter, ${message}`);
+    //console.log(`Message Direction: ${message.direction}`)
+    //console.log(`Message Recipient: ${message.to}`)
+    if(state.conversations[key]){
+        for (let i = 0; i < state.conversations[key].length; i++) {
+            if (state.conversations[key][i].id == message.id) {
+                state.conversations[key][i] = message;
+                return;
+            }
+    
+            if (state.conversations[key][i].timestamp.isAfter(message.timestamp)) {
+                state.conversations[key].splice(i, 0, message);
+                return;
+            }
         }
     }
+    else{
+        state.conversations[key] = new Array<MessageData>();
+    }
+    
 
     // no existing message matched, append to end
-    state.messages.push(message);
+    //console.log("before ", state.conversations[key].length);
+    state.conversations[key].push(message);
+    console.log("after:", state.conversations[key]);
 }

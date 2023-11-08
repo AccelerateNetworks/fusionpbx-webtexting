@@ -1,6 +1,6 @@
 <script lang="ts" >
 import { MessageData, emitter, state, } from '../../lib/global';
-import ThreadPreview from '../ThreadPreview/ThreadPreview.vue';
+import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
 import { RouterLink } from 'vue-router';
 
 // type ThreadListInterface = {
@@ -10,8 +10,33 @@ import { RouterLink } from 'vue-router';
 
 
 export default{
+    name:'ThreadList',
+//     data(){
+//         const threads:Array<ThreadPreviewInterface> = [
+//             {
+//                 displayName: "dan ryan",
+//     bodyPreview: "Hmm",
+    
+//     link: "thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310",
+    
+//     timestamp: new Date("2023-09-06 21:57:12.733721"),
+    
+//     remoteNumber: "12068589310",
+    
+//     ownNumber: "12065797799"
+//     }
+    
+// }
+
+//         ]
+
+//     },
+    
     props:{
-        username: String,
+        displayName: String,
+        ownNumber: String,
+        threads: Array<Object>,
+            threadPreviews: Array<ThreadPreviewInterface>
     },
     components:{ThreadPreview}
 }
@@ -38,10 +63,10 @@ export default{
     <input type='hidden' name='key_uuid' id='key_uuid'/>
     </form>
     */
-
 </script>
 
 <style>
+
 
 .td_preview:active{
     background-color:#3178B1;
@@ -51,16 +76,23 @@ export default{
     background-color: aliceblue;
 }
 .td_preview{
-    border: solid black;
+    border: solid #3178b1;
     border-radius: 1em;
     padding: 0.5em;
     margin-bottom: 0.5em;
     min-height: calc(50px + 1em);
 }
+.preview_list_container{
+    direction:ltr;
+    padding-left:0.25rem;
+}
+
+
 .threadlist_container{
     height: 80vh;
     grid-column-start: 1;
     grid-column-end: 1;
+    padding-right: 0.25rem;
 }
 .timestamp {
     color: #999;
@@ -77,8 +109,9 @@ export default{
 
 .table {
     /*border-spacing: 1em; */
+    direction:rtl;
     overflow-y: scroll;
-    height: 100%;
+    height: 80vh;
     width: 100%;
     table-layout: fixed;
 }
@@ -86,6 +119,9 @@ export default{
 @media screen  and (width <=700) {
     div.action_bar{
         top: 0px;
+    }
+    .table{
+        height:80vh;
     }
 }
 
@@ -96,39 +132,16 @@ export default{
 <template>
     
     <div class="threadlist_container">
-        <!-- <link rel="stylesheet" href="./frontend/components/ThreadListStyle.css">
-        <link rel="stylesheet" href="./frontend/components/conversation/ConversationStyle.css">
-        <link rel="stylesheet" href="./frontend/components/message/MessageStyle.css">
-        <link rel="stylesheet" href="./frontend/SendBoxStyle.css"> -->
-
-
         <div class='action_bar' id='action_bar'>
-            <div class='heading'><b>WebTexting</b> {{username}}  </div>
+            <div class='heading'><b>WebTexting</b> {{displayName}}  </div>
             <div class='actions'>
             </div>
             <div style='clear: both;'></div>
         </div>
         <div class='table'>
-            <!-- <ThreadPreview  v-for="preview in this.threads" /> -->
             <div class="preview_list_container">
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">dan ryan</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Franklin</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Oogway</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Pope</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Poe</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Tai Lung</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Roshi</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Goku</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161"> <span class="thread-name">12063801161</span><br><span class="thread-last-message">Test </span><span class="timestamp" data-timestamp="2023-09-13 21:39:05.45867">9 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">dan ryan</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Franklin</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Oogway</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Pope</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Poe</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Tai Lung</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Roshi</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                <div class='tr_replace'><div  class=td_preview><router-link to="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"> <span class="thread-name">Goku</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></router-link></div ></div >
-                </div>
+                <ThreadPreview v-for="preview in threadPreviews"   :key="preview.toString()" v-bind="preview"/> 
+            </div>
             </div>
     </div>
     

@@ -72,6 +72,8 @@ class S3Helper
             'Bucket' => $_SESSION['webtexting']['mms_bucket']['text'],
             'Key' => $uploadPath,
         ]);
+        $testbucketeer = $_SESSION['webtexting']['mms_bucket']['text'];
+        $testKEY = $uploadPath;
         $request = $s3->createPresignedRequest($cmd, '+1 hour');
 
         return $request->getUri();

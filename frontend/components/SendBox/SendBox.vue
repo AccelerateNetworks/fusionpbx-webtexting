@@ -35,6 +35,7 @@ export default {
             state: state,
         }
     },
+    name:"SendBox",
     props: {
         remoteNumber: {
             type: String,
@@ -70,6 +71,7 @@ export default {
             }
         },
         async send() {
+            console.log(this.enteredText);
             if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
                 this.$refs.textbox.focus();
                 return;
@@ -120,7 +122,9 @@ export default {
             }
         },
         onAttach(e: Event) {
+            console.log(e.target.files);
             const target = e.target as HTMLInputElement;
+            console.log(target);
             for(const file of target.files) {
                 const a: PendingAttachment = {
                     file: file,
@@ -174,6 +178,18 @@ export default {
                         a.upload = this.uploadAttachment(a);
                         this.pendingAttachments.push(a);
                         break;
+                    case "image/jpeg":
+                        const fileJpeg = item.getAsFile();
+                        const aJpeg: PendingAttachment = {
+                            file: file,
+                            previewURL: URL.createObjectURL(file),
+                            progress: 0,
+                            upload: null,
+                            uploadedURL: null,
+                        };
+                        a.upload = this.uploadAttachment(a);
+                        this.pendingAttachments.push(a);
+                        break;
                     case "text/plain":
                         continue;
                     default:
@@ -207,7 +223,7 @@ export default {
 
 </template>
 
-<style scoped>
+<style>
 /*SENDBOX STYLES */
 
 .sendbox {
@@ -301,4 +317,5 @@ export default {
     position: absolute;
     bottom: 1em;
     right: 1em;
-}</style>
+}
+</style>

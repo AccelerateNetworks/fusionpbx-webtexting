@@ -2,6 +2,7 @@ import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Mess
 import { CPIM } from './CPIM';
 import { state, emitter, MessageData, addMessage } from './global';
 import moment from 'moment';
+import { compileScript } from 'vue/compiler-sfc';
 
 // nginx timeout is 300 seconds. in testing we can set this to 300 seconds too
 // and it will renew a few seconds earlier, but I don't really want to risk it.
@@ -10,6 +11,40 @@ import moment from 'moment';
 const registrationIntervalSeconds = 270;
 
 let backoff = 0;
+
+function calculatePlainThreadID(message:Message, direction:string, originalTo: string, messageFromUser: string){
+    console.log(`calculatePlainThreadID: ${message}`)
+    console.log(message);
+
+    switch(direction){
+        case "incoming":{
+            console.log(`incoming message from ${messageFromUser} to ${originalTo}`)
+            return messageFromUser;
+        }
+
+        case"outgoing":{
+            console.log(`outgoing message to ${originalTo} from ${messageFromUser}.`)
+            return message.to;
+        }
+    }message.request.from.uri.user
+
+    
+    return'do not add';
+}
+
+function calculateCPIMThreadID(cpim:CPIM, direction:string, originalTo: string, messageFromUser: string){    
+    console.log(`calculateCPIMThreadID ${cpim}`);
+    if(cpim.getHeader("group-uuid")) {
+        console.log("message is for a group");
+        //return cpim.getHeader("group-uuid")
+    }
+    else if ((originalTo || messageFromUser) ) {
+        console.log(`adding message to conversation between ${originalTo} and ${messageFromUser}.`)
+                             //so addMessage it to the correct thread
+        //return;
+    }
+    return 'do not add';
+}
 
 function reconnect(userAgent: UserAgent) {
     state.connected = false;
@@ -59,32 +94,28 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             // },
             onMessage: async (message: Message) => {
                 console.log("[MESSAGE]", message);
+                console.log(`own number: ${ownNumber}`)
 
                 let direction = 'incoming';
                 let originalTo = message.request.getHeader("X-Original-To");
+                console.log(`Message requsetfrom ${message.request.from.uri.user}`)
                 if (message.request.from.uri.user == ownNumber) {
                     console.log("our own message mirrored back to us: ", message.request);
-                    direction = 'outgoing';
+                    direction = 'outgoing'; 
                 }
-
+                const messageFromUser = message.request.from.uri.user;
+                //I think we can rewrite this in a way that just adds the message to the correct destination 
+                // and ignores the conditional ignore situation all together if we implement our Record<threadID, Array<MessageData>> correctly
+                //TL;DR we need a determineThreadID function
                 switch (message.request.getHeader("Content-Type")) {
                     case "text/plain":
-                        if (!remote_number) {
-                            // text/plain messages cannot be sent to groups, they are always MMSs
-                            console.log("skipping non-group message");
-                            return;
-                        }
 
-                        if ((originalTo || message.request.from.uri.user) != remote_number) {
-                            console.log("message not from current thread: ", originalTo || message.request.from.uri.user, "!=", remote_number)
-                            return;
-                        }
-
-                        addMessage({
+                        const plainThreadID = calculatePlainThreadID(message, direction, originalTo, messageFromUser);
+                        addMessage(plainThreadID , {
                             direction: direction,
                             contentType: message.request.getHeader("Content-Type"),
                             timestamp: moment(),
-                            from: message.request.from.uri.user,
+                            from: messageFromUser,
                             to: originalTo,
                             body: message.request.body,
                             id: message.request.getHeader("x-message-id"),
@@ -95,25 +126,15 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                         let cpim = CPIM.fromString(message.request.body);
                         console.log("Received CPIM ", cpim);
 
-                        if (group) {
-                            if(cpim.getHeader("group-uuid") != group) {
-                                console.log("message is not for this group");
-                                return
-                            }
-                        } else if (cpim.getHeader("group-uuid")) {
-                            console.log("message is for a group, current thread is not a group")
-                            return;
-                        } else if ((originalTo || message.request.from.uri.user) != remote_number) {
-                            console.log("message not from current thread: ", originalTo || message.request.from.uri.user, "!=", remote_number)
-                            return;
-                        }
 
                         console.log("adding new message to the thread from CPIM");
-                        addMessage({
+                        
+                        const cpimThreadID = calculateCPIMThreadID(cpim, direction, originalTo, messageFromUser);
+                        addMessage(cpimThreadID ,{
                             direction: direction,
                             contentType: message.request.getHeader("Content-Type"),
                             timestamp: moment(),
-                            from: message.request.from.uri.user,
+                            from: messageFromUser,
                             to: message.request.to.uri.user,
                             cpim: cpim,
                             id: message.request.getHeader("x-message-id"),
@@ -204,7 +225,9 @@ function RunSIPConnection(username: string, password: string, server: string, ow
 
         message.timestamp = moment();
         const m = message;
-        addMessage(m);
+        //if plain/text use to number as key
+        //if it's cpim 
+        addMessage(message.to,m);
 
         if(message.cpim) {
             message.body = message.cpim.serialize();
@@ -212,12 +235,16 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         }
 
         const remoteURI = new URI('sip', message.to || message.from, server);
+        console.log(remoteURI)
         let options: MessagerOptions = {extraHeaders: []};
         if(message.id) {
+            console.log(message.id)
             options.extraHeaders.push("X-Message-ID: " + message.id);
         }
         const messager = new Messager(userAgent, remoteURI, message.body, message.contentType, options);
-
+        console.log(`Messager: `);
+        console.log(messager);
+        console.log(userAgent)
         emitter.emit('scroll-to-bottom');
 
         await messager.message();

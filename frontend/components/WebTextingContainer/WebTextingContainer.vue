@@ -1,8 +1,10 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
 import ThreadList from '../ThreadList/ThreadList.vue'
-import { useRoute } from 'vue-router';
+import ConvoPlaceholder from '../ConvoPlaceholder.vue';
+import { RouterView } from 'vue-router';
 import { MessageData } from '../../lib/global';
+
 
 export default {
     //     data() {    },
@@ -30,150 +32,34 @@ export default {
     //             type: Array<String>,
     //         }
     //     },
+    name:'WebTextingContainer',
+    props:{
+        ownNumber: String,
+        username:String,
+        threads: Array<Object>,
+        threadPreviews:Array<Object>
+    },
     components: { Conversation, ThreadList },
+    
 }
 </script>
 
 <!-- This container should default to threadlist on the left and blank space on the right.
 The blank space should notify the user that they can select a thread to display that thread in the threadContainer -->
 <template>
-    <Router-View>
+    <RouterView>
+
 
     <div id="WEB_TEXT_ROOT">
         <link type="text/css" href="../../../js/style.css">
-        <ThreadList username='Steve'/>
-        <!-- <div class="threadlist_container"> 
-                    <div class='action_bar' id='action_bar'>
-                        <div class='heading'><b>WebTexting</b>  this.props.username  </div>
-                        <div class='actions'>
-                        </div>
-                        <div style='clear: both;'></div>
-                    </div>
-                    <table class='table'> -->
-        <!-- <ThreadPreview  v-for="preview in this.threads" /> -->
-        <!-- <tbody><tr><td><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161"><span class="thread-name">12063801161</span><br><span class="thread-last-message">Test </span><span class="timestamp" data-timestamp="2023-09-13 21:39:05.45867">9 days ago</span></a></td></tr>
-                            <tr><td><a href="thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310"><span class="thread-name">dan ryan</span><br><span class="thread-last-message">Hmm</span><span class="timestamp" data-timestamp="2023-09-06 21:57:12.733721">16 days ago</span></a></td></tr>
-                            </tbody>
-                    </table> -->
-        <!-- </div> -->
-        <div id="conversation" data-v-app="">
-            <div class="thread-header">12063801161 <!----> as {{this.$route.query.number ? this.$route.query.number : this.$route.query.extension_uuid}}<!----></div>
-            <div class="thread">
-                <div class="message-container">
-                    <backfill backfillavailable="false"></backfill>
-                    <div><!----></div>
-                    <div class="message-wrapper">
-                        <div class="author incoming">12063801161</div>
-                        <div class="message incoming">
-                            <p class="message-body">Test message </p><!----><!---->
-                            <span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Scroll bar test requires more messages sorry for the spam</p>
-                            <!----><!---->
-                            <span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!---->
-                            <span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!---->
-                            <span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!----><span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!----><span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!----><span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!----><span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!----><span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!----><span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!----><span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Spam</p><!----><!----><span class="ts">14 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Again thanks for understanding </p><!----><!----><span class="ts">14
-                                days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Testing </p><!----><!----><span class="ts">9 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">
-                        <div class="author incoming"></div>
-                        <div class="message incoming">
-                            <p class="message-body">Test </p><!----><!----><span class="ts">9 days ago</span>
-                        </div>
-                    </div>
-                    <div class="message-wrapper">&nbsp;</div>
-                </div>
-                <div class="attachment-previews"></div>
-                <div class="sendbox"><textarea maxlength="160" class="textentry" autofocus="true"></textarea><label
-                        for="attachment-upload" class="btn btn-attach"><span
-                            class="fas fa-paperclip fa-fw"></span></label><input type="file" id="attachment-upload"
-                        multiple="true" style="display: none;"><button class="btn btn-send" disabled="false"><span
-                            class="fas fa-paper-plane fa-fw"></span></button></div>
-                <div class="char-counter-box">
-                    <div class="char-counter-display">0 / 160</div>
-                </div>
-                <div class="statusbox">Registered - Sending as 12068589311</div>
-            </div>
-        </div>
+        <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads" :threadPreviews="this.$props.threadPreviews">
+        </RouterView>
+        
+    <suspense>
+        <RouterView name="rightSide" :extension_uuid="this.$route.query.extension_uuid" :remoteNumber="this.$route.query.number" :ownNumber="this.$props.ownNumber" /> 
+    </suspense>
     </div>
-    </Router-View>
+</RouterView>
 </template>
 
 <style scoped>
@@ -293,11 +179,13 @@ The blank space should notify the user that they can select a thread to display 
     float: right;
     border-radius: 1em 1em 0 1em;
     background-color: #3178B1;
+    border-color: #3178b1;
     color: #fff;
 }
 
 .message.outgoing {
     border-radius: 1em 1em 1em 0;
+    border-color: #bb6025;
     background-color: #BB6025;
     color: #fff;
 }
