@@ -26,7 +26,7 @@ function calculatePlainThreadID(message:Message, direction:string, originalTo: s
             console.log(`outgoing message to ${originalTo} from ${messageFromUser}.`)
             return message.to;
         }
-    }message.request.from.uri.user
+    }
 
     
     return'do not add';
@@ -36,12 +36,12 @@ function calculateCPIMThreadID(cpim:CPIM, direction:string, originalTo: string, 
     console.log(`calculateCPIMThreadID ${cpim}`);
     if(cpim.getHeader("group-uuid")) {
         console.log("message is for a group");
-        //return cpim.getHeader("group-uuid")
+        return cpim.getHeader("group-uuid")
     }
     else if ((originalTo || messageFromUser) ) {
         console.log(`adding message to conversation between ${originalTo} and ${messageFromUser}.`)
                              //so addMessage it to the correct thread
-        //return;
+        return messageFromUser;
     }
     return 'do not add';
 }
@@ -107,6 +107,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 //I think we can rewrite this in a way that just adds the message to the correct destination 
                 // and ignores the conditional ignore situation all together if we implement our Record<threadID, Array<MessageData>> correctly
                 //TL;DR we need a determineThreadID function
+                console.log(message.request.getHeader("Content-Type"));
                 switch (message.request.getHeader("Content-Type")) {
                     case "text/plain":
 

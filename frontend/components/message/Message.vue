@@ -148,6 +148,8 @@ export default {
 .message-body-inline-media {
     max-width: 100%;
     border-radius: 0.5em;
+    max-height: 300px;
+    background-color:white; /* This is for png transparency so the blue / orange message bubble doesn't ruin anything*/
 }
 
 /* MESSAGE STYLES */

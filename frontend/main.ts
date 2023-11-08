@@ -82,7 +82,7 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
     RunSIPConnection(opts.username, opts.password, opts.server, opts.ownNumber, opts.remoteNumber, opts.groupUUID);
 
     emitter.on('backfill-requested', (key:string) => {
-        console.log(`backfill key ${key}`)
+        console.log(`main.ts backfill key ${key}`)
         //key is either a uuid or phone number uuid length is at least 16
         if(key.length<12){
             backfillMessages(opts.extensionUUID, key, opts.groupUUID);

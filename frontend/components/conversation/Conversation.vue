@@ -26,11 +26,7 @@ type MessageQuery={
     group?: string,
     older_than?: string,
 }
-//i think this is the offending function
-const  messagesFromState=(key:string) =>{
-    //console.log(`message from state ${key}`);
-    return state.conversations[key];
-}
+
 const  getMessages = async (queryParams: MessageQuery) => {
     if(fetchingActive){
         //console.log("skipping duplicate message fetches");
@@ -43,9 +39,11 @@ const  getMessages = async (queryParams: MessageQuery) => {
         }
         if(queryParams.number){
             params.number = queryParams.number
+            //emitter.emit('backfill-requested',params.number);
         }
         if(queryParams.group){
             params.group = queryParams.group
+            //emitter.emit('backfill-requested',params.group);
         }
         let key ='';
         //console.log(params);
@@ -74,7 +72,7 @@ const  getMessages = async (queryParams: MessageQuery) => {
                     key = m.from_number
                 }
             }
-            emitter.emit('backfill-requested',key);
+            
         }
         
         fetchingActive = false;
@@ -118,10 +116,10 @@ const  getMessages = async (queryParams: MessageQuery) => {
                 number: props.remoteNumber });
         //const messages =  await getMessages(initialQueryParams);
         if(props.remoteNumber){
-            emitter.emit('backfill-requested',props.remoteNumber);
+            //emitter.emit('backfill-requested',props.remoteNumber);
         }
         else if(props.groupUUID){
-            emitter.emit('backfill-requested',props.groupUUID);
+            //emitter.emit('backfill-requested',props.groupUUID);
         }
         
         //console.log(`setup ${messages}`);
@@ -183,7 +181,7 @@ const  getMessages = async (queryParams: MessageQuery) => {
             }
 
             if (this.topVisible && this.bottomVisible) {
-                //console.log('top and bottom of conversation visible, attempting to backfill immediately');
+                console.log('top and bottom of conversation visible, attempting to backfill immediately');
                 emitter.emit('backfill-requested',this.conversationKey);
                 return;
             }
@@ -191,6 +189,7 @@ const  getMessages = async (queryParams: MessageQuery) => {
             //console.log('will backfill if top is still visible in 1 second');
             setTimeout(() => {
                 if (this.topVisible) {
+                    console.log("top still visible backfill")
                     emitter.emit('backfill-requested',this.conversationKey);
                 }
             }, 5000);
@@ -227,7 +226,7 @@ const  getMessages = async (queryParams: MessageQuery) => {
                     this.messages = this.state.conversations[rN];
                 }
                 this.conversationKey=rN;
-                emitter.emit("backfill-requested",rN)
+                //emitter.emit("backfill-requested",rN)
                 //console.log(observedChangeQueryParams)
                 
             }
@@ -286,6 +285,7 @@ const  getMessages = async (queryParams: MessageQuery) => {
                     case this.$refs.top:
                         this.topVisible = e.isIntersecting;
                         if (e.isIntersecting && this.backfillAvailable) {
+                            console.log("isIntersecting and backfillavailable");
                             emitter.emit('backfill-requested',this.conversationKey);
                         }
                         //console.log("top is", e.isIntersecting ? "visible" : "hidden");
