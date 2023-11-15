@@ -169,7 +169,7 @@ export default {
     color: gray;
 }*/
 
-.td_preview:hover {
+.tr_replace:hover {
     background-color: #a1cff7;
 }
 
@@ -184,10 +184,10 @@ export default {
     grid-template-columns: 0 auto auto;
 }
 
-.thread-preview-container:hover span{
+.tr_replace:hover span{
     color:black;
 }
-.thread-preview-container.activeThread:hover span{
+.tr_replace.activeThread:hover span{
     color:white;
 }
 
@@ -217,7 +217,7 @@ export default {
 .activeThread{
     color:white;
 }
-.td_preview.activeThread:hover {
+.tr_replace.activeThread:hover {
     background-color: #3178B1;
 }
 .tr_replace.activeThread{
@@ -225,6 +225,14 @@ export default {
 }
 .tr_replace.activeThread:hover{
     background-color:#3178B1;
+}
+.tr_replace:first-child{
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+.tr_replace:last-child{
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
 }
 
 </style>

@@ -87,11 +87,14 @@ export default{
 }
 
 
+
 .threadlist_container{
     height: 80vh;
     grid-column-start: 1;
     grid-column-end: 1;
     padding-right: 0.25rem;
+    border-radius: 0.5rem;
+    border-color: none;
 }
 
 
