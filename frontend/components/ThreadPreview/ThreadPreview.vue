@@ -35,7 +35,7 @@ export type ThreadPreviewInterface = {
 }
 
 export default {
-    name:'ThreadPreview',
+    name: 'ThreadPreview',
     props: {
         displayName: {
             type: String,
@@ -64,25 +64,167 @@ export default {
         },
         groupMembers: {
             type: Array<String>,
+        },
+        activeThread:{
+            type:String||Boolean, 
+            required:true,
         }
 
     },
     components: { Conversation },
+    computed:{
+        currentThread(){
+            if(this.remoteNumber == this.activeThread){
+                console.log("change my background");
+                return this.remoteNumber;
+            }
+            else if(this.groupUUID == this.activeThread){
+                console.log("change my background");
+                return this.groupUUID;
+            }
+            return false;
+        }
+    },
+    emits:{
+        'thread-change':String,
+    },
+    methods:{
+        routerLinkClickHandler(event){
+            if(this.remoteNumber){
+                console.log(event);
+                this.$emit("thread-change", this.remoteNumber)
+            }
+            else if(this.groupUUID){
+                console.log(event);
+
+                this.$emit("thread-change", this.groupUUID)
+
+            }
+        }
+    }
 }
 </script>
 
 <template>
-    <div class='tr_replace'>
-        <div class='td_preview'>
-            <router-link :to="this.link">
-                <span class='thread-name'>{{ this.displayName }}</span><br />
-                <span class='thread-last-message'>{{ this.bodyPreview }}</span><br/>
-                <span class='timestamp' :data-timestamp="this.timestamp"></span>
+    <div class='tr_replace' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
+        <div class='td_preview' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
+            <router-link :to="this.link" class="thread-link" @click="routerLinkClickHandler">
+                <div class="thread-preview-container" v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
+                     <!-- <span class="dot"></span> -->
+                    <span class='thread-name' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{ this.displayName }}</span> 
+                    <span class='timestamp' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'"
+                        :data-timestamp="this.timestamp"></span>
+
+                    <span class='thread-last-message' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'" >{{ this.bodyPreview }}</span>
+                </div>
+
+
             </router-link>
         </div>
     </div>
 </template>
 
 <style>
+
+.thread-name {
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row: 1;
+    justify-self: start;
+    color:black;
+}
+
+.timestamp {
+    grid-column-start: 3;
+    grid-column-end: 3;
+    grid-row: 1;
+    justify-self: end;
+}
+
+.thread-last-message {
+    color: darkgray;
+    grid-row-start: 2;
+    grid-column: 2;
+    justify-self: start;
+}
+
+.timestamp.activeThread {
+    color:white;
+}
+.thread-name.activeThread{
+    color:white;
+}
+.thread-last-message.activeThread {
+    color: white;
+}
+/*
+.timestamp.activeThread:hover {
+    color:gray;
+}
+.thread-name.activeThread:hover{
+    color:gray;
+}
+
+.thread-last-message.activeThread:hover {
+    color: gray;
+}*/
+
+.td_preview:hover {
+    background-color: #a1cff7;
+}
+
+
+.thread-preview-container {
+    border-radius: 1em;
+    padding: 0.5625em;
+    /* margin-bottom: 0.5em;
+    min-height: calc(50px + 1em); */
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 0 auto auto;
+}
+
+.thread-preview-container:hover span{
+    color:black;
+}
+.thread-preview-container.activeThread:hover span{
+    color:white;
+}
+
+.text-center {
+    margin: 0;
+    position: relative;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
+.dot {
+    grid-column: 1;
+    grid-row-start: 1;
+    grid-row-end: 3;
+    height: 50px;
+    width: 50px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    margin: 0;
+    position: relative;
+    top: 50%;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+.activeThread{
+    color:white;
+}
+.td_preview.activeThread:hover {
+    background-color: #3178B1;
+}
+.tr_replace.activeThread{
+    background-color:#5f9fd3;
+}
+.tr_replace.activeThread:hover{
+    background-color:#3178B1;
+}
 
 </style>

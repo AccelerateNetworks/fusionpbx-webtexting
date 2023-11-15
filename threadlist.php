@@ -199,6 +199,7 @@ $frontendOpts['ownNumber'] = $ownNumber;
 require_once "footer.php";
 ?>
 <link rel="stylesheet" href="js/style.css" />
+<link rel="stylesheet" href="src/footer.css"/>
 <script type="text/javascript">
 WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); ?>);
 </script>

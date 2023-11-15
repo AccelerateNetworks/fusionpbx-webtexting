@@ -118,15 +118,15 @@ export default {
 
 .message.incoming {
     float: left;
-    border-radius: 1em 1em 0 1em;
+    border-radius: 1em 1em 1em 0;
     background-color: #BB6025;
     color: #fff;
 }
 
 .message.outgoing{
     float:right;
-    border-radius: 1em 1em 1em 0;
-    background-color: #3178B1;
+    background-color: #3178B1;    
+    border-radius: 1em 1em 0 1em;
     color: #fff;
 }
 

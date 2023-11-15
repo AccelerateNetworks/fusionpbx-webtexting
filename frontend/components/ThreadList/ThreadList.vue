@@ -1,7 +1,5 @@
 <script lang="ts" >
-import { MessageData, emitter, state, } from '../../lib/global';
 import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
-import { RouterLink } from 'vue-router';
 
 // type ThreadListInterface = {
     
@@ -38,7 +36,16 @@ export default{
         threads: Array<Object>,
             threadPreviews: Array<ThreadPreviewInterface>
     },
-    components:{ThreadPreview}
+    components:{ThreadPreview},
+    data(){
+        return {activeThread: false}
+    },
+    methods:{
+        recieveEmit(activeConversation){
+            // alert(`active conversation: ${activeConversation}`);
+            this.activeThread = activeConversation;
+        }
+    }
 }
 
 
@@ -64,24 +71,16 @@ export default{
     </form>
     */
 </script>
-
+<template>
+    <div class="threadlist_container">
+        <div class='table'>
+            <div class="preview_list_container">
+                <ThreadPreview @thread-change="recieveEmit" v-for="preview in threadPreviews"   :key="preview.toString()" v-bind="preview" :activeThread="this.activeThread"/>
+            </div>
+        </div>
+    </div>
+</template>
 <style>
-
-
-.td_preview:active{
-    background-color:#3178B1;
-    color:white;
-}
-.td_preview:hover{
-    background-color: aliceblue;
-}
-.td_preview{
-    border: solid #3178b1;
-    border-radius: 1em;
-    padding: 0.5em;
-    margin-bottom: 0.5em;
-    min-height: calc(50px + 1em);
-}
 .preview_list_container{
     direction:ltr;
     padding-left:0.25rem;
@@ -94,18 +93,9 @@ export default{
     grid-column-end: 1;
     padding-right: 0.25rem;
 }
-.timestamp {
-    color: #999;
-    font-size: 8pt;
-    padding-left: 0.5em;
-}
-.thread-name {
-    font-size: 12pt;
-    color: #000;
-}
-.thread-last-message {
-    color: #000;
-}
+
+
+
 
 .table {
     /*border-spacing: 1em; */
@@ -126,23 +116,3 @@ export default{
 }
 
 </style>
-
-
-
-<template>
-    
-    <div class="threadlist_container">
-        <div class='action_bar' id='action_bar'>
-            <div class='heading'><b>WebTexting</b> {{displayName}}  </div>
-            <div class='actions'>
-            </div>
-            <div style='clear: both;'></div>
-        </div>
-        <div class='table'>
-            <div class="preview_list_container">
-                <ThreadPreview v-for="preview in threadPreviews"   :key="preview.toString()" v-bind="preview"/> 
-            </div>
-            </div>
-    </div>
-    
-</template>

@@ -28,7 +28,7 @@ function calculatePlainThreadID(message:Message, direction:string, originalTo: s
         }
     }
 
-    
+    console.log("do not add")
     return'do not add';
 }
 
@@ -43,6 +43,7 @@ function calculateCPIMThreadID(cpim:CPIM, direction:string, originalTo: string, 
                              //so addMessage it to the correct thread
         return messageFromUser;
     }
+    console.log("do not add")
     return 'do not add';
 }
 

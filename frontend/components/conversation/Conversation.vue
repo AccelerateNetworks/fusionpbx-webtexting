@@ -209,6 +209,8 @@ const  getMessages = async (queryParams: MessageQuery) => {
         remoteNumber: async function (rN) {
             this.title= rN;
             this.messages=[];
+
+            this.backfillAvailable=true;
             //console.log(rN);
             //console.log("remote number changed changing this.messages")
             if(this.remoteNumber) {
@@ -220,13 +222,13 @@ const  getMessages = async (queryParams: MessageQuery) => {
                     this.messages = this.state.conversations[rN];
                 }
                 else{
-                    const observedRemoteNumberChangeQueryParams= <MessageQuery>({ extension_uuid: this.$route.query.extension_uuid,
-                number: rN });
+                //     const observedRemoteNumberChangeQueryParams= <MessageQuery>({ extension_uuid: this.$route.query.extension_uuid,
+                // number: rN });
                     //this.state.conversations[rN] = await this.fetchInitialMessages();
                     this.messages = this.state.conversations[rN];
                 }
                 this.conversationKey=rN;
-                //emitter.emit("backfill-requested",rN)
+                emitter.emit("backfill-requested",rN)
                 //console.log(observedChangeQueryParams)
                 
             }
@@ -238,13 +240,15 @@ const  getMessages = async (queryParams: MessageQuery) => {
         groupUUID: function(gUUID) {
             this.messages =[];
             if(this.groupUUID){
-                const observedGroupUUIDChangeQueryParams= <MessageQuery>({ extension_uuid: this.$route.query.extension_uuid,
-                group: gUUID });
+                // const observedGroupUUIDChangeQueryParams= <MessageQuery>({ extension_uuid: this.$route.query.extension_uuid,
+                // group: gUUID });
                 //console.log(observedChangeQueryParams)
                 this.messages = this.state.conversations[gUUID];
                 this.title= gUUID;
             }
             this.conversationKey=gUUID;
+            this.backfillAvailable=true;
+            emitter.emit("backfill-requested",rN)
         }
     },
     methods: {
@@ -414,25 +418,13 @@ table {
     font-size: 8pt;
     padding-left: 0.5em;
 }
-.thread-name {
-    font-size: 12pt;
-    color: #000;
-}
-.thread-name:active{
-    color:white;
-}
-.thread-last-message {
-    color: #000;
-}
-.thread-last-message:active {
-    color: #fff;
-}
+
 td {
     border: solid #3178b1;
     border-radius: 1em;
-    padding: 0.25em;
+   /* padding: 0.25em;
     margin-bottom: 0.5em;
-    min-height: calc(50px + 1em);
+   min-height: calc(50px + 1em);*/
 }
 table {
     width: 100%;
