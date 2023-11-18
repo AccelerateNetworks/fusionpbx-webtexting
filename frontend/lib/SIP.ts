@@ -13,37 +13,37 @@ const registrationIntervalSeconds = 270;
 let backoff = 0;
 
 function calculatePlainThreadID(message:Message, direction:string, originalTo: string, messageFromUser: string){
-    console.log(`calculatePlainThreadID: ${message}`)
-    console.log(message);
+    //console.log(`calculatePlainThreadID: ${message}`)
+    //console.log(message);
 
     switch(direction){
         case "incoming":{
-            console.log(`incoming message from ${messageFromUser} to ${originalTo}`)
+            //console.log(`incoming message from ${messageFromUser} to ${originalTo}`)
             return messageFromUser;
         }
 
         case"outgoing":{
-            console.log(`outgoing message to ${originalTo} from ${messageFromUser}.`)
+            //console.log(`outgoing message to ${originalTo} from ${messageFromUser}.`)
             return message.to;
         }
     }
 
-    console.log("do not add")
+    //console.log("do not add")
     return'do not add';
 }
 
 function calculateCPIMThreadID(cpim:CPIM, direction:string, originalTo: string, messageFromUser: string){    
-    console.log(`calculateCPIMThreadID ${cpim}`);
+    //console.log(`calculateCPIMThreadID ${cpim}`);
     if(cpim.getHeader("group-uuid")) {
-        console.log("message is for a group");
+        //console.log("message is for a group");
         return cpim.getHeader("group-uuid")
     }
     else if ((originalTo || messageFromUser) ) {
-        console.log(`adding message to conversation between ${originalTo} and ${messageFromUser}.`)
+        //console.log(`adding message to conversation between ${originalTo} and ${messageFromUser}.`)
                              //so addMessage it to the correct thread
         return messageFromUser;
     }
-    console.log("do not add")
+    //console.log("do not add")
     return 'do not add';
 }
 
@@ -94,14 +94,14 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             //     console.log("[NOTIFY]", notify);
             // },
             onMessage: async (message: Message) => {
-                console.log("[MESSAGE]", message);
-                console.log(`own number: ${ownNumber}`)
+                //console.log("[MESSAGE]", message);
+                //console.log(`own number: ${ownNumber}`)
 
                 let direction = 'incoming';
                 let originalTo = message.request.getHeader("X-Original-To");
-                console.log(`Message requsetfrom ${message.request.from.uri.user}`)
+                //console.log(`Message requsetfrom ${message.request.from.uri.user}`)
                 if (message.request.from.uri.user == ownNumber) {
-                    console.log("our own message mirrored back to us: ", message.request);
+                    //console.log("our own message mirrored back to us: ", message.request);
                     direction = 'outgoing'; 
                 }
                 const messageFromUser = message.request.from.uri.user;
@@ -129,9 +129,10 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                         console.log("Received CPIM ", cpim);
 
 
-                        console.log("adding new message to the thread from CPIM");
+                        //console.log("adding new message to the thread from CPIM");
                         
                         const cpimThreadID = calculateCPIMThreadID(cpim, direction, originalTo, messageFromUser);
+                        console.log(`cpim thread id: ${cpimThreadID}`)
                         addMessage(cpimThreadID ,{
                             direction: direction,
                             contentType: message.request.getHeader("Content-Type"),
@@ -144,25 +145,25 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                         break;
 
                     default:
-                        console.log("dropping message with unknown content type ", message.request.getHeader("Content-Type"))
+                        //console.log("dropping message with unknown content type ", message.request.getHeader("Content-Type"))
                 }
             }
         }
     };
 
-    console.log("initializing user agent with options:", uaOpts);
+    //console.log("initializing user agent with options:", uaOpts);
     const userAgent = new UserAgent(uaOpts);
 
     userAgent.transport.onDisconnect = (err?: Error) => {
         if(err) {
-            console.log("connectivity error:", err)
+            //console.log("connectivity error:", err)
         }
     }
 
     let registerer: Registerer = null;
 
     userAgent.transport.stateChange.addListener(async (data: TransportState) => {
-        console.log("transport state changeed to", data, "registerer=", registerer);
+        //console.log("transport state changeed to", data, "registerer=", registerer);
         switch(data) {
             case TransportState.Connected:
                 if(registerer != null) {
@@ -172,14 +173,14 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 registerer.stateChange.addListener(async (data: RegistererState) => {
                     state.connected = data == RegistererState.Registered;
                     state.connectivityStatus = data;
-                    console.log("registerer state changed to", data, " connected?", state.connected);
+                    //console.log("registerer state changed to", data, " connected?", state.connected);
                     switch(data) {
                         case RegistererState.Registered:
                             backoff = 0; // reset reconnect backoff timer
                             break;
                         case RegistererState.Unregistered:
                             let registerRequest = await registerer.register();
-                            console.log("sent register request:", registerRequest);
+                            //console.log("sent register request:", registerRequest);
                             break;
                     }
                 });
@@ -223,12 +224,13 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     userAgent.start();
 
     emitter.on('outbound-message', async (message: MessageData) => {
-        console.log("outbound message:", message);
+        //console.log("outbound message:", message);
 
         message.timestamp = moment();
         const m = message;
         //if plain/text use to number as key
         //if it's cpim 
+        //this is a reason for group messages being giga wierdo mode imo
         addMessage(message.to,m);
 
         if(message.cpim) {
@@ -237,15 +239,15 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         }
 
         const remoteURI = new URI('sip', message.to || message.from, server);
-        console.log(remoteURI)
+        //console.log(remoteURI)
         let options: MessagerOptions = {extraHeaders: []};
         if(message.id) {
-            console.log(message.id)
+            //console.log(message.id)
             options.extraHeaders.push("X-Message-ID: " + message.id);
         }
         const messager = new Messager(userAgent, remoteURI, message.body, message.contentType, options);
-        console.log(`Messager: `);
-        console.log(messager);
+        //console.log(`Messager: `);
+        //console.log(messager);
         console.log(userAgent)
         emitter.emit('scroll-to-bottom');
 

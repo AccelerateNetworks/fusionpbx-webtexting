@@ -24,15 +24,15 @@ type backfillQuery = {
     older_than?: string,
 }
 
-let active = false;
+let fetching = false;
 
 export async function backfillMessages(extensionUUID: string, remoteNumber?: string, group?: string) {
-    if (active) {
+    if (fetching) {
         console.log("skipping duplicate backfill request");
         return;
     }
 
-    active = true;
+    fetching = true;
     try {
         let params: backfillQuery = { extension_uuid: extensionUUID };
         let key = remoteNumber ? remoteNumber : group;
@@ -43,8 +43,8 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         if (group) {
             params.group = group;
         }
-        //console.log(`backfilling conversations array, ${state.conversations}`)
-        //console.log(`backfill key: ${key}`)
+        console.log(`backfilling conversations array, ${state.conversations}`)
+        console.log(`backfill key: ${key}`)
         //if state.conversations[key] exists we have already backfilled at least once
         const stateMessages = state.conversations[key];
         if(stateMessages){
@@ -84,7 +84,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                     else{
                         key = remoteNumber;
                     }
-                    console.log(`cpim ${m}`);
+                    //console.log(`cpim ${m}`);
                     insertMessageInHistory(key,{
                         direction: m.direction,
                         contentType: m.content_type,
@@ -98,15 +98,15 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
             }
         }
 
-        active = false;
-        console.log('backfill request complete');
+        fetching = false;
+        //console.log('backfill request complete');
 
         if (response.messages.length == 0) {
             emitter.emit('conversation-fully-backfilled');
         }
         emitter.emit('backfill-complete');
     } catch (e) {
-        active = false;
+        fetching = false;
         console.log('backfill error:', e);
     }
 }
@@ -132,5 +132,5 @@ export function insertMessageInHistory(key:string, message: MessageData) {
     }
     // no existing message matched, append to end    
     state.conversations[key].push(message);
-    console.log("after:", state.conversations[key]);
+    //console.log("after:", state.conversations[key]);
 }

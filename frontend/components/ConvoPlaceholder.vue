@@ -23,9 +23,9 @@ height: 83vh;
 }
 
 @media screen and (width <=700px){
-    #conversation{ 
+ /*   #conversation{ 
         display: none;
     }
-
+*/
 }
 </style>

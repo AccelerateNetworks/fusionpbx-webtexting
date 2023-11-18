@@ -34,6 +34,15 @@ export type ThreadPreviewInterface = {
     }
 }
 
+const updateActiveComponent = (event) => {
+            var ele = document.querySelector('.active');
+            ele.classList.remove('active');
+            var threadie = document.getElementById("THREAD");
+            console.log(ele);
+            console.log(`thread : ${threadie}`);
+            threadie.classList.add('active');
+        }
+
 export default {
     name: 'ThreadPreview',
     props: {
@@ -65,42 +74,42 @@ export default {
         groupMembers: {
             type: Array<String>,
         },
-        activeThread:{
-            type:String||Boolean, 
-            required:true,
+        activeThread: {
+            type: String || Boolean,
+            required: true,
         }
-
     },
     components: { Conversation },
-    computed:{
-        currentThread(){
-            if(this.remoteNumber == this.activeThread){
-                console.log("change my background");
+    computed: {
+        currentThread() {
+            if (this.remoteNumber == this.activeThread) {
                 return this.remoteNumber;
             }
-            else if(this.groupUUID == this.activeThread){
-                console.log("change my background");
+            else if (this.groupUUID == this.activeThread) {
                 return this.groupUUID;
             }
             return false;
         }
     },
-    emits:{
-        'thread-change':String,
+    emits: {
+        'thread-change': String,
     },
-    methods:{
-        routerLinkClickHandler(event){
-            if(this.remoteNumber){
-                console.log(event);
+    methods: {
+        routerLinkClickHandler(event) {
+            if (this.remoteNumber) {
                 this.$emit("thread-change", this.remoteNumber)
+                console.log("Hey! you clicked me!")
+                updateActiveComponent(event)
+                
             }
-            else if(this.groupUUID){
-                console.log(event);
-
+            else if (this.groupUUID) {
                 this.$emit("thread-change", this.groupUUID)
+                console.log("Hey! you clicked me!")
+                updateActiveComponent(event)
+
 
             }
-        }
+        },
     }
 }
 </script>
@@ -110,12 +119,14 @@ export default {
         <div class='td_preview' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
             <router-link :to="this.link" class="thread-link" @click="routerLinkClickHandler">
                 <div class="thread-preview-container" v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
-                     <!-- <span class="dot"></span> -->
-                    <span class='thread-name' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{ this.displayName }}</span> 
+                    <!-- <span class="dot"></span> -->
+                    <span class='thread-name' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{
+                        this.displayName }}</span>
                     <span class='timestamp' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'"
                         :data-timestamp="this.timestamp"></span>
 
-                    <span class='thread-last-message' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'" >{{ this.bodyPreview }}</span>
+                    <span class='thread-last-message' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{
+                        this.bodyPreview }}</span>
                 </div>
 
 
@@ -125,13 +136,12 @@ export default {
 </template>
 
 <style>
-
 .thread-name {
     grid-column-start: 2;
     grid-column-end: 2;
     grid-row: 1;
     justify-self: start;
-    color:black;
+    color: black;
 }
 
 .timestamp {
@@ -149,14 +159,17 @@ export default {
 }
 
 .timestamp.activeThread {
-    color:white;
+    color: white;
 }
-.thread-name.activeThread{
-    color:white;
+
+.thread-name.activeThread {
+    color: white;
 }
+
 .thread-last-message.activeThread {
     color: white;
 }
+
 /*
 .timestamp.activeThread:hover {
     color:gray;
@@ -170,7 +183,7 @@ export default {
 }*/
 
 .tr_replace:hover {
-    background-color: #a1cff7;
+    background-color: #aaaaaa;
 }
 
 
@@ -184,11 +197,12 @@ export default {
     grid-template-columns: 0 auto auto;
 }
 
-.tr_replace:hover span{
-    color:black;
+.tr_replace:hover span {
+    color: black;
 }
-.tr_replace.activeThread:hover span{
-    color:white;
+
+.tr_replace.activeThread:hover span {
+    color: white;
 }
 
 .text-center {
@@ -214,25 +228,30 @@ export default {
     -ms-transform: translateY(-50%);
     transform: translateY(-50%);
 }
-.activeThread{
-    color:white;
+
+.activeThread {
+    color: white;
 }
+
 .tr_replace.activeThread:hover {
-    background-color: #3178B1;
+    background-color: #aaaaaa;
 }
-.tr_replace.activeThread{
-    background-color:#5f9fd3;
+
+.tr_replace.activeThread {
+    background-color: #5f9fd3;
 }
-.tr_replace.activeThread:hover{
-    background-color:#3178B1;
+
+.tr_replace.activeThread:hover {
+    background-color: #aaaaaa;
 }
-.tr_replace:first-child{
+
+.tr_replace:first-child {
     border-top-left-radius: 0.5rem;
     border-top-right-radius: 0.5rem;
 }
-.tr_replace:last-child{
+
+.tr_replace:last-child {
     border-bottom-left-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
 }
-
 </style>

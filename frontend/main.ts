@@ -85,10 +85,10 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
         console.log(`main.ts backfill key ${key}`)
         //key is either a uuid or phone number uuid length is at least 16
         if(key.length<12){
-            backfillMessages(opts.extensionUUID, key, opts.groupUUID);
+            backfillMessages(opts.extensionUUID, null, key);
         }
         else if(key.length>12){
-            backfillMessages(opts.extensionUUID, opts.remoteNumber, key);
+            backfillMessages(opts.extensionUUID, key, null);
         }
         
     })

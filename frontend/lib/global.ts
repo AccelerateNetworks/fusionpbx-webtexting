@@ -32,7 +32,7 @@ const emitter = mitt();
 
 //reconfiguring to work with messages as a record of keys / adding message IDs
 function addMessage(key:string, message: MessageData) {
-    //console.log("trying to add message");
+    console.log("trying to add message with key: " + key);
     
     if(state.conversations[key]){
         //console.log("conversation found checking messages");
@@ -44,15 +44,15 @@ function addMessage(key:string, message: MessageData) {
             if(messages){
                 for(let m of messages) {
                     if (m.id == message.id) {
-                        //console.log("not re-inserting message", message.id);
+                        console.log("not re-inserting message", message.id);
                         return;
                     }
                 }
-                //console.log("inserting new message", message.id);
+                console.log("inserting new message", message.id);
             }
             
         } else {
-           // console.log("adding message with no ID!", message);       
+            console.log("adding message with no ID!", message);       
         }
         emitter.emit('scroll-to-bottom'); 
         // console.log(`key: ${key}`);

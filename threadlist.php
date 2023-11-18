@@ -226,12 +226,10 @@ WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); 
     #WEB_TEXT_ROOT{
     grid-template-columns:100%;
     grid-template-rows:80vh;
-    height:calc(80vh +2em);
+    height: 85vh;
     }
 
-    .table{
-        height:75vh;
-    }
+
 
 }
 
