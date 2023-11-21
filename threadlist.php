@@ -31,7 +31,7 @@ if (!$destination) {
     die();
 }
 ?>
-<form method='get' action="thread.php" onsubmit="clean_number()">
+<form method='get' action="new-message.php" onsubmit="clean_number()">
 <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
 <div id='modal-new-thread' class='modal-window'>
     <div>
@@ -165,11 +165,12 @@ foreach ($threads as $thread) {
             }
         }
     }
+    //need to put group name in here too lol
     $frontendOpts['server'] = $extension['user_context'];
-$frontendOpts['username'] = $extensionDetails['extension'];
-$frontendOpts['password'] = $extensionDetails['password'];
-$frontendOpts["extensionUUID"] = $extension['extension_uuid'];
-$frontendOpts['ownNumber'] = $ownNumber;
+    $frontendOpts['username'] = $extensionDetails['extension'];
+    $frontendOpts['password'] = $extensionDetails['password'];
+    $frontendOpts["extensionUUID"] = $extension['extension_uuid'];
+    $frontendOpts['ownNumber'] = $ownNumber;
 
     $link = "thread.php?extension_uuid=".$extension['extension_uuid']."&";
     if ($group_uuid != null) {
@@ -182,6 +183,7 @@ $frontendOpts['ownNumber'] = $ownNumber;
     $body_preview = $last_message['content_type'] == "text/plain" ? $last_message['message'] : "[media]";
     $thread_preview_opts[$z]['bodyPreview'] = $body_preview;
     $thread_preview_opts[$z]['ownNumber'] = $ownNumber;
+    $thread_preview_opts[$z]['displayName']= $display_name;
     $z++;
  }
  $frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
@@ -203,6 +205,23 @@ require_once "footer.php";
 <script type="text/javascript">
 WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); ?>);
 </script>
+<form method='post' action='group-rename.php' value="rename-group">
+    <input type="hidden" name="action" value="group_name_change"/>
+      <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
+      <input type="hidden" name="group" value="<?php echo $_GET['group']; ?>" />
+      <div id='modal-rename-group' class='modal-window'>
+        <div>
+            <span title="" class='modal-close' onclick="modal_close(); ">&times</span>
+            <span class='modal-title'>Rename Group</span>
+            <span class='modal-message'>New name: <input type="text" name="name" placeholder="My besties" value="<?php if($group['name']) {echo $group['name'];} ?>" /></span>
+            <span class='modal-actions'>
+                <button type='button' alt='Cancel' title='Cancel' onclick='modal_close();' class='btn btn-default' ><span class='fas fa-times fa-fw'></span><span class='button-label never pad'>Cancel</span></button>
+                <button type='submit' value='Ok' id='btn_ok' alt='ok' title='ok' onclick='modal_close();' class='btn btn-default' style='float: right; margin-left: 15px' ><span class='fas fa-check fa-fw'></span><span class='button-label never pad'>Start</span></button>
+            </span>
+        </div>
+      </div>
+      <input type='hidden' name='key_uuid' id='key_uuid'/>
+    </form>
 
 <style type="text/css">
   /* .container-fluid {

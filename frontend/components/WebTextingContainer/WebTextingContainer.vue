@@ -41,6 +41,25 @@ export default {
         threadPreviews:Array<Object>
     },
     components: { Conversation, ThreadList },
+    beforeUpdate() {
+        console.log(this.props.threadPreviews);
+    },
+    methods:{
+        calculateDisplayName(){
+            if(this.$route.query.group){
+                for(let m in this.$props.threadPreviews){
+                    console.log(`group: ${m}`);
+                }
+            }
+            else{
+                for(let m in this.$props.threadPreviews){
+                    console.log(`contact: ${m}`);
+                }
+            }
+            console.log("display name calculated");
+            return "tested";
+        }
+    }
     
 }
 </script>
@@ -62,7 +81,10 @@ The blank space should notify the user that they can select a thread to display 
         <RouterView name="rightSide" 
             :extension_uuid="this.$route.query.extension_uuid" 
             :remoteNumber="this.$route.query.number" 
-            :ownNumber="this.$props.ownNumber" /> 
+            :groupUUID="this.$route.query.group"
+            :ownNumber="this.$props.ownNumber" 
+            :displayName="this.$props.threadPreviews"
+            v-bind="calculateDisplayName"/> 
     </suspense>
     </div>
 </RouterView>

@@ -46,10 +46,10 @@ export default {
             this.activeThread = activeConversation;
         }
     },
-    beforeUpdate() {
+    afterUpdate() {
         // document.querySelector("#active").removeAttribute('id');
         // document.getElementsByClassName(".threadlist_container")[0].setAttribute('id','active')
-        console.log("now threadlist is active")
+        console.log(this.props)
     },
 }
 

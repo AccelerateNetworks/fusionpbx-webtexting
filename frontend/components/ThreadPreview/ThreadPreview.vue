@@ -35,12 +35,12 @@ export type ThreadPreviewInterface = {
 }
 
 const updateActiveComponent = (event) => {
-            var ele = document.querySelector('.active');
-            ele.classList.remove('active');
-            var threadie = document.getElementById("THREAD");
-            console.log(ele);
-            console.log(`thread : ${threadie}`);
-            threadie.classList.add('active');
+            // var ele = document.querySelector('.active');
+            // ele.classList.remove('active');
+            // var threadie = document.getElementById("THREAD");
+            // console.log(ele);
+            // console.log(`thread : ${threadie}`);
+            // threadie.classList.add('active');
         }
 
 export default {
@@ -110,7 +110,10 @@ export default {
 
             }
         },
-    }
+    },
+    afterUpdate() {
+        console.log(this.props)
+    },
 }
 </script>
 

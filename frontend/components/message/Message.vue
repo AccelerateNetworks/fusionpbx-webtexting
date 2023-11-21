@@ -47,17 +47,19 @@ export default {
                 this.text = this.message.cpim.bodyText;
                 return;
             }
-
+            console.log(this.message.cpim.fileContentType);
             switch (this.message.cpim.fileContentType) {
                 case "text/plain":
                     this.text = await this.message.cpim.getTextBody()
                     this.message.cpim.bodyText = this.text;
                     break
                 case "image/png":
-                case "image/jpg":
+                this.embedImage = this.message.cpim.previewURL || this.message.cpim.fileURL;
                 case "image/jpeg":
                     this.embedImage = this.message.cpim.previewURL || this.message.cpim.fileURL;
                     break;
+                case "image/gif":
+                    this.embedImage = this.message.cpim.previewURL || this.message.cpim.fileURL;
                 default:
                     if (this.message.cpim.fileURL) {
                         this.download = this.message.cpim.fileURL;

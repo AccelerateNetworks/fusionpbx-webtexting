@@ -2,8 +2,6 @@
 
 import { MessageData, emitter, state } from '../../lib/global';
 import { CPIM } from '../../lib/CPIM'
-import { ref } from "vue";
-import { backfillMessages } from '../../lib/backfill';
 import Message from '../message/Message.vue';
 import moment from 'moment';
 import SendBox from '../SendBox/SendBox.vue';
@@ -163,12 +161,15 @@ export default {
 
     mounted() {
         if (this.$route.query.number) {
-            backfillMessages(this.$route.query.extension_uuid, this.$route.query.number);
             this.conversationKey = this.$route.query.number;
+            emitter.emit('backfill-requested', this.conversationKey);
         }
         else if (this.$route.query.group) {
-            backfillMessages(this.$route.query.extension_uuid, this.$route.query.group);
             this.conversationKey = this.$route.query.group
+            emitter.emit('backfill-requested', this.conversationKey);
+            const groupTag = document.getElementsByName("group");
+                groupTag[0].value = this.$route.query.group;
+        
         }
 
         emitter.on('scroll-to-bottom', this.toBottom);
@@ -213,6 +214,11 @@ export default {
         // document.querySelector("#active").removeAttribute('id');
         // this.$ref.convoContainer.addAttribute('id','active');
         //console.log("changing active component");
+        if(this.$route.query.group){
+            const groupTag = document.getElementsByName("group");
+                groupTag[0].value = this.$route.query.group;
+        }
+        
     },
     watch: {
         //this fires when we set remoteNumber to null or w/e
@@ -255,7 +261,8 @@ export default {
                 // group: gUUID });
                 //console.log(observedChangeQueryParams)
                 this.messages = this.state.conversations[this.$route.query.group];
-                this.title = this.$route.query.group;
+                //this.title = this.$route.query.group;
+                
             }
             this.conversationKey = this.$route.query.group;
             this.backfillAvailable = true;

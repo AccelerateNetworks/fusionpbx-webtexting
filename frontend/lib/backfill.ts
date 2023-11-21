@@ -31,7 +31,12 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         console.log("skipping duplicate backfill request");
         return;
     }
-
+    if(group){
+        console.log(`group = ${group}`);
+    }
+    if(remoteNumber){
+        console.log(`group = ${remoteNumber}`);
+    }
     fetching = true;
     try {
         let params: backfillQuery = { extension_uuid: extensionUUID };
