@@ -47,7 +47,7 @@ export default {
                 this.text = this.message.cpim.bodyText;
                 return;
             }
-            console.log(this.message.cpim.fileContentType);
+            //console.log(this.message.cpim.fileContentType);
             switch (this.message.cpim.fileContentType) {
                 case "text/plain":
                     this.text = await this.message.cpim.getTextBody()

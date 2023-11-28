@@ -32,10 +32,10 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         return;
     }
     if(group){
-        console.log(`group = ${group}`);
+        //console.log(`group = ${group}`);
     }
     if(remoteNumber){
-        console.log(`group = ${remoteNumber}`);
+        //console.log(`group = ${remoteNumber}`);
     }
     fetching = true;
     try {
@@ -48,8 +48,8 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         if (group) {
             params.group = group;
         }
-        console.log(`backfilling conversations array, ${state.conversations}`)
-        console.log(`backfill key: ${key}`)
+        //console.log(`backfilling conversations array, ${state.conversations}`)
+        //console.log(`backfill key: ${key}`)
         //if state.conversations[key] exists we have already backfilled at least once
         const stateMessages = state.conversations[key];
         if(stateMessages){

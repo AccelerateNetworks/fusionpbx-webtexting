@@ -1,6 +1,6 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
-import { MessageData } from '../../lib/global'
+import { MessageData, emitter } from '../../lib/global'
 import { RouterLink } from 'vue-router';
 
 export type ThreadPreviewInterface = {
@@ -14,7 +14,7 @@ export type ThreadPreviewInterface = {
         type: String,
     },
     timestamp: {
-        type: Date,
+        type: String,
     },
     remoteNumber: {
         type: String,
@@ -96,16 +96,21 @@ export default {
     },
     methods: {
         routerLinkClickHandler(event) {
-            if (this.remoteNumber) {
-                this.$emit("thread-change", this.remoteNumber)
-                console.log("Hey! you clicked me!")
+            if(this.displayName){
+                emitter.emit("thread-change", this.displayName)
+                console.log(`Hey! you clicked me! I have displayName: ${this.displayName}`)
+                updateActiveComponent(event)
+            }
+            else if (this.remoteNumber) {
+                emitter.emit("thread-change", this.remoteNumber)
+                console.log(`Hey! you clicked me! I have remoteNumber: ${this.remoteNumber}`)
                 updateActiveComponent(event)
                 
             }
             else if (this.groupUUID) {
-                this.$emit("thread-change", this.groupUUID)
-                console.log("Hey! you clicked me!")
-                updateActiveComponent(event)
+                emitter.emit("thread-change", this.groupUUID)
+                console.log(`Hey! you clicked me! I have groupUUID: ${this.groupUUID}`)
+               updateActiveComponent(event)
 
 
             }

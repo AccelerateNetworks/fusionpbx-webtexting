@@ -106,7 +106,10 @@ export default {
         },
         groupMembers: {
             type: Array<String>,
-        }
+        },
+        selectedConvo: {
+            type:Boolean,
+        },
     },
     components: { Message, SendBox },
     async setup(props) {
@@ -128,22 +131,22 @@ export default {
     data() {
 
         let title = "";
-        if (this.displayName) {
-            title = this.displayName;
-        } else if (this.groupMembers) {
-            title = this.groupMembers.join(", ");
-        }
+        // if (this.displayName) {
+        //     title = this.displayName;
+        // } else if (this.groupMembers) {
+        //     title = this.groupMembers.join(", ");
+        // }
 
-        if (this.remoteNumber) {
-            if (title.length > 0) {
-                title += " (" + this.remoteNumber + ")";
-            } else {
-                title += this.remoteNumber;
-            }
-        }
-        else if(this.groupUUID){
-            title+= this.groupUUID;
-        }
+        // if (this.remoteNumber) {
+        //     if (title.length > 0) {
+        //         title += " (" + this.remoteNumber + ")";
+        //     } else {
+        //         title += this.remoteNumber;
+        //     }
+        // }
+        // else if(this.groupUUID){
+        //     title+= this.groupUUID;
+        // }
         let conversationKey = this.remoteNumber ? this.remoteNumber : this.groupUUID;
         return {
             bottomVisible: true,
@@ -207,6 +210,11 @@ export default {
             console.log('preventing future backfilling attempts, this conversation has been fully backfilled');
             this.backfillAvailable = false;
         })
+
+        emitter.on('thread-changed', (newDisplayName:String) => {
+            console.log(`thread changed new display name is ${newDisplayName}`);
+            this.title = newDisplayName;
+        })
         //console.log(this.state.messages);
         //console.log("Conversation.vue mounted with props:\nremoteNumber:", this.remoteNumber, "\ngroupUUID:", this.groupUUID, "\ndisplayName:", this.displayName, "\nownNumber:", this.ownNumber);
     },
@@ -223,7 +231,7 @@ export default {
     watch: {
         //this fires when we set remoteNumber to null or w/e
         remoteNumber: async function (rN) {
-            this.title = rN;
+            //this.title = rN;
             this.messages = [];
 
             this.backfillAvailable = true;
@@ -341,7 +349,7 @@ export default {
 </script>
 
 <template>
-    <div class="thread-container" id="THREAD">
+    <div class="thread-container" v-bind:class="selectedConvo ? 'show-convo': 'hide-if-no-thread'" id="THREAD">
         <div class="thread-header">
             <router-link class="back-link" :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`">Go Back!</router-link>
             {{ title }}
@@ -378,7 +386,9 @@ export default {
 }
 
 /* these are for conversation which we are sidestepping for now */
-
+.hide-if-no-thread{
+    display:none;
+}
 
 .messages {
     height: 80vh;

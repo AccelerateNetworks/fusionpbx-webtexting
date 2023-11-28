@@ -15,7 +15,7 @@ export const router = createRouter({
                 path:"/threadlist.php",
                 components:{
                     leftSide: ThreadList,
-                    rightSide: ConvoPlaceholderVue,
+                    rightSide: ConversationVue,
                 },
             },
             {

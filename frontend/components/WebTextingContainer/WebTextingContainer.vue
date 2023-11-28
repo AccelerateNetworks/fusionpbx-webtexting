@@ -3,7 +3,7 @@ import Conversation from '../conversation/Conversation.vue';
 import ThreadList from '../ThreadList/ThreadList.vue'
 import ConvoPlaceholder from '../ConvoPlaceholder.vue';
 import { RouterView } from 'vue-router';
-import { MessageData } from '../../lib/global';
+import { emitter } from '../../lib/global';
 
 
 
@@ -33,34 +33,51 @@ export default {
     //             type: Array<String>,
     //         }
     //     },
-    name:'WebTextingContainer',
-    props:{
+    name: 'WebTextingContainer',
+    props: {
         ownNumber: String,
-        username:String,
+        username: String,
         threads: Array<Object>,
-        threadPreviews:Array<Object>
+        threadPreviews: Array<Object>
+    },
+    computed: {
+        // a computed getter
+        conversationSelected() {
+            // `this` points to the component instance
+            let selectedConvo = false;
+            if (this.$route.query.number || this.$route.query.group) {
+                selectedConvo = true;
+            }
+            return selectedConvo;
+        },
     },
     components: { Conversation, ThreadList },
     beforeUpdate() {
         console.log(this.props.threadPreviews);
     },
-    methods:{
-        calculateDisplayName(){
-            if(this.$route.query.group){
-                for(let m in this.$props.threadPreviews){
+    methods: {
+        calculateDisplayName() {
+            if (this.$route.query.group) {
+                for (let m in this.$props.threadPreviews) {
                     console.log(`group: ${m}`);
                 }
             }
-            else{
-                for(let m in this.$props.threadPreviews){
+            else {
+                for (let m in this.$props.threadPreviews) {
                     console.log(`contact: ${m}`);
                 }
             }
             console.log("display name calculated");
             return "tested";
         }
-    }
-    
+    },
+    mounted() {
+        emitter.on('thread-change', (newDisplayName: String) => {
+            console.log("WTC event get", newDisplayName)
+            emitter.emit('thread-changed', newDisplayName);
+        })
+    },
+
 }
 </script>
 
@@ -70,24 +87,24 @@ The blank space should notify the user that they can select a thread to display 
     <RouterView>
 
 
-    <div id="WEB_TEXT_ROOT">
-        <link type="text/css" href="../../../js/style.css">
-        <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" 
-                                    :threads="this.$props.threads" 
-                                    :threadPreviews="this.$props.threadPreviews"/>
-        
-        
-    <suspense>
-        <RouterView name="rightSide" 
-            :extension_uuid="this.$route.query.extension_uuid" 
-            :remoteNumber="this.$route.query.number" 
-            :groupUUID="this.$route.query.group"
-            :ownNumber="this.$props.ownNumber" 
-            :displayName="this.$props.threadPreviews"
-            v-bind="calculateDisplayName"/> 
-    </suspense>
-    </div>
-</RouterView>
+        <div id="WEB_TEXT_ROOT">
+            <link type="text/css" href="../../../js/style.css">
+            <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
+                :threadPreviews="this.$props.threadPreviews" />
+
+
+            <suspense>
+                <RouterView name="rightSide" 
+                    :extension_uuid="this.$route.query.extension_uuid"
+                    :remoteNumber="this.$route.query.number" 
+                    :groupUUID="this.$route.query.group"
+                    :ownNumber="this.$props.ownNumber" 
+                    :displayName="this.$props.displayName"
+                    :selectedConvo="this.conversationSelected" 
+                    v-bind="calculateDisplayName" />
+            </suspense>
+        </div>
+    </RouterView>
 </template>
 
 <style scoped></style>

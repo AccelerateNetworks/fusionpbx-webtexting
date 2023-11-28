@@ -179,8 +179,16 @@ foreach ($threads as $thread) {
         $link .= "number=".$number;
     }
     $thread_preview_opts[$z]['link'] = $link;
+
     //Thread preview area 
     $body_preview = $last_message['content_type'] == "text/plain" ? $last_message['message'] : "[media]";
+    /* this is where we need to change stuff to see the removal of [media] as the default preview
+    if ($last_message['content_type'] == "text/plain" ) {
+        $body_preview  = $last_message['message'];
+    } else {
+        $body_preview = s3 retrieve nonsense logic;
+    }
+    */
     $thread_preview_opts[$z]['bodyPreview'] = $body_preview;
     $thread_preview_opts[$z]['ownNumber'] = $ownNumber;
     $thread_preview_opts[$z]['displayName']= $display_name;
