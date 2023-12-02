@@ -111,7 +111,7 @@ export default {
 .message {
     border: solid #aaa 1px;
     border-radius: 1em;
-    padding-left: 0.75em;
+    padding-left: 1em;
     padding-right: 1em;
     padding-top: 0.25em;
     padding-bottom: 0.25em;
@@ -131,12 +131,15 @@ export default {
     background-color: #3178B1;    
     border-radius: 1em 1em 0 1em;
     color: #fff;
+    margin-right:0.5rem;
 }
 
 .author.incoming {
+    margin-left: 0.75rem;
     text-align: left;
 }
 .author.outgoing{
+    margin-right: 1.25rem;
     text-align:right;
 }
 
@@ -149,6 +152,7 @@ export default {
 }
 
 .message-body-inline-media {
+    margin-top: 0.5rem;
     max-width: 100%;
     border-radius: 0.5em;
     max-height: 300px;

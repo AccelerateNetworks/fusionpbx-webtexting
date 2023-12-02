@@ -80,6 +80,25 @@ The blank space should notify the user that they can select a thread to display 
 </template>
 
 <style>
+::-webkit-scrollbar {
+    width: 10px;
+    height:10px;
+    padding-top:3px;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.4); 
+    border-radius: 6px;
+    background-color: white;
+    margin-top: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.9); 
+    background-color: lightgray;
+}
 @media screen and (width<700px){
     #main_content{
         margin-top:48px;

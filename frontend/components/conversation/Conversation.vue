@@ -391,9 +391,9 @@ export default {
 .messages {
     height: 80vh;
     margin: 0 auto;
-    border-left: solid #3178b1 2px;
-    border-right: solid #3178b1 2px;
-    border-bottom: solid #3178b1 2px;
+    border-left: solid #5f9fd3 2px;
+    border-right: solid #5f9fd3 2px;
+    border-bottom: solid #5f9fd3 2px;
     border-bottom-left-radius: 0.5em;
     border-bottom-right-radius: 0.5em;
     padding-left: 0.5em;
@@ -405,12 +405,14 @@ export default {
 }
 
 .thread-header {
+    box-shadow: 0 4px 2px -2px gray;
     margin: 0 auto;
     padding: 1em;
-    background-color: #3178b1;
+    background-color: #5f9fd3;
     color: #fff;
     border-top-left-radius: 0.5em;
     border-top-right-radius: 0.5em;
+    border-bottom: solid grey 2px;
     font-weight: bold;
 }
 
