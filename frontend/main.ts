@@ -59,8 +59,8 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
         threads: opts.threads,
         threadPreviews: opts.$thread_preview_opts
     }
-    console.log(opts)
-    console.log("props", containerProps)
+    //console.log(opts)
+    //console.log("props", containerProps)
     const app = createApp(WebTextingContainer, containerProps);
     
     app.config.errorHandler = (err, instance, info) => {
@@ -70,27 +70,23 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
     app.use(router);
     app.mount("#TEST_DIV_FOR_TESTING_WEBTEXTING");
 
-    //i think this is stuff that will have to get ported over to threads instead of messages
-
-    //we'll have to backfill for each thread
-    //backfillMessages(opts.extensionUUID, opts.remoteNumber, opts.groupUUID);
-    //i think this needs to stay in conversation mode only but we're doing both
-    //that's because we are using webtextingcontainer to deliver both threadlist and conversation side by side
-    //so that means we need to mash all the options together and initialize all the components from there.
-    //this makse the data flow a little wierd because users will select from threadlist component 
-    //we'll have to deliver the information to the container which dispatches the changes to conversation view
     RunSIPConnection(opts.username, opts.password, opts.server, opts.ownNumber, opts.remoteNumber, opts.groupUUID);
 
     emitter.on('backfill-requested', (key:string) => {
-        //console.log(`main.ts backfill key ${key}`)
+        console.log(`main.ts backfill key ${key}`)
         //key is either a uuid or phone number. uuid length is at least 16
-        if(key.length<15){
-            console.log(`backfill using remotenumber: ${key}`)
-            backfillMessages(opts.extensionUUID, key, null);
+        if(key){
+            if(key.length<15){
+                console.log(`backfill using remotenumber: ${key}`)
+                backfillMessages(opts.extensionUUID, key, null);
+            }
+            else{
+                console.log(`backfill using group ${key}`)
+                backfillMessages(opts.extensionUUID, null, key);
+            }
         }
         else{
-            console.log(`backfill using group ${key}`)
-            backfillMessages(opts.extensionUUID, null, key);
+            console.log("ignoring backfill request with no key");
         }
         
     })

@@ -165,11 +165,11 @@ export default {
     mounted() {
         if (this.$route.query.number) {
             this.conversationKey = this.$route.query.number;
-            emitter.emit('backfill-requested', this.conversationKey);
+            //emitter.emit('backfill-requested', this.conversationKey);
         }
         else if (this.$route.query.group) {
             this.conversationKey = this.$route.query.group
-            emitter.emit('backfill-requested', this.conversationKey);
+            //emitter.emit('backfill-requested', this.conversationKey);
             const groupTag = document.getElementsByName("group");
                 groupTag[0].value = this.$route.query.group;
         
@@ -187,7 +187,7 @@ export default {
 
         emitter.on('backfill-complete', () => {
             if (!this.backfillAvailable) {
-                //console.log('conversation fully backfilled, refusing to attempt to backfill more');
+                console.log('conversation fully backfilled, refusing to attempt to backfill more');
                 return;
             }
 
@@ -212,7 +212,7 @@ export default {
         })
 
         emitter.on('thread-changed', (newDisplayName:String) => {
-            console.log(`thread changed new display name is ${newDisplayName}`);
+            //console.log(`thread changed new display name is ${newDisplayName}`);
             this.title = newDisplayName;
         })
         //console.log(this.state.messages);
@@ -231,9 +231,7 @@ export default {
     watch: {
         //this fires when we set remoteNumber to null or w/e
         remoteNumber: async function (rN) {
-            //this.title = rN;
             this.messages = [];
-
             this.backfillAvailable = true;
             //console.log(rN);
             //console.log("remote number changed changing this.messages")
@@ -253,7 +251,7 @@ export default {
                 }
                 this.conversationKey = rN;
                 emitter.emit("backfill-requested", rN)
-                console.log("changed Rn " + rN);
+                //console.log("changed Rn " + rN);
 
             }
             else {
@@ -275,7 +273,7 @@ export default {
             this.conversationKey = this.$route.query.group;
             this.backfillAvailable = true;
             emitter.emit("backfill-requested", this.$route.query.group)
-            console.log("changed gUUID " + this.$route.query.group);
+            //console.log("changed gUUID " + this.$route.query.group);
         }
     },
     methods: {
@@ -478,6 +476,13 @@ table {
         z-index: 5;
         grid-column-start: 1;
         grid-column-end: 1;
+        height:94vh;
+    }
+    .thread-container{
+        height:90vh;
+    }
+    .messages{
+        height:88vh;
     }
 
 }</style>

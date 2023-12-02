@@ -1,3 +1,4 @@
+//TODO: file limit = 500kb = 5000000
 async function uploadAttachment(file: File): Promise<string> {
     const uploadTarget = await fetch("upload.php", {
         method: "POST",

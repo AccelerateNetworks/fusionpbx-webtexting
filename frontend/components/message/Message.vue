@@ -40,6 +40,7 @@ export default {
         }
     },
     async mounted() {
+        //console.log(this.message); 
         this.bumpTimestamp();
         this.interval = setInterval(this.bumpTimestamp, 10000);
         if (this.message.cpim) {

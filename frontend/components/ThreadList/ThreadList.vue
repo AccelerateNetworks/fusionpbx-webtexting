@@ -1,5 +1,6 @@
 <script lang="ts" >
 import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
+import {emitter} from '../../lib/global'
 
 // type ThreadListInterface = {
 
@@ -9,47 +10,31 @@ import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPr
 
 export default {
     name: 'ThreadList',
-    //     data(){
-    //         const threads:Array<ThreadPreviewInterface> = [
-    //             {
-    //                 displayName: "dan ryan",
-    //     bodyPreview: "Hmm",
-
-    //     link: "thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12068589310",
-
-    //     timestamp: new Date("2023-09-06 21:57:12.733721"),
-
-    //     remoteNumber: "12068589310",
-
-    //     ownNumber: "12065797799"
-    //     }
-
-    // }
-
-    //         ]
-
-    //     },
 
     props: {
         displayName: String,
         ownNumber: String,
         threads: Array<Object>,
-        threadPreviews: Array<ThreadPreviewInterface>
+        threadPreviews: Array<ThreadPreviewInterface>,
+        selectedConvo: Boolean,
     },
     components: { ThreadPreview },
     data() {
-        return { activeThread: false }
+        return { activeThread: '' }
     },
-    methods: {
+    computed: {
         recieveEmit(activeConversation) {
-            // alert(`active conversation: ${activeConversation}`);
+            //console.log(`active conversation: ${activeConversation}`);
             this.activeThread = activeConversation;
+            return this.activeThread;
         }
     },
-    afterUpdate() {
-        // document.querySelector("#active").removeAttribute('id');
-        // document.getElementsByClassName(".threadlist_container")[0].setAttribute('id','active')
-        console.log(this.props)
+    mounted(){
+        emitter.on('thread-change', (activeConversation: String) => {
+            //console.log("TL event get", activeConversation);
+            this.activeThread = activeConversation;
+            return this.activeThread;
+        })
     },
 }
 
@@ -77,10 +62,10 @@ export default {
 */
 </script>
 <template>
-    <div class="threadlist_container active" id="THREADLIST">
+    <div class="threadlist_container active" id="THREADLIST" v-bind:class="selectedConvo ? 'hide-if-small': 'no-convo-selected'">
         <div class='table'>
             <div class="preview_list_container">
-                <ThreadPreview @thread-change="recieveEmit" v-for="preview in threadPreviews" :key="preview.toString()"
+                <ThreadPreview  v-for="preview in threadPreviews" :key="preview.toString()"
                     v-bind="preview" :activeThread="this.activeThread" />
             </div>
         </div>
@@ -106,7 +91,8 @@ export default {
     border-radius: 0.5rem;
     border-color: none;
 }
-
+.hide-if-small{
+}
 
 
 
@@ -119,10 +105,8 @@ export default {
     table-layout: fixed;
 }
 
-@media screen and (width <=700) {
-    .hide-if-small{
-        display:none;
-    }
+
+    @media screen and (width <=700px) {    
     div.action_bar {
         top: 0px;
     }
@@ -132,7 +116,7 @@ export default {
     .table {
         height: 80vh;
     }
-    .threadlist_container{
+    .hide-if-small{
         display:none;
     }
 }

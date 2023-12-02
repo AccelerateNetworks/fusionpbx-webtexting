@@ -1,7 +1,6 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
 import { MessageData, emitter } from '../../lib/global'
-import { RouterLink } from 'vue-router';
 
 export type ThreadPreviewInterface = {
     displayName: {
@@ -34,14 +33,6 @@ export type ThreadPreviewInterface = {
     }
 }
 
-const updateActiveComponent = (event) => {
-            // var ele = document.querySelector('.active');
-            // ele.classList.remove('active');
-            // var threadie = document.getElementById("THREAD");
-            // console.log(ele);
-            // console.log(`thread : ${threadie}`);
-            // threadie.classList.add('active');
-        }
 
 export default {
     name: 'ThreadPreview',
@@ -56,7 +47,7 @@ export default {
             type: String,
         },
         timestamp: {
-            type: Date,
+            type: String,
         },
         remoteNumber: {
             type: String,
@@ -88,36 +79,34 @@ export default {
             else if (this.groupUUID == this.activeThread) {
                 return this.groupUUID;
             }
+            else if(this.displayName == this.activeThread){
+                return this.displayName;
+            }
             return false;
-        }
+        },
     },
     emits: {
         'thread-change': String,
+        'change-active-thread': String
     },
     methods: {
         routerLinkClickHandler(event) {
             if(this.displayName){
-                emitter.emit("thread-change", this.displayName)
-                console.log(`Hey! you clicked me! I have displayName: ${this.displayName}`)
-                updateActiveComponent(event)
+                emitter.emit("thread-change", this.displayName);
+                //console.log(`Hey! you clicked me! I have displayName: ${this.displayName}`)
             }
             else if (this.remoteNumber) {
                 emitter.emit("thread-change", this.remoteNumber)
-                console.log(`Hey! you clicked me! I have remoteNumber: ${this.remoteNumber}`)
-                updateActiveComponent(event)
+                //console.log(`Hey! you clicked me! I have remoteNumber: ${this.remoteNumber}`)
                 
             }
             else if (this.groupUUID) {
                 emitter.emit("thread-change", this.groupUUID)
-                console.log(`Hey! you clicked me! I have groupUUID: ${this.groupUUID}`)
-               updateActiveComponent(event)
+                //console.log(`Hey! you clicked me! I have groupUUID: ${this.groupUUID}`)
 
 
             }
         },
-    },
-    afterUpdate() {
-        console.log(this.props)
     },
 }
 </script>

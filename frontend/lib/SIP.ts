@@ -235,6 +235,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
 
         if(message.cpim) {
             message.body = message.cpim.serialize();
+            console.log(`serialized cpim message ${message.body}`)
             message.contentType = 'message/cpim';
         }
 

@@ -89,7 +89,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                     else{
                         key = remoteNumber;
                     }
-                    //console.log(`cpim ${m}`);
+                    //console.log(`cpim ${m.message}`);
                     insertMessageInHistory(key,{
                         direction: m.direction,
                         contentType: m.content_type,

@@ -8,31 +8,6 @@ import { emitter } from '../../lib/global';
 
 
 export default {
-    //     data() {    },
-    //     props:{
-    //         activeConvo:{
-    //             type:String,
-    //         },
-    //         remoteNumber: {
-    //             type: String,
-    //         },
-    //         groupUUID: {
-    //             type: String,
-    //         },
-    //         displayName: {
-    //             type: String,
-    //         },
-    //         ownNumber: {
-    //             type: String,
-    //             required: true,
-    //         },
-    //         contactEditLink: {
-    //             type: String,
-    //         },
-    //         groupMembers: {
-    //             type: Array<String>,
-    //         }
-    //     },
     name: 'WebTextingContainer',
     props: {
         ownNumber: String,
@@ -52,9 +27,6 @@ export default {
         },
     },
     components: { Conversation, ThreadList },
-    beforeUpdate() {
-        console.log(this.props.threadPreviews);
-    },
     methods: {
         calculateDisplayName() {
             if (this.$route.query.group) {
@@ -73,7 +45,6 @@ export default {
     },
     mounted() {
         emitter.on('thread-change', (newDisplayName: String) => {
-            console.log("WTC event get", newDisplayName)
             emitter.emit('thread-changed', newDisplayName);
         })
     },
@@ -90,10 +61,11 @@ The blank space should notify the user that they can select a thread to display 
         <div id="WEB_TEXT_ROOT">
             <link type="text/css" href="../../../js/style.css">
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
-                :threadPreviews="this.$props.threadPreviews" />
+                :threadPreviews="this.$props.threadPreviews" 
+                :selectedConvo="this.conversationSelected"/>
 
 
-            <suspense>
+            <suspense> 
                 <RouterView name="rightSide" 
                     :extension_uuid="this.$route.query.extension_uuid"
                     :remoteNumber="this.$route.query.number" 
@@ -107,4 +79,17 @@ The blank space should notify the user that they can select a thread to display 
     </RouterView>
 </template>
 
-<style scoped></style>
+<style>
+@media screen and (width<700px){
+    #main_content{
+        margin-top:48px;
+        border-radius:0;
+        -webkit-border-radius:0;
+    }
+    #TEST_DIV_FOR_TESTING_WEBTEXTING{
+        height:93vh;
+    }
+} 
+
+
+</style>

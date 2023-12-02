@@ -15,27 +15,34 @@ type PendingAttachment = {
 // createRandomToken borrowed from sip.js, which does not export it :(
 // https://github.com/onsip/SIP.js/blob/main/src/core/messages/utils.ts#L85
 function createRandomToken(size: number, base = 32): string {
-  let token = "";
-  for (let i = 0; i < size; i++) {
-    const r: number = Math.floor(Math.random() * base);
-    token += r.toString(base);
-  }
-  return token;
+    let token = "";
+    for (let i = 0; i < size; i++) {
+        const r: number = Math.floor(Math.random() * base);
+        token += r.toString(base);
+    }
+    return token;
+}
+const MAXFILESIZE = 500000; //<---500KB in bytes
+function verifyFileSize(file: File) {
+    if (file.size < MAXFILESIZE) {
+        return true;
+    }
+    return false;
 }
 
 export default {
     data(): {
-            enteredText: string,
-            pendingAttachments: PendingAttachment[],
-            state: GlobalState,
-        } {
+        enteredText: string,
+        pendingAttachments: PendingAttachment[],
+        state: GlobalState,
+    } {
         return {
             enteredText: "",
             pendingAttachments: [],
             state: state,
         }
     },
-    name:"SendBox",
+    name: "SendBox",
     props: {
         remoteNumber: {
             type: String,
@@ -52,7 +59,7 @@ export default {
         keypress(e: KeyboardEvent) {
             if (e.key == "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                if(state.connected) {
+                if (state.connected) {
                     this.send();
                 } else {
                     console.log("not connected, can't send message");
@@ -77,7 +84,7 @@ export default {
                 return;
             }
 
-            while(this.pendingAttachments.length > 0) {
+            while (this.pendingAttachments.length > 0) {
                 const attachment = this.pendingAttachments.shift();
                 await attachment.upload;
 
@@ -122,20 +129,29 @@ export default {
             }
         },
         onAttach(e: Event) {
-            console.log(e.target.files);
+
+            //console.log(e.target.files);
+
             const target = e.target as HTMLInputElement;
-            console.log(target);
-            for(const file of target.files) {
-                const a: PendingAttachment = {
-                    file: file,
-                    previewURL: URL.createObjectURL(file),
-                    progress: 0,
-                    upload: null,
-                    uploadedURL: null,
-                };
-                a.upload = this.uploadAttachment(a);
-                this.pendingAttachments.push(a);
+            //console.log(target);
+            for (const file of target.files) {
+                if (verifyFileSize(file)) {
+                    const a: PendingAttachment = {
+                        file: file,
+                        previewURL: URL.createObjectURL(file),
+                        progress: 0,
+                        upload: null,
+                        uploadedURL: null,
+                    };
+                    a.upload = this.uploadAttachment(a);
+                    this.pendingAttachments.push(a);
+                }
+                else {
+                    alert(`The selected file is too large. We cannot send files bigger than ${MAXFILESIZE / 1000}kB.`);
+                }
             }
+
+
         },
         removeAttachment(attachment: PendingAttachment) {
             let position = this.pendingAttachments.indexOf(attachment);
@@ -164,32 +180,63 @@ export default {
             var items = (e.clipboardData || e.originalEvent.clipboardData).items;
             console.log(JSON.stringify(items)); // will give you the mime types
             for (const item of items) {
-                switch(item.type) {
+                switch (item.type) {
                     case "image/png":
+                    const filePng = item.getAsFile();
+                        if (verifyFileSize(filePng)) {
+                            const aPng: PendingAttachment = {
+                                file: filePng,
+                                previewURL: URL.createObjectURL(filePng),
+                                progress: 0,
+                                upload: null,
+                                uploadedURL: null,
+                            };
+                            aPng.upload = this.uploadAttachment(aPng);
+                            this.pendingAttachments.push(aPng);
+                            break;
+                        }
+                        else {
+                            alert(`The selected file is too large. We cannot send files bigger than ${MAXFILESIZE / 1000}kB.`);
+                            break;
+                        }
                     case "image/jpg":
                         const file = item.getAsFile();
-                        const a: PendingAttachment = {
-                            file: file,
-                            previewURL: URL.createObjectURL(file),
-                            progress: 0,
-                            upload: null,
-                            uploadedURL: null,
-                        };
-                        a.upload = this.uploadAttachment(a);
-                        this.pendingAttachments.push(a);
-                        break;
+                        if (verifyFileSize(file)) {
+                            const a: PendingAttachment = {
+                                file: file,
+                                previewURL: URL.createObjectURL(file),
+                                progress: 0,
+                                upload: null,
+                                uploadedURL: null,
+                            };
+                            a.upload = this.uploadAttachment(a);
+                            this.pendingAttachments.push(a);
+                            break;
+                        }
+                        else {
+                            alert(`The selected file is too large. We cannot send files bigger than ${MAXFILESIZE / 1000}kB.`);
+                            break;
+                        }
+
                     case "image/jpeg":
                         const fileJpeg = item.getAsFile();
-                        const aJpeg: PendingAttachment = {
-                            file: file,
-                            previewURL: URL.createObjectURL(file),
-                            progress: 0,
-                            upload: null,
-                            uploadedURL: null,
-                        };
-                        a.upload = this.uploadAttachment(a);
-                        this.pendingAttachments.push(a);
-                        break;
+                        if (verifyFileSize(fileJpeg)) {
+                            console.log(fileJpeg);
+                            const aJpeg: PendingAttachment = {
+                                file: file,
+                                previewURL: URL.createObjectURL(file),
+                                progress: 0,
+                                upload: null,
+                                uploadedURL: null,
+                            };
+                            aJpeg.upload = this.uploadAttachment(a);
+                            this.pendingAttachments.push(a);
+                            break;
+                        }
+                        else {
+                            alert(`The selected file is too large. We cannot send files bigger than ${MAXFILESIZE / 1000}kB.`);
+                            break;
+                        }
                     case "text/plain":
                         continue;
                     default:
@@ -203,24 +250,26 @@ export default {
 
 <template>
     <div class="sendbox-container">
-    <div class="attachment-previews">
-        <div class="attachment-preview-wrapper" v-for="attachment in pendingAttachments">
-            <img :src="attachment.previewURL" v-if="attachment.previewURL" class="attachment-preview-img" />
-            <span class="fas fa-trash fa-fw remove-attachment-btn" v-on:click="removeAttachment(attachment)"></span>
-            <span class="attachment-upload-progress">{{ attachment.progress}}%</span>
+        <div class="attachment-previews">
+            <div class="attachment-preview-wrapper" v-for="attachment in pendingAttachments">
+                <img :src="attachment.previewURL" v-if="attachment.previewURL" class="attachment-preview-img" />
+                <span class="fas fa-trash fa-fw remove-attachment-btn" v-on:click="removeAttachment(attachment)"></span>
+                <span class="attachment-upload-progress">{{ attachment.progress }}%</span>
+            </div>
+        </div>
+        <div class="sendbox">
+            <textarea maxlength="160" class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText"
+                ref="textbox" v-on:paste="onPaste"></textarea>
+            <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
+            <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />
+            <button class="btn btn-send"
+                :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected"
+                v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
+        </div>
+        <div class="char-counter-box">
+            <div class="char-counter-display">{{ enteredText.length }} / 160</div>
         </div>
     </div>
-    <div class="sendbox">
-        <textarea maxlength="160" class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste" ></textarea>
-        <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
-        <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />
-        <button class="btn btn-send" :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected" v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
-    </div>
-    <div class="char-counter-box">
-        <div class="char-counter-display">{{ enteredText.length }} / 160</div>
-    </div>
-</div>
-
 </template>
 
 <style>
@@ -232,7 +281,7 @@ export default {
     background-color: #eee;
 }
 
-.char-counter-box{
+.char-counter-box {
     display: grid;
     align-content: center;
     align-items: center;
@@ -240,7 +289,7 @@ export default {
     justify-content: center;
 }
 
-.char-counter-display{
+.char-counter-display {
     align-content: center;
     align-items: center;
     justify-items: center;

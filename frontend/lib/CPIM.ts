@@ -108,7 +108,6 @@ export class CPIM {
         if(this.fileContentType != "text/plain") {
             return null;
         }
-
         let response = await fetch(this.fileURL)
         return await response.text()
     }
