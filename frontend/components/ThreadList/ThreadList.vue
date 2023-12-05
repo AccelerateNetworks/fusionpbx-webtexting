@@ -43,30 +43,42 @@ export default {
     get the user extension this is handled in threadlist.php
 */
 
-/* add contact type stuff
-<form method='get' action="thread.php" onsubmit="clean_number()">
-<input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
-<div id='modal-new-thread' class='modal-window'>
-    <div>
-        <span title="" class='modal-close' onclick="modal_close(); ">&times</span>
-        <span class='modal-title'>New Message</span>
-        <span class='modal-message'>Enter Number: <input type="text" name="number" id="new-thread-number" placeholder="(206) 555-1212" /></span>
-        <span class='modal-actions'>
-            <button type='button' alt='Cancel' title='Cancel' onclick='modal_close();' class='btn btn-default' ><span class='fas fa-times fa-fw'></span><span class='button-label never pad'>Cancel</span></button>
-            <button type='submit' name='action' value='Ok' id='btn_ok' alt='ok' title='ok' onclick='modal_close();' class='btn btn-default' style='float: right; margin-left: 15px' ><span class='fas fa-check fa-fw'></span><span class='button-label never pad'>Start</span></button>
-        </span>
-    </div>
-</div>
-<input type='hidden' name='key_uuid' id='key_uuid'/>
-</form>
-*/
+
+
 </script>
 <template>
+
     <div class="threadlist_container active" id="THREADLIST" v-bind:class="selectedConvo ? 'hide-if-small': 'no-convo-selected'">
-        <div class='table'>
+
+            <div class="threadlist-header">Conversations
+                <router-link :to="'/createthread.php'" class="thread-link" >New contact</router-link>
+            </div>
+
+        <div class='threadlist-table'>
+            
             <div class="preview_list_container">
                 <ThreadPreview  v-for="preview in threadPreviews" :key="preview.toString()"
                     v-bind="preview" :activeThread="this.activeThread" />
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
             </div>
         </div>
     </div>
@@ -84,7 +96,7 @@ export default {
 
 
 .threadlist_container {
-    height: 80vh;
+    height: 100%;
     grid-column-start: 1;
     grid-column-end: 1;
     padding-right: 0.25rem;
@@ -94,15 +106,26 @@ export default {
 .hide-if-small{
 }
 
+.threadlist-header{
+    box-shadow: 0 4px 4px -2px white;
+    margin: 0 auto 3px auto;
+    padding: 1em;
+    background-color: #5f9fd3;
+    color: #fff;
+    border-top-left-radius: 0.5em;
+    border-top-right-radius: 0.5em;
+    font-weight: bold;
+    border: solid #5f9fd3 2px;
+}
 
-
-.table {
+.threadlist-table {
     /*border-spacing: 1em; */
     direction: rtl;
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 80vh;
     width: 100%;
     table-layout: fixed;
+    
 }
 
 

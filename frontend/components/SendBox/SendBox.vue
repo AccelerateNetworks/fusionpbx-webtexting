@@ -258,7 +258,7 @@ export default {
             </div>
         </div>
         <div class="sendbox">
-            <textarea maxlength="160" class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText"
+            <textarea maxlength="160" rows="3" class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText"
                 ref="textbox" v-on:paste="onPaste"></textarea>
             <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
             <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />

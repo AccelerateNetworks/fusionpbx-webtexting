@@ -26,6 +26,14 @@ export const router = createRouter({
                     rightSide: ConversationVue
                 }
             },
+            {
+                path:'/createthread.php',
+                components:{
+                    leftSide: ThreadList,
+                    rightSide: ConvoPlaceholderVue,
+                }
+                    
+            },
             
         ]
         }

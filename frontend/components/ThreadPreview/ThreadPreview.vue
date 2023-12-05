@@ -167,18 +167,6 @@ export default {
     color: white;
 }
 
-/*
-.timestamp.activeThread:hover {
-    color:gray;
-}
-.thread-name.activeThread:hover{
-    color:gray;
-}
-
-.thread-last-message.activeThread:hover {
-    color: gray;
-}*/
-
 .tr_replace:hover {
     background-color: #aaaaaa;
 }
@@ -187,8 +175,6 @@ export default {
 .thread-preview-container {
     border-radius: 1em;
     padding: 0.5625em;
-    /* margin-bottom: 0.5em;
-    min-height: calc(50px + 1em); */
     display: grid;
     grid-template-rows: auto;
     grid-template-columns: 0 auto auto;
@@ -235,17 +221,14 @@ export default {
 }
 
 .tr_replace.activeThread {
-    background-color: #5f9fd3;
+    background-color: #3178B1;
 }
 
 .tr_replace.activeThread:hover {
     background-color: #aaaaaa;
 }
 
-.tr_replace:first-child {
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
-}
+
 
 .tr_replace:last-child {
     border-bottom-left-radius: 0.5rem;

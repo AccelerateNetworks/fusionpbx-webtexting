@@ -1,6 +1,6 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
-import ThreadList from '../ThreadList/ThreadList.vue'
+import ThreadList from '../ThreadList/ThreadList.vue';
 import ConvoPlaceholder from '../ConvoPlaceholder.vue';
 import { RouterView } from 'vue-router';
 import { emitter } from '../../lib/global';
@@ -59,7 +59,7 @@ The blank space should notify the user that they can select a thread to display 
 
 
         <div id="WEB_TEXT_ROOT">
-            <link type="text/css" href="../../../js/style.css">
+            
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
                 :threadPreviews="this.$props.threadPreviews" 
                 :selectedConvo="this.conversationSelected"/>
@@ -75,6 +75,7 @@ The blank space should notify the user that they can select a thread to display 
                     :selectedConvo="this.conversationSelected" 
                     v-bind="calculateDisplayName" />
             </suspense>
+            <link type="text/css" href="../../../js/style.css">
         </div>
     </RouterView>
 </template>
@@ -84,22 +85,17 @@ The blank space should notify the user that they can select a thread to display 
     width: 10px;
     height:10px;
     padding-top:3px;
-    border-radius: 3px;
+    background-color: white;
 }
 
-::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.4); 
-    border-radius: 6px;
-    background-color: white;
-    margin-top: 5px;
-}
+
 
 ::-webkit-scrollbar-thumb {
     border-radius: 6px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.9); 
-    background-color: lightgray;
+    -webkit-box-shadow: inset 0 0 6px rgba(255,255,255,0.5); 
+    background-color: #BB6025;
 }
-@media screen and (width<700px){
+@media screen and (width<=700px){
     #main_content{
         margin-top:48px;
         border-radius:0;
@@ -109,6 +105,12 @@ The blank space should notify the user that they can select a thread to display 
         height:93vh;
     }
 } 
+@media screen and (width<=575px){
+    .navbar-toggler{
+        background-color: #3178B1;
+    }
+
+}
 
 
 </style>
