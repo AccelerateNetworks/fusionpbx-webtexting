@@ -338,7 +338,9 @@ export default {
             //console.log("new message added to bottom. scrolling?", this.atBottom);
             if (this.atBottom) {
                 const messageContainer = this.$refs.message_container;
-                messageContainer.scrollTo(0, messageContainer.scrollHeight);
+                if(messageContainer){
+                    messageContainer.scrollTo(0, messageContainer.scrollHeight);
+                }
             }
         },
     },
@@ -349,7 +351,7 @@ export default {
 <template>
     <div class="thread-container" v-bind:class="selectedConvo ? 'show-convo': 'hide-if-no-thread'" id="THREAD">
         <div class="thread-header">
-            <router-link class="back-link" :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`">Go Back!</router-link>
+            <router-link class="back-link" :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!">←</router-link>
             {{ title }}
             <a v-if="contactEditLink" :href="contactEditLink" class="white">
                 <span class='fas fa-edit fa-fw'> </span>
@@ -370,7 +372,6 @@ export default {
                     v-for="(message, index) in this.state.conversations[conversationKey]" />
                 <div class="message-wrapper" ref="bottom">&nbsp;</div>
             </div>
-            <!-- this is why group sending doesn't work let's try to make groupuuid a computed thing-->
             <SendBox :remoteNumber="remoteNumber" :groupUUID="this.$route.query.group" :ownNumber="ownNumber" />
             <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ ownNumber }}</div>
         </div>

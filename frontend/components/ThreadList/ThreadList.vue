@@ -1,6 +1,6 @@
 <script lang="ts" >
 import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
-import {emitter} from '../../lib/global'
+import {emitter, ThreadChangePayload} from '../../lib/global'
 
 // type ThreadListInterface = {
 
@@ -17,22 +17,23 @@ export default {
         threads: Array<Object>,
         threadPreviews: Array<ThreadPreviewInterface>,
         selectedConvo: Boolean,
+        newThreadView: Boolean
     },
     components: { ThreadPreview },
     data() {
         return { activeThread: '' }
     },
     computed: {
-        recieveEmit(activeConversation) {
+        recieveEmit(threadChangeObject:ThreadChangePayload) {
             //console.log(`active conversation: ${activeConversation}`);
-            this.activeThread = activeConversation;
+            this.activeThread = threadChangeObject.key;
             return this.activeThread;
         }
     },
     mounted(){
-        emitter.on('thread-change', (activeConversation: String) => {
+        emitter.on('thread-change', (threadChangeObject:ThreadChangePayload) => {
             //console.log("TL event get", activeConversation);
-            this.activeThread = activeConversation;
+            this.activeThread = threadChangeObject.key;
             return this.activeThread;
         })
     },
@@ -48,42 +49,27 @@ export default {
 </script>
 <template>
 
-    <div class="threadlist_container active" id="THREADLIST" v-bind:class="selectedConvo ? 'hide-if-small': 'no-convo-selected'">
-
-            <div class="threadlist-header">Conversations
-                <router-link :to="'/createthread.php'" class="thread-link" >New contact</router-link>
-            </div>
-
+    <div class="threadlist_container active" id="THREADLIST" v-bind:class="(selectedConvo || newThreadView) ? 'hide-if-small': 'no-convo-selected'">
+        <div class="threadlist-header">Conversations
+            <a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
+        </div>
         <div class='threadlist-table'>
-            
             <div class="preview_list_container">
                 <ThreadPreview  v-for="preview in threadPreviews" :key="preview.toString()"
                     v-bind="preview" :activeThread="this.activeThread" />
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
-                    <div class="tr_replace inactiveThread" last_message="[object Object]"><div class="td_preview inactiveThread"><a href="/app/webtexting/thread.php?extension_uuid=fe91be7c-ecb2-4661-9d3a-bcf27099221b&amp;number=12063801161" class="thread-link"><div class="thread-preview-container inactiveThread"><span class="thread-name inactiveThread">12063801161</span><span class="timestamp inactiveThread" data-timestamp="2023-11-29 22:45:09.679273">5 days ago</span><span class="thread-last-message inactiveThread">MMS message</span></div></a></div></div>
+            </div>
+            <div class="link-container">
+                <router-link :to="'/createthread.php'" class="thread-link dot" aria-label="new contact">＋</router-link>
             </div>
         </div>
     </div>
 </template>
 <style>
+.float-right{
+    position:absolute;
+    top: 50%;
+    float:right;
+}
 
 .active{
     grid-column-start: 1;
@@ -92,9 +78,6 @@ export default {
     direction: ltr;
     padding-left: 0.25rem;
 }
-
-
-
 .threadlist_container {
     height: 100%;
     grid-column-start: 1;
@@ -126,6 +109,29 @@ export default {
     width: 100%;
     table-layout: fixed;
     
+}
+.link-container{
+    font-size: 2rem;
+    line-height: 2rem;
+    height: 3rem;
+    width: 3rem;
+    background-color: #5f9fd3;
+    border-radius: 50%;
+    position:relative;
+    float: right;
+}
+.dot {    
+    color: white;
+    text-align:center;
+    margin: 0;
+    position: absolute;               /* 2 */
+    top: 50%;                         /* 3 */
+    left: 50%;
+    transform: translate(-50%, -50%) ;
+
+}
+.dot:hover{
+    color:#BB6025;
 }
 
 

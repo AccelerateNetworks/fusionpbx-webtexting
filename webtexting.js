@@ -45,7 +45,7 @@ async function toggleNotifications() {
 
         // this displays the notification permission prompt to the user
         try {
-            subscription = await registration.pushManager.subscribe({ applicationServerKey: convertedVapidKey });
+            subscription = await registration.pushManager.subscribe({ applicationServerKey: convertedVapidKey,userVisibleOnly: true });
         } catch (e) {
             console.log("error subscribing: ", e);
             document.querySelector('#notification-btn').style.display = 'none';
@@ -73,10 +73,9 @@ function setNotificationButtonState(notificationState) {
     if(!btn) {
         return;
     }
-
     btn.dataset.state = notificationState.state;
 
-    const icon = btn.querySelector('.fas')
+    //const icon = btn.querySelector('.fas')
     switch(notificationState.state) {
         case "all":
             if(window.notification_data.remote_identifier) {
@@ -85,12 +84,12 @@ function setNotificationButtonState(notificationState) {
             }
             // note no "break", execution continues to "on" case
         case "on":
-            icon.classList.add("fa-bell");
-            icon.classList.remove("fa-bell-slash");
+            btn.classList.add("fa-bell");
+            btn.classList.remove("fa-bell-slash");
             break;
         case "off":
-            icon.classList.add("fa-bell-slash");
-            icon.classList.remove("fa-bell");
+            btn.classList.add("fa-bell-slash");
+            btn.classList.remove("fa-bell");
             break;
     }
     
@@ -102,7 +101,7 @@ function setNotificationButtonState(notificationState) {
 
 if (window.notification_data) {
     navigator.serviceWorker.register('webtexting-worker.js').then(async function (registration) {
-        const state = await registration.pushManager.permissionState();
+        const state = await registration.pushManager.permissionState({userVisibleOnly:true});
         console.log("push notification permission state:", state);
         if (state == "denied") {
             return;

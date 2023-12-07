@@ -224,7 +224,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     userAgent.start();
 
     emitter.on('outbound-message', async (message: MessageData) => {
-        //console.log("outbound message:", message);
+        console.log("outbound message:", message);
 
         message.timestamp = moment();
         const m = message;
@@ -250,9 +250,11 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         //console.log(`Messager: `);
         //console.log(messager);
         console.log(userAgent)
-        emitter.emit('scroll-to-bottom');
+        
 
-        await messager.message();
+        const reponse = await messager.message();
+        console.log(reponse);
+        //emitter.emit('scroll-to-bottom');
     });
 }
 

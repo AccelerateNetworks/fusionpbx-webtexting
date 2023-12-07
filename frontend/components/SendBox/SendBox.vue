@@ -53,7 +53,7 @@ export default {
         ownNumber: {
             type: String,
             required: true,
-        }
+        },
     },
     methods: {
         keypress(e: KeyboardEvent) {

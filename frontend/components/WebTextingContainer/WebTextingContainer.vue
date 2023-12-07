@@ -1,9 +1,9 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
 import ThreadList from '../ThreadList/ThreadList.vue';
-import ConvoPlaceholder from '../ConvoPlaceholder.vue';
+import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
-import { emitter } from '../../lib/global';
+import { emitter,ThreadChangePayload } from '../../lib/global';
 
 
 
@@ -25,8 +25,19 @@ export default {
             }
             return selectedConvo;
         },
+        newThreadSelected(){
+            let newThreadSelected= false;
+           if(this.$route.path === ("/createthread.php")){
+                newThreadSelected= true;
+           }
+            return newThreadSelected;
+        },
     },
     components: { Conversation, ThreadList },
+    data(){
+        let contactEditLink = null;
+        return contactEditLink;
+    },
     methods: {
         calculateDisplayName() {
             if (this.$route.query.group) {
@@ -44,8 +55,9 @@ export default {
         }
     },
     mounted() {
-        emitter.on('thread-change', (newDisplayName: String) => {
-            emitter.emit('thread-changed', newDisplayName);
+        emitter.on('thread-change', (payload:ThreadChangePayload ) => {
+            this.contactEditLink = payload.editLink;
+            emitter.emit('thread-changed', payload.key);
         })
     },
 
@@ -62,7 +74,8 @@ The blank space should notify the user that they can select a thread to display 
             
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
                 :threadPreviews="this.$props.threadPreviews" 
-                :selectedConvo="this.conversationSelected"/>
+                :selectedConvo="this.conversationSelected"
+                :newThreadView="this.newThreadSelected"/>
 
 
             <suspense> 
@@ -73,6 +86,7 @@ The blank space should notify the user that they can select a thread to display 
                     :ownNumber="this.$props.ownNumber" 
                     :displayName="this.$props.displayName"
                     :selectedConvo="this.conversationSelected" 
+                    :contactEditLink="this.contactEditLink"
                     v-bind="calculateDisplayName" />
             </suspense>
             <link type="text/css" href="../../../js/style.css">

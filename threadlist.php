@@ -30,6 +30,8 @@ if (!$destination) {
     include_once "footer.php";
     die();
 }
+ //echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'onclick' => 'toggleNotifications()']);
+
 ?>
 <form method='get' action="new-message.php" onsubmit="clean_number()">
 <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
@@ -161,7 +163,14 @@ foreach ($threads as $thread) {
                 $name_parts[] = $contact['contact_role'];
             }
             if (sizeof($name_parts) > 0) {
-                $display_name = implode(" ", $name_parts);
+                $frontendOpts['threadName'] = implode(" ", $name_parts);
+                if (permission_exists('contact_phone_edit')) {
+                    $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
+                    $frontendOpts['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
+                }
+            } elseif (permission_exists('contact_phone_edit')) {
+                $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
+              $frontendOpts['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
             }
         }
     }
@@ -185,6 +194,7 @@ foreach ($threads as $thread) {
     $thread_preview_opts[$z]['bodyPreview'] = $body_preview;
     $thread_preview_opts[$z]['ownNumber'] = $ownNumber;
     $thread_preview_opts[$z]['displayName']= $display_name;
+    $thread_preview_opts[$z]['contactEditLink'] = $frontendOpts['contactEditLink'] ;
     $z++;
  }
  $frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
@@ -203,9 +213,6 @@ require_once "footer.php";
 ?>
 <link rel="stylesheet" href="js/style.css" />
 <link rel="stylesheet" href="src/footer.css"/>
-<script type="text/javascript">
-WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); ?>);
-</script>
 <form method='post' action='group-rename.php' value="rename-group">
     <input type="hidden" name="action" value="group_name_change"/>
       <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
@@ -223,6 +230,12 @@ WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); 
       </div>
       <input type='hidden' name='key_uuid' id='key_uuid'/>
     </form>
+  
+<script type="text/javascript">
+    
+WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); ?>);
+</script>
+
 
 <style type="text/css">
   /* .container-fluid {

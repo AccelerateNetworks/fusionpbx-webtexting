@@ -5,6 +5,13 @@ import mitt from 'mitt';
 
 type ConversationData = Record<string,Array<MessageData>>;
 
+type ThreadChangePayload = {
+  key: string, 
+
+  editLink?:  string;
+  
+};
+
 type MessageData = {
     direction: string;
     contentType: string;
@@ -83,4 +90,4 @@ function addThread(key:string, message?:MessageData){
     }
 }
 
-export { state, emitter, MessageData, GlobalState, addMessage }
+export { state, emitter, MessageData, GlobalState, addMessage, ThreadChangePayload }

@@ -1,6 +1,6 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
-import { MessageData, emitter } from '../../lib/global'
+import { MessageData, emitter, ThreadChangePayload } from '../../lib/global'
 
 export type ThreadPreviewInterface = {
     displayName: {
@@ -73,13 +73,13 @@ export default {
     components: { Conversation },
     computed: {
         currentThread() {
-            if (this.remoteNumber == this.activeThread) {
+            if (this.remoteNumber && this.remoteNumber == this.activeThread) {
                 return this.remoteNumber;
             }
-            else if (this.groupUUID == this.activeThread) {
+            else if (this.groupUUID && this.groupUUID == this.activeThread) {
                 return this.groupUUID;
             }
-            else if(this.displayName == this.activeThread){
+            else if(this.displayName && this.displayName == this.activeThread){
                 return this.displayName;
             }
             return false;
@@ -91,21 +91,29 @@ export default {
     },
     methods: {
         routerLinkClickHandler(event) {
+            
+            let payload:ThreadChangePayload= {key:' ',};
             if(this.displayName){
-                emitter.emit("thread-change", this.displayName);
+                //emitter.emit("thread-change", this.displayName);
+                payload.key=this.displayName;
                 //console.log(`Hey! you clicked me! I have displayName: ${this.displayName}`)
             }
             else if (this.remoteNumber) {
-                emitter.emit("thread-change", this.remoteNumber)
+                //emitter.emit("thread-change", this.remoteNumber)
+                payload.key=this.remoteNumber;
                 //console.log(`Hey! you clicked me! I have remoteNumber: ${this.remoteNumber}`)
                 
             }
-            else if (this.groupUUID) {
-                emitter.emit("thread-change", this.groupUUID)
+            else{
+                //emitter.emit("thread-change", this.groupUUID)
                 //console.log(`Hey! you clicked me! I have groupUUID: ${this.groupUUID}`)
-
+                payload.key=this.groupUUID;
 
             }
+            console.log(`here's the link to edit a contact ${this.contactEditLink}`)
+            payload.editLink = this.contactEditLink;
+            console.log(payload);
+            emitter.emit("thread-change",payload)
         },
     },
 }
@@ -196,21 +204,7 @@ export default {
     transform: translateY(-50%);
 }
 
-.dot {
-    grid-column: 1;
-    grid-row-start: 1;
-    grid-row-end: 3;
-    height: 50px;
-    width: 50px;
-    background-color: #bbb;
-    border-radius: 50%;
-    display: inline-block;
-    margin: 0;
-    position: relative;
-    top: 50%;
-    -ms-transform: translateY(-50%);
-    transform: translateY(-50%);
-}
+
 
 .activeThread {
     color: white;
@@ -228,7 +222,10 @@ export default {
     background-color: #aaaaaa;
 }
 
-
+.tr_replace:first-child {
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
 
 .tr_replace:last-child {
     border-bottom-left-radius: 0.5rem;

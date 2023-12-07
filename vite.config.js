@@ -12,13 +12,12 @@ export default defineConfig({
     }
   },
   define: {
-    "process.env.NODE_ENV": "'development'",
+    "process.env.NODE_ENV": "'production'",
   },
   root: "frontend",
   build: {
     outDir: '../js',
     sourcemap: true,
-    minify:false,
     lib: {
       entry: resolve(__dirname, 'frontend/main.ts'),
       name: 'WebTexting',
