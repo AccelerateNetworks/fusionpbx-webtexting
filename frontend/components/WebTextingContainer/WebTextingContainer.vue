@@ -34,7 +34,8 @@ export default {
     components: { Conversation, ThreadList },
     data(){
         let contactEditLink = null;
-        return contactEditLink;
+        let title=''
+        return {contactEditLink,title};
     },
     methods: {
         calculateDisplayName() {
@@ -55,6 +56,8 @@ export default {
     mounted() {
         emitter.on('thread-change', (payload:ThreadChangePayload ) => {
             this.contactEditLink = payload.editLink;
+            console.log(`wtc thread change ${payload.key}`)
+            this.title= payload.key;
             emitter.emit('thread-changed', payload.key);
         })
     },
@@ -82,11 +85,11 @@ The blank space should notify the user that they can select a thread to display 
                     :remoteNumber="this.$route.query.number" 
                     :groupUUID="this.$route.query.group"
                     :ownNumber="this.$props.ownNumber" 
-                    :displayName="this.$props.displayName"
+                    :displayName="this.title"
                     :selectedConvo="this.conversationSelected" 
-                    :contactEditLink="this.contactEditLink"
+                    :contactEditLink="contactEditLink"
                     :title="this.title"
-                    v-bind="calculateDisplayName" />
+                     />
             </suspense>
             <link type="text/css" href="../../../js/style.css">
         </div>

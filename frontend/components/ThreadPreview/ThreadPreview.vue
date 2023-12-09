@@ -73,14 +73,14 @@ export default {
     components: { Conversation },
     computed: {
         currentThread() {
-            if (this.remoteNumber && this.remoteNumber == this.activeThread) {
+            if(this.displayName && this.displayName == this.activeThread){
+                return this.displayName;
+            }
+            else if (this.remoteNumber && this.remoteNumber == this.activeThread) {
                 return this.remoteNumber;
             }
             else if (this.groupUUID && this.groupUUID == this.activeThread) {
                 return this.groupUUID;
-            }
-            else if(this.displayName && this.displayName == this.activeThread){
-                return this.displayName;
             }
             return false;
         },

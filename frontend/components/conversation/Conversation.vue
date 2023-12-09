@@ -113,14 +113,14 @@ export default {
     
     data() {
 
-        let title = "";
+         let title = "";
         if (this.displayName) {
             title = this.displayName;
         } else if (this.groupMembers) {
             title = this.groupMembers.join(", ");
         }
 
-        if (this.remoteNumber) {
+        else if (this.remoteNumber) {
             if (title.length > 0) {
                 title += " (" + this.remoteNumber + ")";
             } else {
@@ -157,6 +157,7 @@ export default {
                 groupTag[0].value = this.$route.query.group;
         
         }
+        
 
         emitter.on('scroll-to-bottom', this.toBottom);
 

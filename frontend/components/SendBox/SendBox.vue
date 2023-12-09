@@ -29,6 +29,9 @@ function verifyFileSize(file: File) {
     }
     return false;
 }
+function phoneNumbertoPhoneString(number:Number){
+    return number.toString().replace(/[^\d+]/g, "");
+}
 
 export default {
     data(): {
@@ -78,12 +81,9 @@ export default {
             }
         },
         async send() {
-            //we need to fail 10 digit remote number messages
-            const outboundNumber = this.remoteNumber.toString().replace(/[^\d+]/g, "");
-
-            console.log(outboundNumber)
-            console.log(outboundNumber.length);
-        if((outboundNumber && outboundNumber.length===11)  || this.groupUUID)
+            //we need to fail  phone numbers that are not 11 digits long
+            
+        if((this.remoteNumber && phoneNumbertoPhoneString(this.remoteNumber).length===11)  || this.groupUUID)
         {
             console.log(this.enteredText);
             if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
@@ -137,8 +137,8 @@ export default {
         }
         else{
             let errorString = "Outbound number is invalid, not enough digits or invalid groupUUID. \n";
-            if(outboundNumber.length<11){
-                errorString += `Outbound Number: ${outboundNumber}`;
+            if(this.remoteNumber.toString().length!=11){
+                errorString += `Outbound Number: ${this.remoteNumber}`;
             }
             else{
                 errorString+=`GroupUUID: ${this.groupUUID}`;
