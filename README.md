@@ -31,3 +31,13 @@ location /ws {
 
 ## Developing
 Frontend build requires a bunch of javascript stuff. To do it without installing a bunch of javascript stuff, install podman and use `build-frontend.sh`
+To test that everything works:
+Creeate a new conversation
+- Too many numbers (more than 11)
+- Too few Numbers (less than 11)
+- Correct 11 digit number
+- Group Conversation
+
+Test inbound and outbound texting (SMS, MMS Text, Image, GIF):
+- 11 digit numbers (one to one conversations)
+- Group Conversations
