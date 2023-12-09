@@ -234,7 +234,7 @@ require_once "footer.php";
     </form>
   
 <script type="text/javascript">
-    
+window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'], "remote_identifier" => $number)); ?>;
 WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); ?>);
 </script>
 
