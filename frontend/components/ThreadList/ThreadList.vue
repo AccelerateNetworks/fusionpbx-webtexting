@@ -2,10 +2,6 @@
 import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
 import {emitter, ThreadChangePayload} from '../../lib/global'
 
-// type ThreadListInterface = {
-
-//     username: String,
-// }
 
 
 export default {
@@ -37,12 +33,13 @@ export default {
             return this.activeThread;
         })
     },
+    methods:{
+        dumpSelectedThread(){
+            const newThread = {key:'', editLink:null}
+            emitter.emit('thread-change',newThread);
+        },
+    },
 }
-
-
-/*
-    get the user extension this is handled in threadlist.php
-*/
 
 
 
@@ -52,6 +49,7 @@ export default {
     <div class="threadlist_container active" id="THREADLIST" v-bind:class="(selectedConvo || newThreadView) ? 'hide-if-small': 'no-convo-selected'">
         <div class="threadlist-header">Conversations
             <a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
+            <a class="fas fa-info-circle fa-fw menu-icon" aria-label="Accelerate Netwrosk support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a>
         </div>
         <div class='threadlist-table'>
             <div class="preview_list_container">
@@ -59,12 +57,18 @@ export default {
                     v-bind="preview" :activeThread="this.activeThread" />
             </div>
             <div class="link-container">
-                <router-link :to="'/createthread.php'" class="thread-link dot" aria-label="new contact">＋</router-link>
+                <router-link :to="'/createthread.php'" class="thread-link dot" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
             </div>
         </div>
     </div>
 </template>
 <style>
+.menu-icon{
+    color:white;
+}
+.menu-icon:hover{
+    color:#BB6025;
+}
 .float-right{
     position:absolute;
     top: 50%;
@@ -119,6 +123,7 @@ export default {
     border-radius: 50%;
     position:relative;
     float: right;
+    margin-top: 0.5rem;
 }
 .dot {    
     color: white;

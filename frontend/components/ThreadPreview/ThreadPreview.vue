@@ -93,26 +93,25 @@ export default {
         routerLinkClickHandler(event) {
             
             let payload:ThreadChangePayload= {key:' ',};
+            
             if(this.displayName){
-                //emitter.emit("thread-change", this.displayName);
                 payload.key=this.displayName;
                 //console.log(`Hey! you clicked me! I have displayName: ${this.displayName}`)
             }
             else if (this.remoteNumber) {
-                //emitter.emit("thread-change", this.remoteNumber)
                 payload.key=this.remoteNumber;
                 //console.log(`Hey! you clicked me! I have remoteNumber: ${this.remoteNumber}`)
                 
             }
             else{
-                //emitter.emit("thread-change", this.groupUUID)
                 //console.log(`Hey! you clicked me! I have groupUUID: ${this.groupUUID}`)
                 payload.key=this.groupUUID;
 
             }
-            console.log(`here's the link to edit a contact ${this.contactEditLink}`)
+            //console.log(`here's the link to edit a contact ${this.contactEditLink}`)
             payload.editLink = this.contactEditLink;
-            console.log(payload);
+            //console.log(payload);
+            console.log(payload.key)
             emitter.emit("thread-change",payload)
         },
     },

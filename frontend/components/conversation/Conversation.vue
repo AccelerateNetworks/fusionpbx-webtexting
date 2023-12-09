@@ -37,11 +37,9 @@ const getMessages = async (queryParams: MessageQuery) => {
         }
         if (queryParams.number) {
             params.number = queryParams.number
-            //emitter.emit('backfill-requested',params.number);
         }
         if (queryParams.group) {
             params.group = queryParams.group
-            //emitter.emit('backfill-requested',params.group);
         }
         let key = '';
         //console.log(params);
@@ -112,41 +110,26 @@ export default {
         },
     },
     components: { Message, SendBox },
-    async setup(props) {
-        const initialQueryParams = <MessageQuery>({
-            extension_uuid: props.extension_uuid,
-            number: props.remoteNumber
-        });
-        //const messages =  await getMessages(initialQueryParams);
-        if (props.remoteNumber) {
-            //emitter.emit('backfill-requested',props.remoteNumber);
-        }
-        else if (props.groupUUID) {
-            //emitter.emit('backfill-requested',props.groupUUID);
-        }
-
-        //console.log(`setup ${messages}`);
-
-    },
+    
     data() {
 
         let title = "";
-        // if (this.displayName) {
-        //     title = this.displayName;
-        // } else if (this.groupMembers) {
-        //     title = this.groupMembers.join(", ");
-        // }
+        if (this.displayName) {
+            title = this.displayName;
+        } else if (this.groupMembers) {
+            title = this.groupMembers.join(", ");
+        }
 
-        // if (this.remoteNumber) {
-        //     if (title.length > 0) {
-        //         title += " (" + this.remoteNumber + ")";
-        //     } else {
-        //         title += this.remoteNumber;
-        //     }
-        // }
-        // else if(this.groupUUID){
-        //     title+= this.groupUUID;
-        // }
+        if (this.remoteNumber) {
+            if (title.length > 0) {
+                title += " (" + this.remoteNumber + ")";
+            } else {
+                title += this.remoteNumber;
+            }
+        }
+        else if(this.groupUUID){
+            title+= this.groupUUID;
+        }
         let conversationKey = this.remoteNumber ? this.remoteNumber : this.groupUUID;
         return {
             bottomVisible: true,
@@ -191,7 +174,7 @@ export default {
                 return;
             }
 
-            if (this.topVisible && this.bottomVisible) {
+            else if (this.topVisible && this.bottomVisible) {
                 console.log('top and bottom of conversation visible, attempting to backfill immediately');
                 emitter.emit('backfill-requested', this.conversationKey);
                 return;
@@ -212,41 +195,32 @@ export default {
         })
 
         emitter.on('thread-changed', (newDisplayName:String) => {
-            //console.log(`thread changed new display name is ${newDisplayName}`);
+            console.log(`thread changed new display name is ${newDisplayName}`);
             this.title = newDisplayName;
         })
         //console.log(this.state.messages);
         //console.log("Conversation.vue mounted with props:\nremoteNumber:", this.remoteNumber, "\ngroupUUID:", this.groupUUID, "\ndisplayName:", this.displayName, "\nownNumber:", this.ownNumber);
     },
     beforeUpdate() {
-        // document.querySelector("#active").removeAttribute('id');
-        // this.$ref.convoContainer.addAttribute('id','active');
         //console.log("changing active component");
         if(this.$route.query.group){
             const groupTag = document.getElementsByName("group");
                 groupTag[0].value = this.$route.query.group;
-        }
-        
+        }        
     },
     watch: {
-        //this fires when we set remoteNumber to null or w/e
         remoteNumber: async function (rN) {
             this.messages = [];
             this.backfillAvailable = true;
-            //console.log(rN);
             //console.log("remote number changed changing this.messages")
             if (this.remoteNumber) {
 
-                //console.log("no");
                 if (this.state.conversations[rN]) {
                     //conversation found
                     //console.log("conversation found skipping fetch")
                     this.messages = this.state.conversations[rN];
                 }
                 else {
-                    //     const observedRemoteNumberChangeQueryParams= <MessageQuery>({ extension_uuid: this.$route.query.extension_uuid,
-                    // number: rN });
-                    //this.state.conversations[rN] = await this.fetchInitialMessages();
                     this.messages = this.state.conversations[rN];
                 }
                 this.conversationKey = rN;
@@ -254,17 +228,10 @@ export default {
                 //console.log("changed Rn " + rN);
 
             }
-            else {
-                //console.log(`this.remoteNumber: ${this.remoteNumber}`);
-                //console.log(`rN: ${rN}`);
-            }
         },
         groupUUID: function (gUUID) {
             this.messages = [];
-            //this needs to be changed because groupUUID doesn't get passed like i want
             if (this.$route.query.group) {
-                // const observedGroupUUIDChangeQueryParams= <MessageQuery>({ extension_uuid: this.$route.query.extension_uuid,
-                // group: gUUID });
                 //console.log(observedChangeQueryParams)
                 this.messages = this.state.conversations[this.$route.query.group];
                 //this.title = this.$route.query.group;
@@ -273,32 +240,9 @@ export default {
             this.conversationKey = this.$route.query.group;
             this.backfillAvailable = true;
             emitter.emit("backfill-requested", this.$route.query.group)
-            //console.log("changed gUUID " + this.$route.query.group);
-        }
+        },
     },
     methods: {
-        //this needs to include logic for returning {key:threadID, messages:Array<MessageData>}
-        async fetchInitialMessages() {
-            //console.log("initial fetching")
-            this.messages = new Array<MessageData>();
-            // replace `getPost` with your data fetching util / API wrapper
-            if (this.$route.query.number) {
-                let params = <MessageQuery>({
-                    extension_uuid: this.$route.query.extension_uuid,
-                    number: this.$route.query.number
-                });
-                //console.log(`fetchInitalMessages params: ${params}`)
-                return await getMessages(params);
-            }
-            else {
-                let params = <MessageQuery>({
-                    extension_uuid: this.$route.query.extension_uuid,
-                    group: this.$route.query.group
-                });
-                return await getMessages(params);
-            }
-        },
-
         scrollToBottom() {
             //console.log('scrolling conversation to bottom');
             const messageContainer = this.$refs.message_container;
@@ -349,14 +293,13 @@ export default {
 </script>
 
 <template>
-    <div class="thread-container" v-bind:class="selectedConvo ? 'show-convo': 'hide-if-no-thread'" id="THREAD">
+    <div class="thread-container" v-bind:class="selectedConvo ? 'show-convo': 'hide'" id="THREAD">
         <div class="thread-header">
             <router-link class="back-link" :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!">←</router-link>
             {{ title }}
             <a v-if="contactEditLink" :href="contactEditLink" class="white">
                 <span class='fas fa-edit fa-fw'> </span>
             </a>
-            <!-- this won't work because groupUUID isn't populted unless i change it to be a data thing  -->
             <a v-if="this.$route.query.group" href="javascript: void(0);" class="white" onclick="modal_open('modal-rename-group');">
                 <span class='fas fa-edit fa-fw'> </span>
             </a>
@@ -374,18 +317,17 @@ export default {
             </div>
             <SendBox :remoteNumber="remoteNumber" :groupUUID="this.$route.query.group" :ownNumber="ownNumber" />
             <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ ownNumber }}</div>
-        </div>
+        </div>       
     </div>
 </template>
 
 <style>
+
 #conversation {
     grid-column-start: 2;
     grid-column-end: 2;
 }
-
-/* these are for conversation which we are sidestepping for now */
-.hide-if-no-thread{
+.hide{
     display:none;
 }
 
@@ -455,9 +397,6 @@ table {
 td {
     border: solid #3178b1;
     border-radius: 1em;
-    /* padding: 0.25em;
-    margin-bottom: 0.5em;
-   min-height: calc(50px + 1em);*/
 }
 
 table {

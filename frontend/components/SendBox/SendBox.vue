@@ -78,6 +78,13 @@ export default {
             }
         },
         async send() {
+            //we need to fail 10 digit remote number messages
+            const outboundNumber = this.remoteNumber.toString().replace(/[^\d+]/g, "");
+
+            console.log(outboundNumber)
+            console.log(outboundNumber.length);
+        if((outboundNumber && outboundNumber.length===11)  || this.groupUUID)
+        {
             console.log(this.enteredText);
             if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
                 this.$refs.textbox.focus();
@@ -127,6 +134,18 @@ export default {
 
                 this.enteredText = "";
             }
+        }
+        else{
+            let errorString = "Outbound number is invalid, not enough digits or invalid groupUUID. \n";
+            if(outboundNumber.length<11){
+                errorString += `Outbound Number: ${outboundNumber}`;
+            }
+            else{
+                errorString+=`GroupUUID: ${this.groupUUID}`;
+            }
+            
+            alert(errorString)
+        }
         },
         onAttach(e: Event) {
 
@@ -259,11 +278,11 @@ export default {
         </div>
         <div class="sendbox">
             <textarea maxlength="160" rows="3" class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText"
-                ref="textbox" v-on:paste="onPaste"></textarea>
+                ref="textbox" v-on:paste="onPaste" name="text-message-entry-box"></textarea>
             <label for="attachment-upload" class="btn btn-attach"><span class="fas fa-paperclip fa-fw"></span></label>
             <input type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />
             <button class="btn btn-send"
-                :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected"
+                :disabled="(pendingAttachments.length == 0 && enteredText.length == 0 ) || !state.connected"
                 v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
         </div>
         <div class="char-counter-box">

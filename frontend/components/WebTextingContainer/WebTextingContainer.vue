@@ -16,9 +16,7 @@ export default {
         threadPreviews: Array<Object>
     },
     computed: {
-        // a computed getter
         conversationSelected() {
-            // `this` points to the component instance
             let selectedConvo = false;
             if (this.$route.query.number || this.$route.query.group) {
                 selectedConvo = true;
@@ -87,6 +85,7 @@ The blank space should notify the user that they can select a thread to display 
                     :displayName="this.$props.displayName"
                     :selectedConvo="this.conversationSelected" 
                     :contactEditLink="this.contactEditLink"
+                    :title="this.title"
                     v-bind="calculateDisplayName" />
             </suspense>
             <link type="text/css" href="../../../js/style.css">

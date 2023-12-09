@@ -26,7 +26,8 @@ $parameters['extension_uuid'] = $extension['extension_uuid'];
 $destination = $database->select($sql, $parameters, 'column');
 unset($parameters);
 if (!$destination) {
-    echo "no SMS-enabled number for this extension";
+    echo "To use Web Texting purchase the service at <a href='https://acceleratenetworks.com/services/'>https://acceleratenetworks.com/services/</a> then <a href='mailto:https://acceleratenetworks.com/support/'>Contact Support</a>";
+    echo "<br> No SMS-enabled number for this extension.";
     include_once "footer.php";
     die();
 }
@@ -164,6 +165,7 @@ foreach ($threads as $thread) {
             }
             if (sizeof($name_parts) > 0) {
                 $frontendOpts['threadName'] = implode(" ", $name_parts);
+                $display_name = $frontendOpts['threadName'];
                 if (permission_exists('contact_phone_edit')) {
                     $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
                     $frontendOpts['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];

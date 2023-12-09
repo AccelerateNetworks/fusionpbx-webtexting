@@ -230,7 +230,6 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         const m = message;
         //if plain/text use to number as key
         //if it's cpim 
-        //this is a reason for group messages being giga wierdo mode imo
         addMessage(message.to,m);
 
         if(message.cpim) {
@@ -253,7 +252,6 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         
 
         const reponse = await messager.message();
-        console.log(reponse);
         //emitter.emit('scroll-to-bottom');
     });
 }

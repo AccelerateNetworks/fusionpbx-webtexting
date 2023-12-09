@@ -3,6 +3,7 @@ import WebTextingContainer  from '../components/WebTextingContainer/WebTextingCo
 import ThreadList from '@/components/ThreadList/ThreadList.vue';
 import NewMessage from '@/components/NewMessage.vue';
 import ConversationVue from '@/components/conversation/Conversation.vue';
+import ConvoPlaceholderVue from '@/components/ConvoPlaceholder.vue';
 
 export const router = createRouter({
     history: createWebHistory("/app/webtexting/"),
@@ -15,7 +16,7 @@ export const router = createRouter({
                 path:"/threadlist.php",
                 components:{
                     leftSide: ThreadList,
-                    rightSide: ConversationVue,
+                    rightSide: ConvoPlaceholderVue,
                 },
             },
             {
