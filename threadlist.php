@@ -65,11 +65,6 @@ $threads = $database->select($sql, $parameters, 'all');
 unset($parameters);
 
 //for each thread get the last message and render a preview template
-//threads is the thing we need to make available to threadlist.vue to populate every ThreadPreview.vue
-//where do we need to go for the rest of the frontendopts 
-
-//these two query blocks are ripped from thread.php
-//the intent is that I use these to get comfortable with delivering the vue app then i remove these
 $sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];

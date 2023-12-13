@@ -37,7 +37,6 @@ const state = reactive<GlobalState>({
 
 const emitter = mitt();
 
-//reconfiguring to work with messages as a record of keys / adding message IDs
 function addMessage(key:string, message: MessageData) {
     console.log("trying to add message with key: " + key);
     
@@ -45,9 +44,7 @@ function addMessage(key:string, message: MessageData) {
         //console.log("conversation found checking messages");
         //console.log(state.conversations[key])
         if (message.id ) {
-            //message.id = message.message_uuid;
             let messages = state.conversations[key];
-            //console.log(`this.messages ${messages}`);
             if(messages){
                 for(let m of messages) {
                     if (m.id == message.id) {
