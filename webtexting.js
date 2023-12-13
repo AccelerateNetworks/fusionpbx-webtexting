@@ -48,7 +48,7 @@ async function toggleNotifications() {
             subscription = await registration.pushManager.subscribe({ applicationServerKey: convertedVapidKey,userVisibleOnly: true });
         } catch (e) {
             console.log("error subscribing: ", e);
-            document.querySelector('#notification-btn').style.display = 'none';
+            //document.querySelector('#notification-btn').style.display = 'none';
             return;
         }
     }

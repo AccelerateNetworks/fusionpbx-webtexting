@@ -171,7 +171,6 @@ foreach ($threads as $thread) {
             }
         }
     }
-    //need to put group name in here too lol
     $frontendOpts['server'] = $extension['user_context'];
     $frontendOpts['username'] = $extensionDetails['extension'];
     $frontendOpts['password'] = $extensionDetails['password'];
