@@ -316,7 +316,7 @@ export default {
                     v-for="(message, index) in this.state.conversations[conversationKey]" />
                 <div class="message-wrapper" ref="bottom">&nbsp;</div>
             </div>
-            <SendBox :remoteNumber="remoteNumber" :groupUUID="this.$route.query.group" :ownNumber="ownNumber" />
+            <SendBox :remoteNumber="remoteNumber" :groupUUID="this.$route.query.group" :ownNumber="ownNumber" location="Conversation"/>
             <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ ownNumber }}</div>
         </div>       
     </div>

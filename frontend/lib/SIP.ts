@@ -96,6 +96,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             onMessage: async (message: Message) => {
                 //console.log("[MESSAGE]", message);
                 //console.log(`own number: ${ownNumber}`)
+                //I believe this is where we need to target to add auto updatign threadlist
 
                 let direction = 'incoming';
                 let originalTo = message.request.getHeader("X-Original-To");

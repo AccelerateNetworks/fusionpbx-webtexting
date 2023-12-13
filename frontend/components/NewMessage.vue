@@ -19,7 +19,7 @@ export default {
             <div class="new-message-container">
                 <div class="thread-header new-message-header">
                     <div class="thread-header-container">
-                        <a class="back-link" href="/app/webtexting" aria="Go Back to threadlist!">←</a>
+                        <a class="back-link" href="/app/webtexting" aria="Go Back to Threadlist!">←</a>
                         <div class="new-message-headline">New Conversation</div>
                     </div>
                 </div>
@@ -29,7 +29,7 @@ export default {
                 <br>
                 <br>
                 <label for="new-thread-number">Outbound Number must include Country Code and Area Code:</label>
-                <SendBox :remoteNumber="number" :ownNumber="ownNumber" />    
+                <SendBox :remoteNumber="number" :ownNumber="ownNumber" location="New-Message"/>    
             </div>
         </div>
 </template>

@@ -18,13 +18,11 @@ self.addEventListener('push', function (event) {
       const payload = event.data.json();
 
       channel.postMessage(payload);
-      console.log(payload);
+
       var tab = clientList.some(function (client) {
         let u = new URL(client.url);
-        console.log(u)
         return u.searchParams.get('extension_uuid') == payload.to && u.searchParams.get('number') == payload.from;
       });
-      console.log(tab)
 
       if(tab) {
         console.log("tab with conversation exists");
@@ -33,7 +31,6 @@ self.addEventListener('push', function (event) {
           return;
         }
       }
-
       return self.registration.showNotification(payload.display_name, {body: payload.body});
     })
   );
