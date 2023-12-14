@@ -79,7 +79,7 @@ function setNotificationButtonState(notificationState) {
     switch(notificationState.state) {
         case "all":
             if(window.notification_data.remote_identifier) {
-                btn.style.display = 'none';
+                //btn.style.display = 'none';
                 return;
             }
             // note no "break", execution continues to "on" case
