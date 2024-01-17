@@ -80,6 +80,12 @@ final class Messages
         if ($body instanceof CPIM) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
             $bodyStr = $body->toString();
+            // deliver the webpush notification with "MMS Message" instead of an xml
+            Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, "MMS Message", $groupUUID);
+        }
+        else{
+            // deliver the webpush notification 
+            Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
         }
 
         // deliver the webpush notification
