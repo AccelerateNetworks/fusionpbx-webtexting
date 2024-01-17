@@ -88,9 +88,6 @@ final class Messages
             Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
         }
 
-        // deliver the webpush notification
-        Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
-
         // deliver via SIP
         Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $dedupeID, $groupUUID);
     }
