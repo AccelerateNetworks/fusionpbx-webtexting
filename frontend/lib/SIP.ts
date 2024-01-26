@@ -97,7 +97,6 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 //console.log("[MESSAGE]", message);
                 //console.log(`own number: ${ownNumber}`)
                 //I believe this is where we need to target to add auto updatign threadlist
-
                 let direction = 'incoming';
                 let originalTo = message.request.getHeader("X-Original-To");
                 //console.log(`Message requsetfrom ${message.request.from.uri.user}`)
@@ -106,9 +105,6 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                     direction = 'outgoing'; 
                 }
                 const messageFromUser = message.request.from.uri.user;
-                //I think we can rewrite this in a way that just adds the message to the correct destination 
-                // and ignores the conditional ignore situation all together if we implement our Record<threadID, Array<MessageData>> correctly
-                //TL;DR we need a determineThreadID function
                 console.log(message.request.getHeader("Content-Type"));
                 switch (message.request.getHeader("Content-Type")) {
                     case "text/plain":
@@ -232,7 +228,6 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         //if plain/text use to number as key
         //if it's cpim 
         addMessage(message.to,m);
-
         if(message.cpim) {
             message.body = message.cpim.serialize();
             console.log(`serialized cpim message ${message.body}`)
@@ -249,10 +244,12 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         const messager = new Messager(userAgent, remoteURI, message.body, message.contentType, options);
         //console.log(`Messager: `);
         //console.log(messager);
-        console.log(userAgent)
+        //console.log(userAgent)
         
 
-        const reponse = await messager.message();
+        const response = await messager.message();
+        //console.log(response);
+        //updateLastMessage goes here?
         //emitter.emit('scroll-to-bottom');
     });
 }

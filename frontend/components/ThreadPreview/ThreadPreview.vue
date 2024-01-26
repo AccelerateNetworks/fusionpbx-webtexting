@@ -7,7 +7,7 @@ export type ThreadPreviewInterface = {
         type: String,
     },
     bodyPreview: {
-        type: String,
+        type: string,
     },
     link: {
         type: String,
@@ -66,11 +66,15 @@ export default {
             type: Array<String>,
         },
         activeThread: {
-            type: String || Boolean,
-            required: true,
+            type: String,
         }
     },
     components: { Conversation },
+    data() {
+        return{
+            newMessages:0
+        }
+    },
     computed: {
         currentThread() {
             if(this.displayName && this.displayName == this.activeThread){
@@ -114,7 +118,37 @@ export default {
             console.log(payload.key)
             emitter.emit("thread-change",payload)
         },
+        newMessageHandler(){
+            if(this.currentThread=='activeThread'){
+                this.newMessages = 0;
+            }
+        }
     },
+    mounted(){
+        emitter.on("update-last-message",(message:MessageData) =>{
+            if(message.cpim){
+                if(message.direction =='incoming' )
+                console.log('message to ' + message)
+            }
+            else{
+                if(message.direction == 'incoming' && message.from == this.remoteNumber){
+                    if(this.currentThread != 'activeThread'){
+                        this.newMessages++;
+                        console.log(this.newMessages);
+                    }
+                }
+                else {
+                    //if outgoing we probably are in the matching thread
+                    this.newMessages=0;
+                }
+            }
+            this.newMessageHandler();
+                
+        
+           
+        })
+
+    }
 }
 </script>
 
@@ -131,6 +165,7 @@ export default {
 
                     <span class='thread-last-message' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{
                         this.bodyPreview }}</span>
+                        <span class="new-messages" v-if="newMessages>0">{{this.newMessages}}</span>
                 </div>
 
 
@@ -158,8 +193,12 @@ export default {
 .thread-last-message {
     color: darkgray;
     grid-row-start: 2;
-    grid-column: 2;
+    grid-column: 1;
     justify-self: start;
+}
+.new-messages{
+    grid-row:2;
+    grid-column: 2;
 }
 
 .timestamp.activeThread {

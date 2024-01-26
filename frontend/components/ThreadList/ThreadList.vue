@@ -11,7 +11,7 @@ export default {
         displayName: String,
         ownNumber: String,
         threads: Array<Object>,
-        threadPreviews: Array<ThreadPreviewInterface>,
+        threadPreviews: Map<String, ThreadPreviewInterface>,
         selectedConvo: Boolean,
         newThreadView: Boolean
     },
@@ -26,11 +26,26 @@ export default {
             return this.activeThread;
         }
     },
+    watch:{
+        threadPreviews:{
+            handler(oldPreviews,newPreviews){
+            console.log("threadlist thread previews changed");
+        },
+            deep:true,
+        }
+        
+    },
     mounted(){
         emitter.on('thread-change', (threadChangeObject:ThreadChangePayload) => {
             //console.log("TL event get", activeConversation);
             this.activeThread = threadChangeObject.key;
             return this.activeThread;
+        })
+        emitter.on("update-last-message", ()=>{
+            const temp = this.activeThread;
+            this.activeThread = "";
+            this.activeThread = temp;
+
         })
     },
     methods:{
@@ -49,12 +64,12 @@ export default {
     <div class="threadlist_container active" id="THREADLIST" v-bind:class="(selectedConvo || newThreadView) ? 'hide-if-small': 'no-convo-selected'">
         <div class="threadlist-header">Conversations
             <a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
-            <a class="fas fa-info-circle fa-fw menu-icon" aria-label="Accelerate Netwrosk support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a>
+            <a class="fas fa-info-circle fa-fw menu-icon" aria-label="Accelerate Networks support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a>
         </div>
         <div class='threadlist-table'>
             <div class="preview_list_container">
-                <ThreadPreview  v-for="preview in threadPreviews" :key="preview.toString()"
-                    v-bind="preview" :activeThread="this.activeThread" />
+                <ThreadPreview  v-for="[key,value] in threadPreviews" :key="JSON.stringify(value)"
+                    v-bind="value" :activeThread="this.activeThread"  />
             </div>
             <div class="link-container">
                 <router-link :to="'/createthread.php'" class="thread-link dot" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>

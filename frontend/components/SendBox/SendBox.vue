@@ -110,7 +110,7 @@ export default {
 
                         let message = this.getMessageData();
                         message.cpim = cpim;
-                        console.log('emitting message', message);
+                        //console.log('emitting message', message);
                         emitter.emit('outbound-message', message);
                     }
 
@@ -134,7 +134,7 @@ export default {
                             message.contentType = "text/plain";
                             message.body = this.enteredText;
                         }
-                        console.log('emitting message', message);
+                        //console.log('emitting message', message);
                         emitter.emit('outbound-message', message);
 
                         this.enteredText = "";
@@ -159,7 +159,7 @@ export default {
         async sendNewMessage(){
             if((this.remoteNumber && phoneNumbertoPhoneString(this.remoteNumber).length===11)  || this.groupUUID)
                 {
-                    console.log(this.enteredText);
+                    //console.log(this.enteredText);
                     if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
                         this.$refs.textbox.focus();
                         return;
@@ -189,7 +189,7 @@ export default {
                             message.contentType = "text/plain";
                             message.body = this.enteredText;
                         }
-                        console.log('emitting message', message);
+                        //console.log('emitting message', message);
                         emitter.emit('outbound-message', message);
                         setTimeout(() => 
                             location.reload(), 500

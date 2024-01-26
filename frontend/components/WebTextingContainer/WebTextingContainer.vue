@@ -1,19 +1,22 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
 import ThreadList from '../ThreadList/ThreadList.vue';
+import {ThreadPreviewInterface} from '../ThreadPreview/ThreadPreview.vue';
+import moment from 'moment';
 import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
-import { emitter,ThreadChangePayload } from '../../lib/global';
+import { emitter,MessageData,ThreadChangePayload } from '../../lib/global';
 
 
-
+//TODO: changing threads and threadpreviews to Map<String,Object>
+//      this should change how ThreadList/ThreadPreview and Conversation components interact with the threads and threadPreviews props
 export default {
     name: 'WebTextingContainer',
     props: {
         ownNumber: String,
         username: String,
         threads: Array<Object>,
-        threadPreviews: Array<Object>
+        threadPreviews: Map<String,ThreadPreviewInterface>
     },
     computed: {
         conversationSelected() {
@@ -25,9 +28,9 @@ export default {
         },
         newThreadSelected(){
             let newThreadSelected= false;
-           if(this.$route.path === ("/createthread.php")){
+            if(this.$route.path === ("/createthread.php")){
                 newThreadSelected= true;
-           }
+            }
             return newThreadSelected;
         },
     },
@@ -51,7 +54,64 @@ export default {
             }
             console.log("display name calculated");
             return "tested";
+        },
+        updateLastMessage(message:MessageData){
+            console.log(`ULM: `);
+           // const timezoneOffset = new Date().getTimezoneOffset();
+           // console.log(timezoneOffset)
+            let now:Moment =  moment.utc(Date.now());
+            console.log(now);
+            //const timestamp:Date = now.toUTCString();
+            //now = now + timezoneOffset;
+            //console.log(message)
+            if(message.contentType == "message/cpim"){
+                //console.log(message.cpim.headers[`group-uuid`]);
+               // console.log(this.threadPreviews.get(message.cpim.headers[`group-uuid`]));
+                //bump this thread somehow?
+                if(this.threadPreviews.get(message.cpim.headers[`group-uuid`])){
+                        let temp = this.threadPreviews.get(message.cpim.headers[`group-uuid`]);
+                        temp.bodyPreview = "New MMS Message";
+                        temp.timestamp = now;
+                        this.threadPreviews.set(message.cpim.headers[`group-uuid`], temp);
+                    }
+            }
+            else{
+                //console.log("not message.cpim")
+                if(message.from == this.ownNumber){
+                    //console.log(this.threadPreviews.get(message.to))
+                    //set this.threadPreviews.get(message.to)bodyPreview to message.body
+                    if(this.threadPreviews.get(message.to)){
+                        let temp = this.threadPreviews.get(message.to);
+                        temp.bodyPreview = message.body;
+                        temp.timestamp = now;
+                        this.threadPreviews.set(message.to, temp);
+                    }
+                    
+                }
+                else if(message.to == undefined){
+                   // console.log(this.threadPreviews.get(message.from))
+                                        //set this.threadPreviews.get(message.from)bodyPreview to message.body
+                    if(this.threadPreviews.get(message.from)){
+                        let temp = this.threadPreviews.get(message.from);
+                        temp.bodyPreview = message.body;
+                        temp.timestamp = now;
+
+                        this.threadPreviews.set(message.from, temp);
+                    }
+
+                }
+            }
+            this.$forceUpdate();
         }
+    },
+    watch:{
+        threadPreviews:{
+            handler(oldPreviews,newPreviews){
+                console.log("wtc thread previews changed");
+        },
+            deep:true,
+        }
+        
     },
     mounted() {
         emitter.on('thread-change', (payload:ThreadChangePayload ) => {
@@ -59,7 +119,16 @@ export default {
             console.log(`wtc thread change ${payload.key}`)
             this.title= payload.key;
             emitter.emit('thread-changed', payload.key);
-        })
+        });
+        emitter.on("new-message-ingested", (message:MessageData) =>{
+            //console.log(`Message: ${message.body}`);
+            //console.log("time to fetch");
+        });
+        emitter.on("update-last-message",(message:MessageData) =>{
+            this.updateLastMessage(message);
+            
+        });
+        //need a function that takes the new message ingested and replaces the corresponding threadPreview.text
     },
 
 }
@@ -74,7 +143,7 @@ The blank space should notify the user that they can select a thread to display 
         <div id="WEB_TEXT_ROOT">
             
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
-                :threadPreviews="this.$props.threadPreviews" 
+                :threadPreviews="this.threadPreviews" 
                 :selectedConvo="this.conversationSelected"
                 :newThreadView="this.newThreadSelected"/>
 

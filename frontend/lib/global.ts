@@ -39,7 +39,9 @@ const emitter = mitt();
 
 function addMessage(key:string, message: MessageData) {
     console.log("trying to add message with key: " + key);
-    
+    console.log(message)
+    emitter.emit("update-last-message",message)
+
     if(state.conversations[key]){
         //console.log("conversation found checking messages");
         //console.log(state.conversations[key])
@@ -59,6 +61,7 @@ function addMessage(key:string, message: MessageData) {
             console.log("adding message with no ID!", message);       
         }
         emitter.emit('scroll-to-bottom'); 
+        emitter.emit('new-message-ingested',message);
         // console.log(`key: ${key}`);
         // console.log(`state.conversations[key:${state.conversations[key]}`);
         state.conversations[key].push(message);
@@ -83,7 +86,7 @@ function addThread(key:string, message?:MessageData){
     }
     else{
         state.conversations[key] = new Array<MessageData>();
-        console.log(`ading conversation without message`)
+        console.log(`adding conversation without message`)
     }
 }
 
