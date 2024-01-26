@@ -68,11 +68,30 @@ export default {
                 //console.log(message.cpim.headers[`group-uuid`]);
                // console.log(this.threadPreviews.get(message.cpim.headers[`group-uuid`]));
                 //bump this thread somehow?
-                if(this.threadPreviews.get(message.cpim.headers[`group-uuid`])){
+                //this mightnot work for a new message 
+                console.log(message)
+                if(message.cpim.headers[`group-uuid`]){
                         let temp = this.threadPreviews.get(message.cpim.headers[`group-uuid`]);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
                         this.threadPreviews.set(message.cpim.headers[`group-uuid`], temp);
+                    }
+                    //outbound message case
+                    else if(message.direction == 'outgoing'){
+                        let temp = this.threadPreviews.get(this.$route.query.number);
+                        console.log(this.threadPreviews.get(this.$route.query.number), " ", this.$route.query.number);
+                        temp.bodyPreview = "New MMS Message";
+                        temp.timestamp = now;
+                        this.threadPreviews.set(this.$route.query.number, temp);
+                    }
+                    else if(message.direction == 'incoming'){
+                        let temp = this.threadPreviews.get(message.from);
+                        console.log(this.threadPreviews.get(message.from), " ", message.from);
+                        temp.bodyPreview = "New MMS Message";
+                        temp.timestamp = now;
+                        
+
+                        this.threadPreviews.set(message.from, temp);
                     }
             }
             else{
