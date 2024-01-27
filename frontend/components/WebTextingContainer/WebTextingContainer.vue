@@ -65,24 +65,41 @@ export default {
             //now = now + timezoneOffset;
             //console.log(message)
             if(message.contentType == "message/cpim"){
-                //console.log(message.cpim.headers[`group-uuid`]);
-               // console.log(this.threadPreviews.get(message.cpim.headers[`group-uuid`]));
+                //console.log(message.cpim.headers['group-uuid']);
+               // console.log(this.threadPreviews.get(message.cpim.headers['group-uuid']));
                 //bump this thread somehow?
                 //this mightnot work for a new message 
-                console.log(message)
-                if(message.cpim.headers[`group-uuid`]){
-                        let temp = this.threadPreviews.get(message.cpim.headers[`group-uuid`]);
-                        temp.bodyPreview = "New MMS Message";
-                        temp.timestamp = now;
-                        this.threadPreviews.set(message.cpim.headers[`group-uuid`], temp);
-                    }
+                // console.log(message.cpim.headers["group-uuid"])
+                // console.log(message.cpim.headers["Group-UUID"])
+                // console.log(message.cpim.headers['Group-UUID'])
+                 console.log(message.cpim.headers['group-uuid'])
+
+                
                     //outbound message case
-                    else if(message.direction == 'outgoing'){
-                        let temp = this.threadPreviews.get(this.$route.query.number);
-                        console.log(this.threadPreviews.get(this.$route.query.number), " ", this.$route.query.number);
-                        temp.bodyPreview = "New MMS Message";
-                        temp.timestamp = now;
-                        this.threadPreviews.set(this.$route.query.number, temp);
+                    if(message.direction == 'outgoing'){
+                        if(message.cpim.headers['group-uuid'] ){
+                            let temp = this.threadPreviews.get(message.cpim.headers['group-uuid']);
+                            temp.bodyPreview = "New MMS Message";
+                            temp.timestamp = now;
+                            this.threadPreviews.set(message.cpim.headers['group-uuid'], temp);
+                        }else if(message.cpim.headers["Group-UUID"]){
+                            let temp = this.threadPreviews.get(message.cpim.headers['Group-UUID']);
+                            temp.bodyPreview = "New MMS Message";
+                            temp.timestamp = now;
+                            this.threadPreviews.set(message.cpim.headers['Group-UUID'], temp);
+                        }
+                        else{
+                            if(this.$route.query.number){
+                                let temp = this.threadPreviews.get(this.$route.query.number);
+                                console.log(this.threadPreviews.get(this.$route.query.number), " ", this.$route.query.number);
+                                temp.bodyPreview = "New MMS Message";
+                                temp.timestamp = now;
+                                this.threadPreviews.set(this.$route.query.number, temp);
+                            }
+                            
+                        }
+                        
+                        
                     }
                     else if(message.direction == 'incoming'){
                         let temp = this.threadPreviews.get(message.from);

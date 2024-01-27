@@ -34,9 +34,9 @@ function calculatePlainThreadID(message:Message, direction:string, originalTo: s
 
 function calculateCPIMThreadID(cpim:CPIM, direction:string, originalTo: string, messageFromUser: string){    
     //console.log(`calculateCPIMThreadID ${cpim}`);
-    if(cpim.getHeader("group-uuid")) {
+    if(cpim.getHeader("Group-UUID")) {
         //console.log("message is for a group");
-        return cpim.getHeader("group-uuid")
+        return cpim.getHeader("Group-UUID")
     }
     else if ((originalTo || messageFromUser) ) {
         //console.log(`adding message to conversation between ${originalTo} and ${messageFromUser}.`)

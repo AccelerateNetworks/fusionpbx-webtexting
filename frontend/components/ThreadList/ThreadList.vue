@@ -68,7 +68,7 @@ export default {
         </div>
         <div class='threadlist-table'>
             <div class="preview_list_container">
-                <ThreadPreview  v-for="[key,value] in threadPreviews" :key="JSON.stringify(value)"
+                <ThreadPreview  v-for="[key,value] in threadPreviews" :key="key"
                     v-bind="value" :activeThread="this.activeThread"  />
             </div>
             <div class="link-container">
