@@ -116,6 +116,7 @@ export default {
             payload.editLink = this.contactEditLink;
             //console.log(payload);
             console.log(payload.key)
+            this.newMessages=0;
             emitter.emit("thread-change",payload)
         },
         newMessageHandler(){
@@ -127,25 +128,36 @@ export default {
     mounted(){
         emitter.on("update-last-message",(message:MessageData) =>{
             if(message.cpim){
-                if(message.direction =='incoming' )
-                console.log('message to ' + message)
+                // console.log(message.cpim.headers['Group-UUID'])
+                // console.log(message.cpim.headers["Group-UUID"])
+                // console.log(message.cpim.headers['group-uuid'])
+                // console.log(message.cpim.headers["group-uuid"])
+
+
+                if( message.cpim.headers["group-uuid"]){
+                    if(message.direction =='incoming' && this.groupUUID == message.cpim.headers["group-uuid"] ){
+                        this.newMessages++;
+                    }
+                }
+                else{
+                    console.log(this.remoteNumber, " ", message.from)
+
+                    if(message.direction=='incoming' && this.remoteNumber == message.from){
+                        this.newMessages++;
+                    }
+                }
+                
+                //console.log('message to ' + message)
             }
             else{
-                if(message.direction == 'incoming' && message.from == this.remoteNumber){
+                if(message.direction == 'incoming' && message.from == this.remoteNumber ){
+                    console.log(this.remoteNumber, " ", message.from)
                     if(this.currentThread != 'activeThread'){
                         this.newMessages++;
                         console.log(this.newMessages);
                     }
                 }
-                else {
-                    //if outgoing we probably are in the matching thread
-                    this.newMessages=0;
-                }
-            }
-            this.newMessageHandler();
-                
-        
-           
+            }                
         })
 
     }
@@ -165,7 +177,7 @@ export default {
 
                     <span class='thread-last-message' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{
                         this.bodyPreview }}</span>
-                        <span class="new-messages" v-if="newMessages>0">{{this.newMessages}}</span>
+                        <span class="new-messages dot" v-if="newMessages>0">{{this.newMessages}}</span>
                 </div>
 
 
@@ -198,8 +210,35 @@ export default {
 }
 .new-messages{
     grid-row:2;
-    grid-column: 2;
+    grid-column: 3;
+    display: inline-block;
+    justify-content: right;
+    justify-self: right;
 }
+.dot {    
+    /*color: white;
+     text-align:center;
+     margin: 0;
+     position: absolute;               
+     top: 50%;                         
+     left: 50%;
+     transform: translate(-50%, -50%) ; */
+     background: #BB6025;
+         border-radius: 50%;
+         -moz-border-radius: 50%;
+         -webkit-border-radius: 50%;
+         color: #ffffff;
+         display: inline-block;
+         font-weight: bold;
+         line-height: 22px;
+         margin-right: 5px;
+         text-align: center;
+         width: 22px;
+ 
+ }
+ .dot:hover{
+     color:#BB6025;
+ }
 
 .timestamp.activeThread {
     color: white;

@@ -60,7 +60,7 @@ export default {
            // const timezoneOffset = new Date().getTimezoneOffset();
            // console.log(timezoneOffset)
             let now:Moment =  moment.utc(Date.now());
-            console.log(now);
+            //console.log(now);
             //const timestamp:Date = now.toUTCString();
             //now = now + timezoneOffset;
             //console.log(message)

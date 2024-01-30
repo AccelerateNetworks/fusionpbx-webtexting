@@ -140,19 +140,7 @@ export default {
     float: right;
     margin-top: 0.5rem;
 }
-.dot {    
-    color: white;
-    text-align:center;
-    margin: 0;
-    position: absolute;               /* 2 */
-    top: 50%;                         /* 3 */
-    left: 50%;
-    transform: translate(-50%, -50%) ;
 
-}
-.dot:hover{
-    color:#BB6025;
-}
 
 
     @media screen and (width <=700px) {    
