@@ -146,8 +146,6 @@ export default {
                         this.newMessages++;
                     }
                 }
-                
-                //console.log('message to ' + message)
             }
             else{
                 if(message.direction == 'incoming' && message.from == this.remoteNumber ){
@@ -177,7 +175,9 @@ export default {
 
                     <span class='thread-last-message' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{
                         this.bodyPreview }}</span>
-                        <span class="new-messages dot" v-if="newMessages>0">{{this.newMessages}}</span>
+                        <div class="new-messages">
+                            <span class="new-message-alert-dot bgc-AN-orange" v-if="newMessages>0">{{this.newMessages}}</span>
+                        </div>
                 </div>
 
 
@@ -207,6 +207,9 @@ export default {
     grid-row-start: 2;
     grid-column: 1;
     justify-self: start;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 .new-messages{
     grid-row:2;
@@ -215,15 +218,7 @@ export default {
     justify-content: right;
     justify-self: right;
 }
-.dot {    
-    /*color: white;
-     text-align:center;
-     margin: 0;
-     position: absolute;               
-     top: 50%;                         
-     left: 50%;
-     transform: translate(-50%, -50%) ; */
-     background: #BB6025;
+.new-message-alert-dot {    
          border-radius: 50%;
          -moz-border-radius: 50%;
          -webkit-border-radius: 50%;
@@ -231,13 +226,13 @@ export default {
          display: inline-block;
          font-weight: bold;
          line-height: 22px;
-         margin-right: 5px;
+         margin-right: 1.5rem;
          text-align: center;
          width: 22px;
  
  }
  .dot:hover{
-     color:#BB6025;
+     color:#fff;
  }
 
 .timestamp.activeThread {
@@ -252,27 +247,6 @@ export default {
     color: white;
 }
 
-.tr_replace:hover {
-    background-color: #aaaaaa;
-}
-
-
-.thread-preview-container {
-    border-radius: 1em;
-    padding: 0.5625em;
-    display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: 0 auto auto;
-}
-
-.tr_replace:hover span {
-    color: black;
-}
-
-.tr_replace.activeThread:hover span {
-    color: white;
-}
-
 .text-center {
     margin: 0;
     position: relative;
@@ -281,12 +255,32 @@ export default {
     transform: translateY(-50%);
 }
 
-
-
 .activeThread {
     color: white;
 }
 
+.thread-preview-container {
+    border-radius: 1em;
+    padding: 0.5625em;
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 0 auto auto;
+}
+.tr_replace{
+    max-height: 6rem;
+
+}
+
+.tr_replace:hover span {
+    color: black;
+}
+.tr_replace:hover {
+    background-color: #aaaaaa;
+}
+
+.tr_replace.activeThread:hover span {
+    color: white;
+}
 .tr_replace.activeThread:hover {
     background-color: #aaaaaa;
 }

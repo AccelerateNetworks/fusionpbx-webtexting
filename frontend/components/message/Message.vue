@@ -21,7 +21,7 @@ export default {
         },
         lastSender: {
             type: String,
-            requried: false,
+            required: false,
         }
     },
     methods: {

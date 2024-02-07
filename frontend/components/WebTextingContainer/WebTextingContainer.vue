@@ -216,6 +216,12 @@ The blank space should notify the user that they can select a thread to display 
     -webkit-box-shadow: inset 0 0 6px rgba(255,255,255,0.5); 
     background-color: #BB6025;
 }
+.bgc-AN-orange{
+    background: #BB6025;
+}
+.bgc-none{
+    background: none;
+}
 @media screen and (width<=700px){
     #main_content{
         margin-top:48px;

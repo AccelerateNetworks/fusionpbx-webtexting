@@ -72,7 +72,7 @@ export default {
                     v-bind="value" :activeThread="this.activeThread"  />
             </div>
             <div class="link-container">
-                <router-link :to="'/createthread.php'" class="thread-link dot" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
+                <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
             </div>
         </div>
     </div>
@@ -140,6 +140,30 @@ export default {
     float: right;
     margin-top: 0.5rem;
 }
+.dot-center{
+    text-align:center;
+     margin: 0;
+     position: absolute;               
+     top: 50%;                         
+     left: 50%;
+     transform: translate(-50%, -50%) ; 
+}
+.dot {    
+     
+         border-radius: 50%;
+         -moz-border-radius: 50%;
+         -webkit-border-radius: 50%;
+         color: #ffffff;
+         display: inline-block;
+         font-weight: bold;
+         line-height: 22px;
+         margin-right: 5px;
+         text-align: center;
+ 
+ }
+ .dot:hover{
+     color:#BB6025;
+ }
 
 
 

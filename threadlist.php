@@ -123,9 +123,55 @@ foreach ($threads as $thread) {
         } else {
             $display_name = $group['members'];
         }
-    } else {
+        $group_members = explode(",",$group['members']);
+        $frontendOpts[$z]['groupMembers'] = explode(",",$group['members']);
+        $member_index =0;
+        foreach( $group_members as $member ){
+            $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_organization, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family, v_contacts.contact_nickname, v_contacts.contact_title, v_contacts.contact_role FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
+            $parameters['number'] = $member;
+            $parameters['domain_uuid'] = $domain_uuid;
+            $contact = $database->select($sql, $parameters, 'row');
+            unset($parameters);
+
+            if ($contact) {
+                $name_parts = array();
+                if ($contact['contact_organization']) {
+                    $name_parts[] = $contact['contact_organization'];
+                }
+                if ($contact['contact_title']) {
+                    $name_parts[] = $contact['contact_title'];
+                }
+                if ($contact['contact_name_prefix']) {
+                    $name_parts[] = $contact['contact_name_prefix'];
+                }
+                if ($contact['contact_name_given']) {
+                    $name_parts[] = $contact['contact_name_given'];
+                }
+                if ($contact['contact_name_middle']) {
+                    $name_parts[] = $contact['contact_name_middle'];
+                }
+                if ($contact['contact_name_family']) {
+                    $name_parts[] = $contact['contact_name_family'];
+                }
+                if ($contact['contact_nickname']) {
+                    $name_parts[] = $contact['contact_nickname'];
+                }
+                if ($contact['contact_role']) {
+                    $name_parts[] = $contact['contact_role'];
+                }
+                if (sizeof($name_parts) > 0) {
+                    $frontendOpts[$z]['groupMembers'][$member_index] = implode(" ", $name_parts);
+                }
+            }
+            else{
+                $frontendOpts[$z]['groupMembers'][$member_index] = $member;
+            }            
+        } 
+    }
+    else {
         $display_name = $number;
         $thread_preview_opts[$z]['displayName'] = $display_name;
+        //the following logic would have to be executed 
         $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_organization, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family, v_contacts.contact_nickname, v_contacts.contact_title, v_contacts.contact_role FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
         $parameters['number'] = $number;
         $parameters['domain_uuid'] = $domain_uuid;
@@ -191,6 +237,7 @@ foreach ($threads as $thread) {
     $thread_preview_opts[$z]['ownNumber'] = $ownNumber;
     $thread_preview_opts[$z]['displayName']= $display_name;
     $thread_preview_opts[$z]['contactEditLink'] = $frontendOpts['contactEditLink'] ;
+    $thread_preview_opts[$z]['groupMembers'] = $frontendOpts[$z]['groupMembers'];
     $z++;
  }
  $frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
