@@ -4,6 +4,8 @@ require_once "resources/require.php";
 require_once "resources/check_auth.php";
 require_once "resources/header.php";
 require_once "resources/paging.php";
+require_once "src/AccelerateNetworks.php";
+require_once __DIR__."/vendor/autoload.php";
 
 foreach ($_SESSION['user']['extension'] as $ext) {
     if ($ext['extension_uuid'] == $_GET['extension_uuid']) {
@@ -50,6 +52,7 @@ if (!$destination) {
 <input type='hidden' name='key_uuid' id='key_uuid'/>
 </form>
 <?php
+AccelerateNetworks::ValidateAccessToken();
 $page = 0;
 $page_size = 25;
 $sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message DESC LIMIT ".$page_size;

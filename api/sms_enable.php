@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__."/../lib/acceleratenetworks.php";
+require_once __DIR__."/../src/AccelerateNetworks.php";
 $required_params = array("domain_uuid", "number", "extension_uuid");
 
 function do_action($body) {

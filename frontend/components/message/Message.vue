@@ -1,7 +1,6 @@
 <script lang="ts">
 import { MessageData, emitter } from '../../lib/global';
 import type { PropType } from 'vue'
-
 export default {
     data() {
         return {
@@ -22,6 +21,14 @@ export default {
         lastSender: {
             type: String,
             required: false,
+        },
+        displayName:{
+            type: String,
+            required: false            
+        },
+        mode:{
+            type: String,
+            required: true
         }
     },
     methods: {
@@ -87,7 +94,7 @@ export default {
 <template>
     <div class="message-wrapper">
         <div class="author" :class="this.message.direction">{{ this.lastSender == this.message.from ? "" :
-            this.message.from }}</div>
+            this.displayName }}</div>
         <div class="message" :class="this.message.direction">
             <p class="message-body" v-if="this.text">{{ this.text }}</p>
             <p class="message-body" v-if="this.embedImage" ref="embed">

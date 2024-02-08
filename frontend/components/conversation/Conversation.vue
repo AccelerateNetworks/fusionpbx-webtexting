@@ -311,9 +311,10 @@ export default {
                 <div ref="top">
                     <div class="backfill" v-if="backfillAvailable">loading older messages</div>
                 </div>
-                <Message :message="message" :key="message.id"
+                <Message :message="message" :key="message.id" :displayName="this.displayName ? this.displayName : null "
                     :lastSender="index - 1 >= 0 ? this.state.conversations[conversationKey][index - 1].from : '-1'"
-                    v-for="(message, index) in this.state.conversations[conversationKey]" />
+                    v-for="(message, index) in this.state.conversations[conversationKey]" 
+                    :mode='this.groupUUID ? "group" : "solo"' />
                 <div class="message-wrapper" ref="bottom">&nbsp;</div>
             </div>
             <SendBox :remoteNumber="remoteNumber" :groupUUID="this.$route.query.group" :ownNumber="ownNumber" location="Conversation"/>
