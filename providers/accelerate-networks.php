@@ -56,6 +56,7 @@ function outgoing_mms(string $from, string $to, array $attachments)
 
 function _send(array $body)
 {
+    AccelerateNetworks::ValidateAccessToken();
     $client = new GuzzleHttp\Client();
     $res = $client->request(
         'POST', "https://sms.callpipe.com/message/send", [

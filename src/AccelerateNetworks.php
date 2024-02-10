@@ -37,24 +37,26 @@ final class AccelerateNetworks {
     //This function hits toms ops.callpipe.com for verifying auth
     static function ValidateAccessToken(){
         //Pre-Conditions
-        if(isset($_SESSION['webtexting']['acceleratenetworks_api_key']['text'])){
+        //unset($_SESSION['webtexting']['acceleratenetworks_api_key']['text']);
+        //$_SESSION['webtexting']['accessTokenExpiration'] =time() -140;
+        if(isset($_SESSION['webtexting']['acceleratenetworks_api_key']['text']) && strlen($_SESSION['webtexting']['acceleratenetworks_api_key']['text']) > 1){
             //if accesstoken is set check if expired
             //if accessToken is set we've also set the other relevant session variables
-            if($_SESSION['webtexting']['auth']['accessTokenExpiration'] < (time()-120)){
+            if(isset($_SESSION['webtexting']['accessTokenExpiration'] ) && $_SESSION['webtexting']['accessTokenExpiration'] < (time()-120)){
                 //token is expired hit /refresh
                 $client = new GuzzleHttp\Client();
                 $res = $client->request(
                     'POST', "https://sms.callpipe.com/refresh",[           
                     'json' => [
-                        'refreshToken' => $_SESSION['webtexting']['auth']['refreshToken'],
+                        'refreshToken' => $_SESSION['webtexting']['refreshToken'],
                     ],
                     ]
                 );                
                 if($res->getStatusCode() == '200'){
                     $responseBody = json_decode($res->getBody()->getContents());
                     $_SESSION['webtexting']['acceleratenetworks_api_key']['text'] = $responseBody->accessToken;
-                    $_SESSION['webtexting']['auth']['accessTokenExpiration'] = time() + $responseBody->expiresIn;
-                    $_SESSION['webtexting']['auth']['refreshToken'] = $responseBody->refreshToken;
+                    $_SESSION['webtexting']['accessTokenExpiration'] = time() + $responseBody->expiresIn;
+                    $_SESSION['webtexting']['refreshToken'] = $responseBody->refreshToken;
                 }
                 else{
                     //refresh failed. try /login
@@ -62,17 +64,18 @@ final class AccelerateNetworks {
                     $res = $client->request(
                         'POST', "https://sms.callpipe.com/login",[           
                             'json' => [
-                                //these are set at 
-                                'email' => $_SESSION['webtexting']['auth']['email'],
-                                'password' => $_SESSION['webtexting']['auth']['secret'],
+                                //these are populated in fusionpbx's default setttings
+                                //they'll have to be added there
+                                'email' => $_SESSION['webtexting']['auth_email']['text'],
+                                'password' => $_SESSION['webtexting']['auth_secret']['text'],
                             ],
                         ]
                     );
                     $responseBody = json_decode($res->getBody()->getContents());
                     //the
                     $_SESSION['webtexting']['acceleratenetworks_api_key']['text'] = $responseBody->accessToken;
-                    $_SESSION['webtexting']['auth']['accessTokenExpiration'] = time() + $responseBody->expiresIn;
-                    $_SESSION['webtexting']['auth']['refreshToken'] = $responseBody->refreshToken;
+                    $_SESSION['webtexting']['accessTokenExpiration'] = time() + $responseBody->expiresIn;
+                    $_SESSION['webtexting']['refreshToken'] = $responseBody->refreshToken;
                 }
                 
             }
@@ -86,16 +89,18 @@ final class AccelerateNetworks {
                 $res = $client->request(
                     'POST', "https://sms.callpipe.com/login",[           
                         'json' => [
-                            'email' => $_SESSION['webtexting']['auth']['email'],
-                            'password' => $_SESSION['webtexting']['auth']['secret'],
+                            //these are populated in fusionpbx's default setttings
+                            //they'll have to be added there
+                            'email' => $_SESSION['webtexting']['auth_email']['text'],
+                                'password' => $_SESSION['webtexting']['auth_secret']['text'],
                         ],
                     ]
                 );
                 if($res->getStatusCode() =='200'){
                     $responseBody = json_decode($res->getBody()->getContents());
                     $_SESSION['webtexting']['acceleratenetworks_api_key']['text'] = $responseBody->accessToken;
-                    $_SESSION['webtexting']['auth']['accessTokenExpiration'] = time() + $responseBody->expiresIn;
-                    $_SESSION['webtexting']['auth']['refreshToken'] = $responseBody->refreshToken;
+                    $_SESSION['webtexting']['accessTokenExpiration'] = time() + $responseBody->expiresIn;
+                    $_SESSION['webtexting']['refreshToken'] = $responseBody->refreshToken;
                 }
                 else{
                     echo "<script>alert('Invalid Credentials: Contact support@acceleratenetworks.com');</script>";
