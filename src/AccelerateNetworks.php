@@ -1,5 +1,5 @@
 <?php
-
+//session_start();
 final class AccelerateNetworks {
     static function GetInboundSMSRouting(string $number) {
         $client = new GuzzleHttp\Client();
