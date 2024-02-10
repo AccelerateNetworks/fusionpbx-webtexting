@@ -12,7 +12,7 @@ export default defineConfig({
     }
   },
   define: {
-    "process.env.NODE_ENV": "'development'",
+    "process.env.NODE_ENV": "'production'",
   },
   root: "frontend",
   build: {
