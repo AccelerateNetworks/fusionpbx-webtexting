@@ -3,6 +3,7 @@
 final class AccelerateNetworks {
     static function GetInboundSMSRouting(string $number) {
         $client = new GuzzleHttp\Client();
+        AccelerateNetworks::ValidateAccessToken();
         $res = $client->request(
             'GET', "https://sms.callpipe.com/client?asDialed=".urlencode($number), [
                 'headers' => [
@@ -16,7 +17,7 @@ final class AccelerateNetworks {
 
     static function RegisterInboundRouting(string $number, string $url) {
         $client = new GuzzleHttp\Client();
-        //ValidateAccessToken()
+        AccelerateNetworks::ValidateAccessToken();
         $res = $client->request(
             'POST', "https://sms.callpipe.com/client/register", [
                 'headers' => [
