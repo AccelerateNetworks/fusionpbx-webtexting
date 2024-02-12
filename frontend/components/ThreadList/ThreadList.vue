@@ -71,9 +71,10 @@ export default {
                 <ThreadPreview  v-for="[key,value] in threadPreviews" :key="key"
                     v-bind="value" :activeThread="this.activeThread"  />
             </div>
-            <div class="link-container">
-                <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
-            </div>
+            
+        </div>
+        <div class="link-container">
+            <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
         </div>
     </div>
 </template>
