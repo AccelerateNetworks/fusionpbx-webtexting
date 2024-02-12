@@ -163,7 +163,7 @@ export default {
 </script>
 
 <template>
-    <div class='tr_replace' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
+    <div class='tr_replace' :data-displayName="this.displayName" v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
         <div class='td_preview' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
             <router-link :to="this.link" class="thread-link" @click="routerLinkClickHandler">
                 <div class="thread-preview-container" v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
