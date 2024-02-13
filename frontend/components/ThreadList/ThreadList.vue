@@ -138,7 +138,7 @@ export default {
     background-color: #5f9fd3;
     border-radius: 50%;
     position:relative;
-    float: right;
+    float: center;
     margin-top: 0.5rem;
 }
 .dot-center{
