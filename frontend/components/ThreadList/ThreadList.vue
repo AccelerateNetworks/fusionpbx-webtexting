@@ -1,4 +1,5 @@
 <script lang="ts" >
+import ThreadSearch from '../ThreadSearch/ThreadSearch.vue';
 import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
 import {emitter, ThreadChangePayload} from '../../lib/global'
 
@@ -15,16 +16,19 @@ export default {
         selectedConvo: Boolean,
         newThreadView: Boolean
     },
-    components: { ThreadPreview },
+    components: { ThreadPreview, ThreadSearch },
     data() {
-        return { activeThread: '' }
+        return { activeThread: '',
+                    filterString: '',
+                    displaySearch: false }
     },
     computed: {
         recieveEmit(threadChangeObject:ThreadChangePayload) {
             //console.log(`active conversation: ${activeConversation}`);
             this.activeThread = threadChangeObject.key;
             return this.activeThread;
-        }
+        },
+        
     },
     watch:{
         threadPreviews:{
@@ -47,12 +51,18 @@ export default {
             this.activeThread = temp;
 
         })
+        emitter.on("update-filter-string",(filterString)=>{
+            this.filterString = filterString;
+        });
     },
     methods:{
         dumpSelectedThread(){
             const newThread = {key:'', editLink:null}
             emitter.emit('thread-change',newThread);
         },
+        filteredPreviews(){
+            return new Map([...this.threadPreviews].filter(([key,value])=> value.displayName.toLowerCase().includes(this.filterString.toLowerCase())));
+        }
     },
 }
 
@@ -66,9 +76,10 @@ export default {
             <a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
             <a class="fas fa-info-circle fa-fw menu-icon" aria-label="Accelerate Networks support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a>
         </div>
+        <ThreadSearch v-if='true'></ThreadSearch>
         <div class='threadlist-table'>
             <div class="preview_list_container">
-                <ThreadPreview  v-for="[key,value] in threadPreviews" :key="key"
+                <ThreadPreview  v-for="[key,value] in filteredPreviews()" :key="key"
                     v-bind="value" :activeThread="this.activeThread"  />
             </div>
             
@@ -76,6 +87,7 @@ export default {
         <div class="link-container">
             <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
         </div>
+        
     </div>
 </template>
 <style>
@@ -96,7 +108,6 @@ export default {
 }
 .preview_list_container {
     direction: ltr;
-    padding-left: 0.25rem;
 }
 .threadlist_container {
     height: 100%;
@@ -111,8 +122,8 @@ export default {
 
 .threadlist-header{
     box-shadow: 0 4px 4px -2px white;
-    margin: 0 auto 3px auto;
-    padding: 1em;
+    margin: 0 auto 0px auto;
+    padding: 1em 1em 0.25rem 1em;
     background-color: #5f9fd3;
     color: #fff;
     border-top-left-radius: 0.5em;
@@ -141,6 +152,7 @@ export default {
     float: center;
     margin-top: 0.5rem;
 }
+
 .dot-center{
     text-align:center;
      margin: 0;

@@ -4,6 +4,7 @@ import ThreadList from '@/components/ThreadList/ThreadList.vue';
 import NewMessage from '@/components/NewMessage.vue';
 import ConversationVue from '@/components/conversation/Conversation.vue';
 import ConvoPlaceholderVue from '@/components/ConvoPlaceholder.vue';
+import SearchThread from '@/components/ThreadSearch/ThreadSearch.vue';
 
 export const router = createRouter({
     history: createWebHistory("/app/webtexting/"),
@@ -35,6 +36,14 @@ export const router = createRouter({
                 }
                     
             },
+            {
+                path:'/searchthread.php',
+                components:{
+                    leftSide: ThreadList,
+                    rightSide: SearchThread,
+                }
+                    
+            }
             
         ]
         }
