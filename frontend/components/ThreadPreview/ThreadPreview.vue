@@ -67,9 +67,6 @@ export default {
         },
         activeThread: {
             type: String,
-        },
-        isFiltered:{
-            type: Boolean,
         }
     },
     components: { Conversation },
@@ -166,7 +163,7 @@ export default {
 </script>
 
 <template>
-    <div class='tr_replace' :data-displayName="this.displayName"  v-if='true' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
+    <div class='tr_replace' :data-displayName="this.displayName" v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
         <div class='td_preview' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
             <router-link :to="this.link" class="thread-link" @click="routerLinkClickHandler">
                 <div class="thread-preview-container" v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">
@@ -296,12 +293,11 @@ export default {
     background-color: #aaaaaa;
 }
 
-/*
 .tr_replace:first-child {
     border-top-left-radius: 0.5rem;
     border-top-right-radius: 0.5rem;
 }
-*/
+
 .tr_replace:last-child {
     border-bottom-left-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
