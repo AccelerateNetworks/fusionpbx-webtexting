@@ -1,4 +1,7 @@
 const channel = new BroadcastChannel('message-pushes');
+console.log("channel state", channel);
+console.log("self.clients", self.clients);
+
 
 self.addEventListener('install', function (event) {
   event.waitUntil(self.skipWaiting());
@@ -21,16 +24,18 @@ self.addEventListener('push', function (event) {
 
       var tab = clientList.some(function (client) {
         let u = new URL(client.url);
+        console.log(payload.to , " " , payload.from)
+        //this is always false because it's comparing a uuid to a phone number
         return u.searchParams.get('extension_uuid') == payload.to && u.searchParams.get('number') == payload.from;
       });
-
+      console.log("tav info", tab)
       if(tab) {
         console.log("tab with conversation exists");
-        if(tab.focused) {
-          console.log('tab with conversation is focused, not sending notification');
           return;
-        }
+        
       }
+      console.log("registration", self.registration)
+      console.log("payload" , payload);
       return self.registration.showNotification(payload.display_name, {body: payload.body});
     })
   );
