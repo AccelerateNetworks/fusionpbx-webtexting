@@ -55,12 +55,12 @@ $sql = "SELECT * FROM webtexting_subscriptions WHERE client_uuid = :client_uuid 
 $parameters['client_uuid'] = $client_uuid;
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $body->extension_uuid;
-// if($body->remote_identifier) {
-//     $sql .= "(remote_identifier = :remote_identifier OR remote_identifier IS NULL)";
-//     $parameters['remote_identifier'] = $body->remote_identifier;
-// } else {
-//     $sql .= "remote_identifier IS NULL";
-// }
+if($body->remote_identifier) {
+    $sql .= "(remote_identifier = :remote_identifier OR remote_identifier IS NULL)";
+    $parameters['remote_identifier'] = $body->remote_identifier;
+} else {
+    $sql .= "remote_identifier IS NULL";
+}
 $database = new database;
 $subscriptions = $database->select($sql, $parameters, 'all');
 unset($parameters);
@@ -68,7 +68,10 @@ unset($parameters);
 $notification_state = "off";
 foreach($subscriptions as $subscription) {
     if($subscription['remote_identifier']) {
-        unset($subscription['remote_identifier']);
+        if($notification_state == "off") {
+            $notification_state = "on";
+        }
+    } else {
         $notification_state = "all";
     }
 }
@@ -84,16 +87,16 @@ if($body->{'state'} == "on" && !$subscriptions) { // enabled notifications
     $subscriptions = $database->select($sql, $parameters, 'row');
     unset($parameters);
     $notification_state = "all";
-    // if($body->{'remote_identifier'}) {
-    //     $notification_state = "on";
-    // }
+    if($body->{'remote_identifier'}) {
+        $notification_state = "on";
+    }
 } elseif($body->{'state'} == "off" && $subscriptions) { // disable notifications
     $sql = "DELETE FROM webtexting_subscriptions WHERE client_uuid = :client_uuid AND domain_uuid = :domain_uuid";
     $parameters['client_uuid'] = $client_uuid;
     $parameters['domain_uuid'] = $domain_uuid;
     if($body->{'remote_identifier'}) {
         $sql .= " AND remote_identifier = :remote_identifier";
-        $parameters['remote_identifier'] = Null;
+        $parameters['remote_identifier'] = $body->{'remote_identifier'};
     }
     $database = new database;
     $database->execute($sql, $parameters);

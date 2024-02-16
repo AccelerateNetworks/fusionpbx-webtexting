@@ -34,8 +34,6 @@ self.addEventListener('push', function (event) {
           return;
         
       }
-      console.log("registration", self.registration)
-      console.log("payload" , payload);
       return self.registration.showNotification(payload.display_name, {body: payload.body});
     })
   );
