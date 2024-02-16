@@ -93,7 +93,7 @@ if($body->{'state'} == "on" && !$subscriptions) { // enabled notifications
     $parameters['domain_uuid'] = $domain_uuid;
     if($body->{'remote_identifier'}) {
         $sql .= " AND remote_identifier = :remote_identifier";
-        $parameters['remote_identifier'] = $body->{'remote_identifier'};
+        $parameters['remote_identifier'] = Null;
     }
     $database = new database;
     $database->execute($sql, $parameters);
