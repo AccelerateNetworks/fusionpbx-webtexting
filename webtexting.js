@@ -109,7 +109,7 @@ if (window.notification_data) {
         }
 
         var subscription = await registration.pushManager.getSubscription();
-        console.log("permissionState = " , permissionState)
+        console.log("permissionState = " , subscription)
         var buttonState = {state: "off"};
         if(subscription) {
             console.log(subscription.toJSON());
