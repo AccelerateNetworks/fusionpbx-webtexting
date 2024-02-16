@@ -70,6 +70,7 @@ foreach($subscriptions as $subscription) {
     if($subscription['remote_identifier']) {
         unset($subscription['remote_identifier']);
         $notification_state = "all";
+    }
 }
 
 if($body->{'state'} == "on" && !$subscriptions) { // enabled notifications
