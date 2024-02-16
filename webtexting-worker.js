@@ -1,6 +1,6 @@
 const channel = new BroadcastChannel('message-pushes');
 console.log("channel state", channel);
-console.log("self.clients", self.clients.get());
+console.log("self.clients", self.clients);
 
 
 self.addEventListener('install', function (event) {
