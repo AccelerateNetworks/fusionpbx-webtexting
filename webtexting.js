@@ -58,7 +58,7 @@ async function toggleNotifications() {
         method: "POST",
         body: JSON.stringify({
             endpoint: subscription.toJSON(),
-            state: currentState == "on" || currentState == "all" ? "off" : "on",
+            state: (currentState == "on" || currentState == "all") ? "off" : "on",
             extension_uuid: window.notification_data.extension_uuid,
             remote_identifier: window.notification_data.remote_identifier,
         }),
@@ -104,10 +104,12 @@ if (window.notification_data) {
         const state = await registration.pushManager.permissionState({userVisibleOnly:true});
         console.log("push notification permission state:", state);
         if (state == "denied") {
+            console.log("Push notification permissions denied. Please contact support@accleratenetworks.com.")
             return;
         }
 
         var subscription = await registration.pushManager.getSubscription();
+        console.log("permissionState = " , permissionState)
         var buttonState = {state: "off"};
         if(subscription) {
             console.log(subscription.toJSON());

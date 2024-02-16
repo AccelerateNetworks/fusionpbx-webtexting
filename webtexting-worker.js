@@ -37,7 +37,7 @@ self.addEventListener('push', function (event) {
 });
 
 self.addEventListener('notificationclick', function (event) {
-  e.notification.close();
+  event.notification.close();
   event.waitUntil(
     self.clients.matchAll().then(function (clientList) {
       var tab = clientList.some(function (client) {
