@@ -58,9 +58,10 @@ async function toggleNotifications() {
         method: "POST",
         body: JSON.stringify({
             endpoint: subscription.toJSON(),
+            //if either is "on" state is true we need to turn off notifications
             state: (currentState == "on" || currentState == "all") ? "off" : "on",
             extension_uuid: window.notification_data.extension_uuid,
-            remote_identifier: window.notification_data.remote_identifier,
+            // remote_identifier: window.notification_data.remote_identifier,
         }),
     }).then((r) => r.json());
     setNotificationButtonState(toggleResponse);
@@ -118,7 +119,7 @@ if (window.notification_data) {
                 body: JSON.stringify({
                     endpoint: subscription.toJSON(),
                     extension_uuid: window.notification_data.extension_uuid,
-                    remote_identifier: window.notification_data.remote_identifier,
+                    // remote_identifier: window.notification_data.remote_identifier,
                 }),
             }).then((r) => r.json());
         }

@@ -87,16 +87,16 @@ if($body->{'state'} == "on" && !$subscriptions) { // enabled notifications
     $subscriptions = $database->select($sql, $parameters, 'row');
     unset($parameters);
     $notification_state = "all";
-    if($body->{'remote_identifier'}) {
-        $notification_state = "on";
-    }
+    // if($body->{'remote_identifier'}) {
+    //     $notification_state = "on";
+    // }
 } elseif($body->{'state'} == "off" && $subscriptions) { // disable notifications
     $sql = "DELETE FROM webtexting_subscriptions WHERE client_uuid = :client_uuid AND domain_uuid = :domain_uuid";
     $parameters['client_uuid'] = $client_uuid;
     $parameters['domain_uuid'] = $domain_uuid;
     if($body->{'remote_identifier'}) {
         $sql .= " AND remote_identifier = :remote_identifier";
-        $parameters['remote_identifier'] = $body->{'remote_identifier'};
+        $parameters['remote_identifier'] = null;
     }
     $database = new database;
     $database->execute($sql, $parameters);
