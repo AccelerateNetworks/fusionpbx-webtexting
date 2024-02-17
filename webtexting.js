@@ -81,6 +81,8 @@ function setNotificationButtonState(notificationState) {
         case "all":
             if(window.notification_data.remote_identifier) {
                 //btn.style.display = 'none';
+                btn.classList.add("fa-bell");
+            btn.classList.remove("fa-bell-slash");
                 return;
             }
             // note no "break", execution continues to "on" case

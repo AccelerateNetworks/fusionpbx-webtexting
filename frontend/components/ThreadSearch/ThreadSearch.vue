@@ -22,11 +22,14 @@ export default{
 </script>
     <template>
         <div id="THREAD_SEARCH">
-            <div class="thread-search-container">
+            <div class="thread-search-container ">
+                <div class="input-icons">
                 <!-- <span class='thread-search-message'>Enter contact name: -->
+                    <i class="fa fa-search icon"></i>
                     <input class="input" type="text" v-model="searchString" id="thread-search-number" name="thread-search-number" placeholder="Search contacts" />
-                <!--  </span>
+                    <!--  </span>
                <label for="thread-search-number">Outbound Number must include Country Code and Area Code:</label> -->
+            </div>
             </div>
         </div>
 </template>
@@ -38,14 +41,30 @@ export default{
 .thread-search-container{
     width:90%;
     margin: 0 auto;
+    
 }
 .input{
     border-width:2px;
     border-radius:0.5rem;
     width:100%;
     margin-right:0;
-    padding-left:1rem;
+    padding-left:1.5rem; 
     border:none;
+}
+.input-icons {
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.input-icons i {
+    position: absolute;
+}
+
+.icon {
+    padding: 5px;
+    color: grey;
+    min-width: 25px;
+    /*text-align: center;*/
 }
 @media screen and (width <=700px) {
     

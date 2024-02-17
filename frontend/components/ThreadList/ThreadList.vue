@@ -139,7 +139,7 @@ export default {
     height: 70vh;
     width: 100%;
     table-layout: fixed;
-    
+    padding-left: 3px;
 }
 .link-container{
     font-size: 2rem;
