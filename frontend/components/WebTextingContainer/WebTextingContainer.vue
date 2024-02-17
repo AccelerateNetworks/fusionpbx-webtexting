@@ -229,6 +229,9 @@ The blank space should notify the user that they can select a thread to display 
 .bgc-none {
     background: none;
 }
+#TEST_DIV_FOR_TESTING_WEBTEXTING {
+    height: 85vh;
+}
 
 @media screen and (width<=700px) {
     #main_content {
