@@ -245,10 +245,5 @@ The blank space should notify the user that they can select a thread to display 
     }
 }
 
-@media screen and (width<=575px) {
-    .navbar-toggler {
-        background-color: #3178B1;
-    }
 
-}
 </style>
