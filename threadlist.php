@@ -169,7 +169,8 @@ foreach ($threads as $thread) {
             }
             else{
                 $frontendOpts[$z]['groupMembers'][$member_index] = $member;
-            }            
+            }    
+            $member_index++;        
         } 
     }
     else {
@@ -213,11 +214,11 @@ foreach ($threads as $thread) {
                 $display_name = $frontendOpts['threadName'];
                 if (permission_exists('contact_phone_edit')) {
                     $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
-                    $frontendOpts['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
+                    $frontendOpts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
                 }
             } elseif (permission_exists('contact_phone_edit')) {
                 $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
-              $frontendOpts['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
+              $frontendOpts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
             }
         }
     }
@@ -240,7 +241,7 @@ foreach ($threads as $thread) {
     $thread_preview_opts[$z]['bodyPreview'] = $body_preview;
     $thread_preview_opts[$z]['ownNumber'] = $ownNumber;
     $thread_preview_opts[$z]['displayName']= $display_name;
-    $thread_preview_opts[$z]['contactEditLink'] = $frontendOpts['contactEditLink'] ;
+    $thread_preview_opts[$z]['contactEditLink'] = $frontendOpts[$z]['contactEditLink'] ;
     $thread_preview_opts[$z]['groupMembers'] = $frontendOpts[$z]['groupMembers'];
     $z++;
  }

@@ -61,7 +61,21 @@ export default {
             emitter.emit('thread-change',newThread);
         },
         filteredPreviews(){
-            return new Map([...this.threadPreviews].filter(([key,value])=> value.displayName.toLowerCase().includes(this.filterString.toLowerCase())));
+            return new Map([...this.threadPreviews].filter(  ([key,value]) => { 
+                //console.log(value)
+                if(value==null){
+                    console.log("key for null value ", key)
+                    return false;
+                }
+                else if(value.displayName == null){
+                    console.log("key for null value.displayName" , key)
+                    return false;
+                }
+                return value.displayName.toLowerCase().includes(this.filterString.toLowerCase())}
+            
+                
+        )
+            );
         }
     },
 }
