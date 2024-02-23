@@ -256,6 +256,7 @@ foreach ($threads as $thread) {
     }
     </script>
 
+
 <?php
 require_once "footer.php";
 ?>
