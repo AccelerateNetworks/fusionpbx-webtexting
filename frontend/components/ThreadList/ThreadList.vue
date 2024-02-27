@@ -105,6 +105,9 @@ export default {
     </div>
 </template>
 <style>
+/*body{
+    cursor:pointer;
+} */
 .menu-icon{
     color:white;
 }

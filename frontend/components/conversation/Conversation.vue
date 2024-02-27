@@ -298,7 +298,10 @@ export default {
         <div class="thread-header">
             <router-link class="back-link" :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!">←</router-link>
             {{ title }}
-            <a v-if="contactEditLink" :href="contactEditLink" class="white">
+            <a v-if="contactEditLink" :href="contactEditLink" class="white" target="_blank">
+                <span class='fas fa-edit fa-fw'> </span>
+            </a>
+            <a v-else href="/app/contacts/contact_edit.php" class="white" target="_blank">
                 <span class='fas fa-edit fa-fw'> </span>
             </a>
             <a v-if="this.$route.query.group" href="javascript: void(0);" class="white" onclick="modal_open('modal-rename-group');">
