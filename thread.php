@@ -2,8 +2,6 @@
 require_once "root.php";
 require_once "resources/require.php";
 require_once "resources/check_auth.php";
-require_once "resources/header.php";
-require_once "resources/paging.php";
 
 if(!$_SESSION['user']['extension']) {
 	echo "no extensions assigned to user";
