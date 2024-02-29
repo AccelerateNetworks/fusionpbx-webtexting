@@ -295,19 +295,25 @@ export default {
 
 <template>
     <div class="thread-container" v-bind:class="selectedConvo ? 'show-convo': 'hide'" id="THREAD">
-        <div class="thread-header">
-            <router-link class="back-link" :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!">←</router-link>
-            {{ title }}
-            <a v-if="contactEditLink" :href="contactEditLink" class="white" target="_blank">
-                <span class='fas fa-edit fa-fw'> </span>
-            </a>
-            
-            <a v-else-if="this.$route.query.group" href="javascript: void(0);" class="white" onclick="modal_open('modal-rename-group');">
-                <span class='fas fa-edit fa-fw'> </span>
-            </a>
-            <a v-else href="/app/contacts/contact_edit.php" class="white" target="_blank">
-                <span class='fas fa-edit fa-fw'> </span>
-            </a>
+        <div class="thread-header  d-flex justify-content-between align-items-center">
+            <div>
+                <router-link class="back-link fa fa-arrow-left btn btn-large " :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!"></router-link>
+            </div>
+            <div class="m-auto">
+                <h6 class="m-auto">{{ title }}</h6>
+            </div>
+            <div class="justify-content-end">
+                <a v-if="contactEditLink" :href="contactEditLink" class="white btn btn-large" target="_blank">
+                    <span class='fas fa-edit fa-fw'> </span>
+                </a>
+                
+                <a v-else-if="this.$route.query.group" href="javascript: void(0);" class="white btn btn-large" onclick="modal_open('modal-rename-group');">
+                    <span class='fas fa-edit fa-fw'> </span>
+                </a>
+                <a v-else href="/app/contacts/contact_edit.php" class="white btn btn-large" target="_blank">
+                    <span class='fas fa-edit fa-fw'> </span>
+                </a>
+            </div>
         </div>
         <div class="messages">
             <div class="message-container" ref="message_container" v-on:scroll="onScroll">
@@ -357,7 +363,7 @@ export default {
     padding: 1em;
     background-color: #5f9fd3;
     color: #fff;
-
+    display:flex;
     font-weight: bold;
 }
 

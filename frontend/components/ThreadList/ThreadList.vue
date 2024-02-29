@@ -86,9 +86,9 @@ export default {
 <template>
 
     <div class="threadlist_container active" id="THREADLIST" v-bind:class="(selectedConvo || newThreadView) ? 'hide-if-small': 'no-convo-selected'">
-        <div class="threadlist-header">Conversations
-            <a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
-            <a class="fas fa-info-circle fa-fw menu-icon" aria-label="Accelerate Networks support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a>
+        <div class="threadlist-header d-flex justify-content-between align-items-end"> <h6>Conversations</h6>
+            <div><a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f btn btn-large" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
+            <a class="fas fa-info-circle fa-fw menu-icon btn btn-large" aria-label="Accelerate Networks support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a></div>
         </div>
         <ThreadSearch v-if='true'></ThreadSearch>
         <div class='threadlist-table'>
