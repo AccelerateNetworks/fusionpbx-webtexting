@@ -86,9 +86,16 @@ export default {
 <template>
 
     <div class="threadlist_container active" id="THREADLIST" v-bind:class="(selectedConvo || newThreadView) ? 'hide-if-small': 'no-convo-selected'">
-        <div class="threadlist-header d-flex justify-content-between align-items-end"> <h6>Conversations</h6>
-            <div><a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f btn btn-large" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
-            <a class="fas fa-info-circle fa-fw menu-icon btn btn-large" aria-label="Accelerate Networks support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a></div>
+        <div class="threadlist-header d-flex justify-content-between align-items-center"> 
+            <!-- <div class="m-auto">
+                <a class="fas fa-info-circle fa-fw menu-icon btn btn-large" aria-label="Accelerate Networks support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a>
+            </div> -->
+            <div class="ml-05">
+                <h6 class="m-auto">Conversations</h6>
+            </div>
+            <div class="mr-05">
+                <a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f btn btn-large" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
+            </div>
         </div>
         <ThreadSearch v-if='true'></ThreadSearch>
         <div class='threadlist-table'>
@@ -96,15 +103,19 @@ export default {
                 <ThreadPreview  v-for="[key,value] in filteredPreviews()" :key="key"
                     v-bind="value" :activeThread="this.activeThread"  />
             </div>
-            
         </div>
         <div class="link-container">
             <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
         </div>
-        
     </div>
 </template>
 <style>
+.ml-05{
+    margin-left:5%;
+}
+.mr-05{
+    margin-right:5%;
+}
 /*body{
     cursor:pointer;
 } */
@@ -140,7 +151,8 @@ export default {
 .threadlist-header{
     box-shadow: 0 4px 4px -2px white;
     margin: 0 auto 0px auto;
-    padding: 1em 1em 0.25rem 1em;
+    padding-top: 0.75rem;
+    padding-bottom: 0.25rem;
     background-color: #5f9fd3;
     color: #fff;
     border-top-left-radius: 0.5em;
