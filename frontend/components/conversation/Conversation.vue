@@ -469,7 +469,7 @@ table {
         z-index: 5;
         grid-column-start: 1;
         grid-column-end: 1;
-        height: 94vh;
+        height: 91vh;
     }
 
     .thread-container {
@@ -477,7 +477,7 @@ table {
     }
 
     .messages {
-        height: 88vh;
+        height: 80vh;
     }
 
 }</style>
