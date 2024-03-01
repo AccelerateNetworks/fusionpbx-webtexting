@@ -104,9 +104,12 @@ export default {
                     v-bind="value" :activeThread="this.activeThread"  />
             </div>
         </div>
-        <div class="link-container">
-            <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
+        <div class="link-container-container">
+            <div class="link-container">
+                <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
+            </div>
         </div>
+        
     </div>
 </template>
 <style>
@@ -221,6 +224,10 @@ export default {
     }
     .hide-if-small{
         display:none;
+    }
+    .link-container-container{
+        justify-content: center;
+        display:flex;
     }
 }
 </style>

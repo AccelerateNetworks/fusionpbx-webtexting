@@ -176,7 +176,25 @@ export default {
             this.updateLastMessage(message);
 
         });
-        //need a function that takes the new message ingested and replaces the corresponding threadPreview.text
+        const pullToRefresh = document.querySelector('.pull-to-refresh');
+        let touchstartY = 0;
+        document.addEventListener('touchstart', e => {
+        touchstartY = e.touches[0].clientY;
+        });
+        document.addEventListener('touchmove', e => {
+        const touchY = e.touches[0].clientY;
+        const touchDiff = touchY - touchstartY;
+        if (touchDiff > 0 && window.scrollY === 0) {
+            pullToRefresh.classList.add('visible');
+            //e.preventDefault();
+        }
+        });
+        document.addEventListener('touchend', e => {
+        if (pullToRefresh.classList.contains('visible')) {
+            pullToRefresh.classList.remove('visible');
+            location.reload();
+        }
+        });
     },
 
 }
@@ -189,7 +207,7 @@ The blank space should notify the user that they can select a thread to display 
 
 
         <div id="WEB_TEXT_ROOT">
-
+        <div class="pull-to-refresh"><div class="spinner-border"></div></div>
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
                 :threadPreviews="this.threadPreviews" :selectedConvo="this.conversationSelected"
                 :newThreadView="this.newThreadSelected" />
@@ -232,6 +250,21 @@ The blank space should notify the user that they can select a thread to display 
 #TEST_DIV_FOR_TESTING_WEBTEXTING {
     height: 85vh;
 }
+.pull-to-refresh {
+    z-index:-1;
+    position: fixed;
+    top: 50px;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: top 0.7s ease-in-out;
+  }
+  .pull-to-refresh.visible {
+    top: 0;
+    z-index:1;
+  }
 
 @media screen and (width<=700px) {
     #main_content {

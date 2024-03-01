@@ -18,9 +18,14 @@ export default {
         <div id="NEW_MESSAGE">
             <div class="new-message-container">
                 <div class="thread-header new-message-header">
-                    <div class="thread-header-container">
-                        <a class="back-link" href="/app/webtexting" aria="Go Back to Threadlist!">←</a>
-                        <div class="new-message-headline">New Conversation</div>
+                    <div class="thread-header-container  d-flex justify-content-between align-items-center">
+                        <div>
+                            <router-link class="back-link fa fa-arrow-left btn btn-large " :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!"></router-link>
+                        </div>
+                        <div>
+                            <div class="new-message-headline"><h6>New Conversation</h6></div>
+
+                        </div>
                     </div>
                 </div>
                 <span class='new-thread-message'>Enter Number:
@@ -32,6 +37,7 @@ export default {
                 <SendBox :remoteNumber="number" :ownNumber="ownNumber" location="New-Message"/>    
             </div>
         </div>
+   
 </template>
 
 <style>
