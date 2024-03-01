@@ -5,6 +5,7 @@ import { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
 import moment from 'moment';
 import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
+import {useMatchMedia} from '../../lib/matchMedia';
 import { emitter, MessageData, ThreadChangePayload } from '../../lib/global';
 
 
@@ -37,8 +38,10 @@ export default {
     components: { Conversation, ThreadList },
     data() {
         let contactEditLink = null;
-        let title = ''
-        return { contactEditLink, title };
+        let title = '';
+        let smallScreen = useMatchMedia('(width<=700px)');
+
+        return { contactEditLink, title, smallScreen };
     },
     methods: {
         calculateDisplayName() {
@@ -158,10 +161,23 @@ export default {
                 console.log("wtc thread previews changed");
             },
             deep: true,
+        },
+        smallScreen:{
+            handler(oldScreen, newScreen){
+                let smallScreen = useMatchMedia('(max-width<=700px)');
+                console.log("smallscreen handler")
+                if(smallScreen){
+                    let pullToRefresh = document.querySelector('.pull-to-refresh');
+                }
+                else{
+                    let pullToRefresh = false;
+                }
+            }
         }
 
     },
     mounted() {
+
         emitter.on('thread-change', (payload: ThreadChangePayload) => {
             this.contactEditLink = payload.editLink;
             console.log(`wtc thread change ${payload.key}`)
@@ -176,25 +192,7 @@ export default {
             this.updateLastMessage(message);
 
         });
-        const pullToRefresh = document.querySelector('.pull-to-refresh');
-        let touchstartY = 0;
-        document.addEventListener('touchstart', e => {
-        touchstartY = e.touches[0].clientY;
-        });
-        document.addEventListener('touchmove', e => {
-        const touchY = e.touches[0].clientY;
-        const touchDiff = touchY - touchstartY;
-        if (touchDiff > 0 && window.scrollY === 0) {
-            pullToRefresh.classList.add('visible');
-            //e.preventDefault();
-        }
-        });
-        document.addEventListener('touchend', e => {
-        if (pullToRefresh.classList.contains('visible')) {
-            pullToRefresh.classList.remove('visible');
-            location.reload();
-        }
-        });
+        
     },
 
 }
@@ -207,7 +205,7 @@ The blank space should notify the user that they can select a thread to display 
 
 
         <div id="WEB_TEXT_ROOT">
-        <div class="pull-to-refresh"><div class="spinner-border"></div></div>
+        <div v-if="smallScreen" class="pull-to-refresh"><div class="spinner-border"></div></div>
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
                 :threadPreviews="this.threadPreviews" :selectedConvo="this.conversationSelected"
                 :newThreadView="this.newThreadSelected" />
@@ -250,21 +248,7 @@ The blank space should notify the user that they can select a thread to display 
 #TEST_DIV_FOR_TESTING_WEBTEXTING {
     height: 85vh;
 }
-.pull-to-refresh {
-    z-index:-1;
-    position: fixed;
-    top: 50px;
-    width: 100%;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: top 0.7s ease-in-out;
-  }
-  .pull-to-refresh.visible {
-    top: 0;
-    z-index:1;
-  }
+
 
 @media screen and (width<=700px) {
     #main_content {
@@ -276,6 +260,21 @@ The blank space should notify the user that they can select a thread to display 
     #TEST_DIV_FOR_TESTING_WEBTEXTING {
         height: 93vh;
     }
+    .pull-to-refresh {
+        z-index:-1;
+        position: fixed;
+        top: 50px;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: top 0.7s ease-in-out;
+      }
+      .pull-to-refresh.visible {
+        top: 0;
+        z-index:1;
+      }
 }
 
 

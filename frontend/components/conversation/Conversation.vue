@@ -106,14 +106,14 @@ export default {
             type: Array<String>,
         },
         selectedConvo: {
-            type:Boolean,
+            type: Boolean,
         },
     },
     components: { Message, SendBox },
-    
+
     data() {
 
-         let title = "";
+        let title = "";
         if (this.displayName) {
             title = this.displayName;
         } else if (this.groupMembers) {
@@ -127,8 +127,8 @@ export default {
                 title += this.remoteNumber;
             }
         }
-        else if(this.groupUUID){
-            title+= this.groupUUID;
+        else if (this.groupUUID) {
+            title += this.groupUUID;
         }
         let conversationKey = this.remoteNumber ? this.remoteNumber : this.groupUUID;
         return {
@@ -154,10 +154,10 @@ export default {
             this.conversationKey = this.$route.query.group
             //emitter.emit('backfill-requested', this.conversationKey);
             const groupTag = document.getElementsByName("group");
-                groupTag[0].value = this.$route.query.group;
-        
+            groupTag[0].value = this.$route.query.group;
+
         }
-        
+
 
         emitter.on('scroll-to-bottom', this.toBottom);
 
@@ -195,19 +195,43 @@ export default {
             this.backfillAvailable = false;
         })
 
-        emitter.on('thread-changed', (newDisplayName:String) => {
+        emitter.on('thread-changed', (newDisplayName: String) => {
             console.log(`thread changed new display name is ${newDisplayName}`);
             this.title = newDisplayName;
         })
+
+        let touchstartY = 0;
+        const refreshElement = document.getElementsByClassName("thread-header")[0];
+        refreshElement.addEventListener('touchstart', e => {
+            touchstartY = e.touches[0].clientY;
+        });
+        refreshElement.addEventListener('touchmove', e => {
+            const touchY = e.touches[0].clientY;
+            const touchDiff = touchY - touchstartY;
+            let pullToRefresh = document.querySelector('.pull-to-refresh');
+            if (touchDiff > 0 && window.scrollY === 0 && pullToRefresh) {
+                pullToRefresh.classList.add('visible');
+                //e.preventDefault();
+            }
+        });
+        refreshElement.addEventListener('touchend', e => {
+            console.log("touch end")
+            let pullToRefresh = document.querySelector('.pull-to-refresh');
+
+            if (pullToRefresh && pullToRefresh.classList.contains('visible')) {
+                pullToRefresh.classList.remove('visible');
+                location.reload();
+            }
+        });
         //console.log(this.state.messages);
         //console.log("Conversation.vue mounted with props:\nremoteNumber:", this.remoteNumber, "\ngroupUUID:", this.groupUUID, "\ndisplayName:", this.displayName, "\nownNumber:", this.ownNumber);
     },
     beforeUpdate() {
         //console.log("changing active component");
-        if(this.$route.query.group){
+        if (this.$route.query.group) {
             const groupTag = document.getElementsByName("group");
-                groupTag[0].value = this.$route.query.group;
-        }        
+            groupTag[0].value = this.$route.query.group;
+        }
     },
     watch: {
         remoteNumber: async function (rN) {
@@ -236,7 +260,7 @@ export default {
                 //console.log(observedChangeQueryParams)
                 this.messages = this.state.conversations[this.$route.query.group];
                 //this.title = this.$route.query.group;
-                
+
             }
             this.conversationKey = this.$route.query.group;
             this.backfillAvailable = true;
@@ -283,21 +307,29 @@ export default {
             //console.log("new message added to bottom. scrolling?", this.atBottom);
             if (this.atBottom) {
                 const messageContainer = this.$refs.message_container;
-                if(messageContainer){
+                if (messageContainer) {
                     messageContainer.scrollTo(0, messageContainer.scrollHeight);
                 }
             }
         },
+    },
+    beforeDestroy() {
+        const refreshElement = document.getElementsByClassName("thread-header")[0];
+        refreshElement.removeEventListener('touchend', e );
+        refreshElement.removeEventListener('touchmove', e );
+        refreshElement.removeEventListener('touchestart', e );
     },
 }
 
 </script>
 
 <template>
-    <div class="thread-container" v-bind:class="selectedConvo ? 'show-convo': 'hide'" id="THREAD">
+    <div class="thread-container" v-bind:class="selectedConvo ? 'show-convo' : 'hide'" id="THREAD">
         <div class="thread-header  d-flex justify-content-between align-items-center">
-            <div>
-                <router-link class="back-link fa fa-arrow-left btn btn-large " :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!"></router-link>
+            <div class="back-container">
+                <router-link class="back-link fa fa-arrow-left btn btn-large "
+                    :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`"
+                    aria="Go Back to threadlist!"></router-link>
             </div>
             <div class="m-auto">
                 <h6 class="m-auto">{{ title }}</h6>
@@ -306,8 +338,9 @@ export default {
                 <a v-if="contactEditLink" :href="contactEditLink" class="white btn btn-large" target="_blank">
                     <span class='fas fa-edit fa-fw'> </span>
                 </a>
-                
-                <a v-else-if="this.$route.query.group" href="javascript: void(0);" class="white btn btn-large" onclick="modal_open('modal-rename-group');">
+
+                <a v-else-if="this.$route.query.group" href="javascript: void(0);" class="white btn btn-large"
+                    onclick="modal_open('modal-rename-group');">
                     <span class='fas fa-edit fa-fw'> </span>
                 </a>
                 <a v-else href="/app/contacts/contact_edit.php" class="white btn btn-large" target="_blank">
@@ -321,26 +354,27 @@ export default {
                 <div ref="top">
                     <div class="backfill" v-if="backfillAvailable">loading older messages</div>
                 </div>
-                <Message :message="message" :key="message.id" :displayName="this.displayName ? this.displayName : null "
+                <Message :message="message" :key="message.id" :displayName="this.displayName ? this.displayName : null"
                     :lastSender="index - 1 >= 0 ? this.state.conversations[conversationKey][index - 1].from : '-1'"
-                    v-for="(message, index) in this.state.conversations[conversationKey]" 
+                    v-for="(message, index) in this.state.conversations[conversationKey]"
                     :mode='this.groupUUID ? "group" : "solo"' />
                 <div class="message-wrapper" ref="bottom">&nbsp;</div>
             </div>
-            <SendBox :remoteNumber="remoteNumber" :groupUUID="this.$route.query.group" :ownNumber="ownNumber" location="Conversation"/>
+            <SendBox :remoteNumber="remoteNumber" :groupUUID="this.$route.query.group" :ownNumber="ownNumber"
+                location="Conversation" />
             <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ ownNumber }}</div>
-        </div>       
+        </div>
     </div>
 </template>
 
 <style>
-
 #conversation {
     grid-column-start: 2;
     grid-column-end: 2;
 }
-.hide{
-    display:none;
+
+.hide {
+    display: none;
 }
 
 .messages {
@@ -363,7 +397,7 @@ export default {
     padding: 1em;
     background-color: #5f9fd3;
     color: #fff;
-    display:flex;
+    display: flex;
     font-weight: bold;
 }
 
@@ -415,8 +449,9 @@ table {
     width: 100%;
     table-layout: fixed;
 }
-.thread-container{
-    border: solid  #5f9fd3 2px;
+
+.thread-container {
+    border: solid #5f9fd3 2px;
     border-bottom-left-radius: 0.5em;
     border-bottom-right-radius: 0.5em;
     border-top-left-radius: 0.5em;
@@ -428,18 +463,21 @@ table {
         display: none;
     }
 }
+
 @media screen and (width <=700px) {
     #THREAD {
         z-index: 5;
         grid-column-start: 1;
         grid-column-end: 1;
-        height:94vh;
+        height: 94vh;
     }
-    .thread-container{
-        height:90vh;
+
+    .thread-container {
+        height: 90vh;
     }
-    .messages{
-        height:88vh;
+
+    .messages {
+        height: 88vh;
     }
 
 }</style>

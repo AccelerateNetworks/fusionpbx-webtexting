@@ -6,11 +6,42 @@ export default {
     props:{
         ownNumber: String
     },
-        data() {
-            return {
-                number: '',
-            }
+    data() {
+        return {
+            number: '',
         }
+    },
+    mounted() {
+        let touchstartY = 0;
+        const refreshElement = document.getElementsByClassName("thread-header")[0];
+        refreshElement.addEventListener('touchstart', e => {
+            touchstartY = e.touches[0].clientY;
+        });
+        refreshElement.addEventListener('touchmove', e => {
+            const touchY = e.touches[0].clientY;
+            const touchDiff = touchY - touchstartY;
+            let pullToRefresh = document.querySelector('.pull-to-refresh');
+            if (touchDiff > 0 && window.scrollY === 0 && pullToRefresh) {
+                pullToRefresh.classList.add('visible');
+                //e.preventDefault();
+            }
+        });
+        refreshElement.addEventListener('touchend', e => {
+            console.log("touch end")
+            let pullToRefresh = document.querySelector('.pull-to-refresh');
+           
+        if (pullToRefresh && pullToRefresh.classList.contains('visible')) {
+            pullToRefresh.classList.remove('visible');
+            location.reload();
+        }
+        });
+    },
+    beforeDestroy() {
+        const refreshElement = document.getElementsByClassName("thread-header")[0];
+        refreshElement.removeEventListener('touchend', e );
+        refreshElement.removeEventListener('touchmove', e );
+        refreshElement.removeEventListener('touchestart', e );
+    },
 }
 
 </script>
