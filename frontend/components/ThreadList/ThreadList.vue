@@ -241,6 +241,11 @@ export default {
      color:#BB6025;
  }
 
+ .link-container-container{
+    justify-content: center;
+    display:flex;
+}
+
 
 
     @media screen and (width <=700px) {    
@@ -256,9 +261,6 @@ export default {
     .hide-if-small{
         display:none;
     }
-    .link-container-container{
-        justify-content: center;
-        display:flex;
-    }
+    
 }
 </style>

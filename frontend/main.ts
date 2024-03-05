@@ -66,26 +66,30 @@ type WebTextingContainerOptions = {
 */
 export const initializeWebTextingContainer = function initializeWebTextingContainerJS(opts: WebTextingContainerOptions){
 
+    
     let threadPreviewMap = new Map<String,ThreadPreviewInterface>();
-            for(let x = 0; x < opts.$thread_preview_opts.length; x++){
-                //console.log(opts.$thread_preview_opts[x])
-                if(opts.$thread_preview_opts[x].groupUUID){
-                    // if(opts.$thread_preview_opts[x].groupMembers){
-                    //     //php delviers us a string of comma separated values instead of an array the rest of the app expects an array of strings
-                    //     console.log(opts.$thread_preview_opts[x].groupMembers);
-                    //     opts.$thread_preview_opts[x].groupMembers = opts.$thread_preview_opts[x].groupMembers.split(", ")
-                    //     console.log(opts.$thread_preview_opts[x].groupMembers);
-                    // }
-                    console.log(opts.$thread_preview_opts[x].groupMembers);
-                    threadPreviewMap.set(opts.$thread_preview_opts[x].groupUUID, opts.$thread_preview_opts[x])
-                }
-                else if(opts.$thread_preview_opts[x].remoteNumber){
-                    threadPreviewMap.set(opts.$thread_preview_opts[x].remoteNumber, opts.$thread_preview_opts[x])
-                }
-                else{
-                    alert("Contact has no identifier. Missing Group UUID and Phone Number")
-                }
+    if(opts.$thread_preview_opts && opts.$thread_preview_opts.length){
+        for(let x = 0; x < opts.$thread_preview_opts.length; x++){
+            //console.log(opts.$thread_preview_opts[x])
+            if(opts.$thread_preview_opts[x].groupUUID){
+                // if(opts.$thread_preview_opts[x].groupMembers){
+                //     //php delviers us a string of comma separated values instead of an array the rest of the app expects an array of strings
+                //     console.log(opts.$thread_preview_opts[x].groupMembers);
+                //     opts.$thread_preview_opts[x].groupMembers = opts.$thread_preview_opts[x].groupMembers.split(", ")
+                //     console.log(opts.$thread_preview_opts[x].groupMembers);
+                // }
+                console.log(opts.$thread_preview_opts[x].groupMembers);
+                threadPreviewMap.set(opts.$thread_preview_opts[x].groupUUID, opts.$thread_preview_opts[x])
             }
+            else if(opts.$thread_preview_opts[x].remoteNumber){
+                threadPreviewMap.set(opts.$thread_preview_opts[x].remoteNumber, opts.$thread_preview_opts[x])
+            }
+            else{
+                alert("Contact has no identifier. Missing Group UUID and Phone Number")
+            }
+        }
+    }
+            
     //how do we want to pass props into threadlist.
     //in theory threads has to be parsed and sent to each conversation component but is that state or props
     const containerProps={

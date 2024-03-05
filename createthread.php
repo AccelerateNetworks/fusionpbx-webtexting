@@ -14,3 +14,7 @@ if(!$_SESSION['user']['extension']) {
 if(sizeof($_SESSION['user']['extension']) == 1) {
 	echo "<script type='text/javascript'>window.location.href = 'threadlist.php?extension_uuid=".$_SESSION['user']['extension'][0]['extension_uuid']."'; </script>";
 }
+else{
+	echo "<script type='text/javascript'>window.location.href = 'index.php'; </script>";
+
+}
