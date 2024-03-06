@@ -44,7 +44,7 @@ export default {
             const newThread = {key:'', editLink:null}
             emitter.emit('thread-change',newThread);
         },
-        filteredPreviews(){
+        filteredAndSortedPreviews(){
             return new Map([...this.threadPreviews].filter(  ([key,value]) => { 
                 //console.log(value)
                 if(value==null){
@@ -58,9 +58,15 @@ export default {
                 return value.displayName.toLowerCase().includes(this.filterString.toLowerCase())}
             
                 
-        )
-            );
-        }
+        ).sort(([a,b]) => {
+            console.log(b.timestamp);
+            console.log(Date.parse(b.timestamp));
+            return Date.parse(b.timestamp);
+        })
+        );
+        },
+
+        
     },
     mounted(){
         emitter.on('thread-change', (threadChangeObject:ThreadChangePayload) => {
@@ -131,7 +137,7 @@ export default {
         <ThreadSearch v-if='true'></ThreadSearch>
         <div class='threadlist-table'>
             <div class="preview_list_container">
-                <ThreadPreview  v-for="[key,value] in filteredPreviews()" :key="key"
+                <ThreadPreview  v-for="[key,value] in filteredAndSortedPreviews()" :key="key"
                     v-bind="value" :activeThread="this.activeThread"  />
             </div>
         </div>

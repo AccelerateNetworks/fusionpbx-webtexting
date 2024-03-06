@@ -134,7 +134,7 @@ export default {
                     if (this.threadPreviews.get(message.to)) {
                         let temp = this.threadPreviews.get(message.to);
                         temp.bodyPreview = message.body;
-                        temp.timestamp = now;
+                        temp.timestamp = now.toString();
                         this.threadPreviews.set(message.to, temp);
                     }
 
@@ -145,7 +145,7 @@ export default {
                     if (this.threadPreviews.get(message.from)) {
                         let temp = this.threadPreviews.get(message.from);
                         temp.bodyPreview = message.body;
-                        temp.timestamp = now;
+                        temp.timestamp = now.toString();
 
                         this.threadPreviews.set(message.from, temp);
                     }

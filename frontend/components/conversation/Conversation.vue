@@ -378,7 +378,7 @@ export default {
 }
 
 .messages {
-    height: 80vh;
+    height: 77vh;
     margin: 0 auto;
 
     border-bottom-left-radius: 0.5em;
@@ -456,6 +456,7 @@ table {
     border-bottom-right-radius: 0.5em;
     border-top-left-radius: 0.5em;
     border-top-right-radius: 0.5em;
+    height:85vh;
 }
 
 @media screen and (width >700px) {
