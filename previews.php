@@ -34,7 +34,7 @@ if (!$ownNumber) {
 }
 
 //this is for Contact Search
-$query_string = 'a';
+$query_string = '';
 
 $sql = "SELECT *
 FROM webtexting_threads,v_contacts , v_contact_phones
@@ -52,6 +52,7 @@ unset($parameters);
 $z = 0;
 if($solo_conversations){
     foreach ($solo_conversations as $solo) {
+        $usedNumbers[$solo['phone_number']] = true;
         $threadPreviews[$z]['remoteNumber'] = $solo['phone_number'];
         $threadPreviews[$z]['displayName']= $solo['phone_number'];
         $threadPreviews[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$solo['contact_uuid'];
@@ -123,6 +124,37 @@ if($groups){
     }
 }
 
+//this is where we search for threads by number
+$sql = "SELECT *
+FROM webtexting_threads
+WHERE webtexting_threads.domain_uuid = :domain_uuid
+AND webtexting_threads.local_number = :local_number
+AND webtexting_threads.remote_number LIKE  LOWER('%'||:query_string||'%' )   ;";
+$parameters['domain_uuid'] = $domain_uuid;
+$parameters['local_number'] = $ownNumber;
+$parameters['query_string'] = $query_string;
+$number_results = $database->select($sql, $parameters, 'all');
+unset($parameters);
+if($number_results){
+    foreach ($number_results as $result) {
+        if($usedNumbers[$result['remote_number']]){ //duplicate entry protection for numbers that are contacts
+            continue;
+        }
+        else{
+            $threadPreviews[$z]['remoteNumber'] = $result['remote_number'];
+            $threadPreviews[$z]['displayName']= $result['remote_number'];
+            $threadPreviews[$z]['contactEditLink'] = "/app/contacts/contact_edit.php";
+        
+            $threadPreviews[$z]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&number=".$result['remote_number'];
+            $threadPreviews[$z]['ownNumber'] = $ownNumber;
+            $threadPreviews[$z]['timestamp'] = $result['last_message'];
+            $z++;
+        }
+        
+    }
+}
+
+//this is where we fetch and attach the bodyPreviews
 $z=0;
 foreach($threadPreviews as $preview){
     $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
