@@ -92,6 +92,18 @@ function fixbutton(array $params, $label="update") {
             $out .= "</label><br />";
         }
     }
+    if($label == 'update'){
+        if($params['fix']){
+            if($params['fix'] == 'inbound_webhook_url'){
+                $params['fix'] = 'register_' . $params['fix'];
+            }
+            $label = explode('_',$params['fix']);
+            if($params['fix'] == 'register_inbound_webhook_url'){
+                $label[3] ='';
+            }
+            $label = implode(' ', $label);
+        }
+    }
     $out .= "<input type='submit' class='btn' value='".$label."' />";
     $out .= "</form>";
     return $out;
@@ -157,9 +169,8 @@ foreach($extensions as $extension) {
             if($inboundRouting->callbackUrl != $desiredWebhookURL) {
                 $problems[] = "webhook URL is wrong: <code>".$inboundRouting->callbackUrl."</code> should be <code>".$desiredWebhookURL."</code>";
             }
-
-            if ($inboundRouting->clientSecret != $_SESSION['webtexting']['acceleratenetworks_inbound_token']['text']) {
-                $problems[] = "client secret incorrect";
+            if($inboundRouting->clientSecret  != $_SESSION['webtexting']['acceleratenetworks_inbound_token']['text']){
+                $problems[] = "client secret incorrect.  FusionPBX Client Secret: ". $inboundRouting->clientSecret . " FusionPBX Session Secret: ".$_SESSION['webtexting']['acceleratenetworks_inbound_token']['text'];
             }
 
             if ($inboundRouting->asDialed != $sms_number) {
