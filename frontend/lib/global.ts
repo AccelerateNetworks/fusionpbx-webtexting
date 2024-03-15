@@ -2,11 +2,12 @@ import { Moment } from 'moment';
 import { reactive } from 'vue'
 import { CPIM } from './CPIM';
 import mitt from 'mitt';
+import { ThreadPreviewInterface } from '@/components/ThreadPreview/ThreadPreview.vue';
 
 type ConversationData = Record<string,Array<MessageData>>;
-
+type PreviewData = Map<String, ThreadPreviewInterface>;
 type ThreadChangePayload = {
-  key: string, 
+  key: String, 
 
   editLink?:  string;
   
@@ -27,12 +28,14 @@ type GlobalState = {
     conversations: ConversationData,
     connectivityStatus: String,
     connected: Boolean,
+    previews: PreviewData
 };
 
 const state = reactive<GlobalState>({
     conversations:  {},
     connectivityStatus: 'loading',
     connected: false,
+    previews: null,
 });
 
 const emitter = mitt();
@@ -89,5 +92,23 @@ function addThread(key:string, message?:MessageData){
         console.log(`adding conversation without message`)
     }
 }
-
-export { state, emitter, MessageData, GlobalState, addMessage, ThreadChangePayload }
+function addPreview(preview : ThreadPreviewInterface){
+    //console.log(preview)
+    const conversationKey:String = preview.groupUUID ? preview.groupUUID : preview.remoteNumber;
+    if(state.previews){
+        if(previewsContainKey(conversationKey)){
+            //don't add duplicates
+        }
+        else{
+            state.previews.set(conversationKey,preview);
+        }
+    }
+    else{   //first add also creates the map
+        state.previews = new Map<String,  ThreadPreviewInterface>();
+        state.previews.set(conversationKey, preview);
+    }
+}
+function previewsContainKey(keyQuery:string){
+    return state.previews.has(keyQuery);
+}
+export { state, emitter, MessageData, GlobalState, addMessage, ThreadChangePayload, addPreview }

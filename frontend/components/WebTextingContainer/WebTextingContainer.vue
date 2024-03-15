@@ -6,8 +6,8 @@ import moment from 'moment';
 import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
 import {useMatchMedia} from '../../lib/matchMedia';
-import { emitter, MessageData, ThreadChangePayload } from '../../lib/global';
-
+import { emitter, MessageData, ThreadChangePayload,state} from '../../lib/global';
+import {searchPreviews,loadPreviews} from '../../lib/backfillPreviews';
 
 //TODO: changing threads and threadpreviews to Map<String,Object>
 //      this should change how ThreadList/ThreadPreview and Conversation components interact with the threads and threadPreviews props
@@ -17,6 +17,7 @@ export default {
         ownNumber: String,
         username: String,
         threads: Array<Object>,
+        extensionUUID: String,
         threadPreviews: Map<String, ThreadPreviewInterface>
     },
     computed: {
@@ -40,8 +41,8 @@ export default {
         let contactEditLink = null;
         let title = '';
         let smallScreen = useMatchMedia('(width<=700px)');
-
-        return { contactEditLink, title, smallScreen };
+        let loadedPreviews = false;
+        return { contactEditLink, title, smallScreen, state:state, previews: state.previews, loadedPreviews };
     },
     methods: {
         calculateDisplayName() {
@@ -176,8 +177,13 @@ export default {
         }
 
     },
+    async created() {
+        //getPreviews();
+        console.log(this.state);
+        loadPreviews(this.extensionUUID);
+    },
     mounted() {
-
+        console.log(this.$route.query.extension_uuid);
         emitter.on('thread-change', (payload: ThreadChangePayload) => {
             this.contactEditLink = payload.editLink;
             console.log(`wtc thread change ${payload.key}`)
@@ -191,6 +197,22 @@ export default {
         emitter.on("update-last-message", (message: MessageData) => {
             this.updateLastMessage(message);
 
+        });
+        emitter.on("thread-search-request", async (queryString: string) =>{
+            if(this.$route.query.extension_uuid){
+                this.loaded = false;
+                this.loadedPreviews = false;
+                console.log("we've got a route")
+                searchPreviews(queryString,this.$route.query.extension_uuid);
+                console.log(this.state.previews);
+            }
+            else{
+                alert("No Extension detected. Reload the page")
+            }
+        });
+        emitter.on("previews-built-and-loaded",() =>{
+            this.loadedPreviews=true;
+            this.load = true;
         });
         
     },
@@ -207,7 +229,7 @@ The blank space should notify the user that they can select a thread to display 
         <div id="WEB_TEXT_ROOT">
         <div v-if="smallScreen" class="pull-to-refresh"><div class="spinner-border"></div></div>
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
-                :threadPreviews="this.threadPreviews" :selectedConvo="this.conversationSelected"
+                :threadPreviews="this.state.previews" :previewsLoaded="this.loadedPreviews" :selectedConvo="this.conversationSelected"
                 :newThreadView="this.newThreadSelected" />
 
 
@@ -240,6 +262,10 @@ The blank space should notify the user that they can select a thread to display 
 
 .bgc-AN-orange {
     background: #BB6025;
+}
+
+.bgc-AN-blue{
+    background:  #3178B1;
 }
 
 .bgc-none {

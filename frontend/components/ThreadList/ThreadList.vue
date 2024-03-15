@@ -14,13 +14,15 @@ export default {
         threads: Array<Object>,
         threadPreviews: Map<String, ThreadPreviewInterface>,
         selectedConvo: Boolean,
-        newThreadView: Boolean
+        newThreadView: Boolean,
+        previewsLoaded: Boolean
     },
     components: { ThreadPreview, ThreadSearch },
     data() {
         return { activeThread: '',
                     filterString: '',
-                    displaySearch: false }
+                    displaySearch: false,
+                    loaded: false }
     },
     computed: {
         recieveEmit(threadChangeObject:ThreadChangePayload) {
@@ -39,33 +41,44 @@ export default {
         }
         
     },
+    async created(){
+        //this.threadPreviews = await this.threadPreviews;
+        if (this.threadPreviews){
+            this.loaded = true;
+        }
+    },
     methods:{
         dumpSelectedThread(){
             const newThread = {key:'', editLink:null}
             emitter.emit('thread-change',newThread);
         },
-        filteredAndSortedPreviews(){
-            return new Map([...this.threadPreviews].filter(  ([key,value]) => { 
-                //console.log(value)
-                if(value==null){
-                    console.log("key for null value ", key)
-                    return false;
+        filteredAndSortedPreviews() {
+            if(this.loaded){            
+                return new Map([...this.threadPreviews].filter(([key, value]) => {
+                    //console.log(value)
+                    if (value == null) {
+                        console.log("key for null value ", key)
+                        return false;
+                    }
+                    else if (value.displayName == null) {
+                        console.log("key for null value.displayName", key)
+                        return false;
+                    }
+                    return value.displayName.toLowerCase().includes(this.filterString.toLowerCase())
                 }
-                else if(value.displayName == null){
-                    console.log("key for null value.displayName" , key)
-                    return false;
-                }
-                return value.displayName.toLowerCase().includes(this.filterString.toLowerCase())}
-            
-                
-        ).sort(([a,b]) => {
-            console.log(b.timestamp);
-            console.log(Date.parse(b.timestamp));
-            return Date.parse(b.timestamp);
-        })
-        );
-        },
-
+                )
+                // .sort(([a, b]) => {
+                //     //console.log(b.timestamp);
+                //   //  console.log(Date.parse(b.timestamp));
+                //     return Date.parse(b.timestamp);
+                // })
+                );
+        }
+        else{
+            return new Map<string,ThreadPreviewInterface>();
+        }
+    }
+        
         
     },
     mounted(){
@@ -83,6 +96,14 @@ export default {
         emitter.on("update-filter-string",(filterString)=>{
             this.filterString = filterString;
         });
+        emitter.on("previews-loading",()=> {
+            this.loaded= false;
+        })
+        emitter.on("previews-done-loading",()=>{
+            console.log("loaded" );
+            this.loaded= null;
+            this.loaded = true;
+        })
 
         let touchstartY = 0;
         const refreshElement = document.getElementsByClassName("threadlist-header")[0];
@@ -137,8 +158,14 @@ export default {
         <ThreadSearch v-if='true'></ThreadSearch>
         <div class='threadlist-table'>
             <div class="preview_list_container">
-                <ThreadPreview  v-for="[key,value] in filteredAndSortedPreviews()" :key="key"
+                <div class="conditional_container" v-if="this.loaded">
+                    <ThreadPreview   v-for="[key,value] in filteredAndSortedPreviews()" :key="key"
                     v-bind="value" :activeThread="this.activeThread"  />
+                </div>
+                <div v-else>
+                    <img src="../../../loading-spinner.svg" alt="loading animation" width="200" height="200"/>
+                </div>
+                 
             </div>
         </div>
         <div class="link-container-container">

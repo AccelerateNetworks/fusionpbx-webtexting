@@ -1,5 +1,7 @@
 <script lang="ts">
 import { emitter } from '../../lib/global';
+//TODO: add an Unsearch button to 
+
 export default{
     name:"ThreadSearch",
     props:{
@@ -7,6 +9,17 @@ export default{
     },
     methods:{
         threadSearch(searchString: String){
+            //this is where we fire off the search function flow
+            //sanitize input
+            //call to backfillPreviews.ts
+            //backfillPreviews should return it's data to ThreadList tho.
+            if(searchString.length >2){
+               emitter.emit("thread-search-request",searchString),500;
+            }
+            else{
+                console.log("ThreadSearch PDL emergency release valve");
+                emitter.emit("previews-done-loading");
+            }
         }
     },
     data(){
@@ -15,6 +28,7 @@ export default{
     },
     watch:{
         searchString(newString, oldString){
+            this.threadSearch(newString);
             emitter.emit("update-filter-string",newString);
         }
     },

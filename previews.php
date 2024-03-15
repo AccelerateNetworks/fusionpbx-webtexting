@@ -21,8 +21,7 @@ if (!$extension) {
 
 $database = new database;
 // get user's number
-$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
-$parameters['domain_uuid'] = $domain_uuid;
+$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";$parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $ownNumber = $database->select($sql, $parameters, 'column');
 unset($parameters);
@@ -34,7 +33,16 @@ if (!$ownNumber) {
 }
 
 //this is for Contact Search
-$query_string = '';
+if($_GET['query_string'] != null){
+    $query_string = $_GET['query_string'];
+    if(strlen($query_string)>2){
+        $query_limit_string = '10';
+    }
+}
+else{
+    $query_string = '';
+    $query_limit_string = '10';
+}
 
 $sql = "SELECT *
 FROM webtexting_threads,v_contacts , v_contact_phones
@@ -44,9 +52,10 @@ AND v_contact_phones.contact_uuid = v_contacts.contact_uuid
 AND webtexting_threads.remote_number = v_contact_phones.phone_number
 AND LOWER(CONCAT(v_contacts.contact_organization , ' ' ,v_contacts.contact_name_given , ' ' , v_contacts.contact_name_middle , 
             ' ' , v_contacts.contact_name_family , ' ' , v_contacts.contact_nickname, ' ', v_contacts.contact_title, ' ', 
-            v_contacts.contact_role) ) LIKE  LOWER('%'||:query_string||'%' )   ;";
+            v_contacts.contact_role) ) LIKE  LOWER('%'||:query_string||'%' )   LIMIT :query_limit;";
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['query_string'] = $query_string;
+$parameters['query_limit'] = $query_limit_string;
 $solo_conversations = $database->select($sql, $parameters, 'all');
 unset($parameters);
 $z = 0;
@@ -102,16 +111,18 @@ where webtexting_groups.domain_uuid = :domain_uuid
 	AND  webtexting_threads.domain_uuid = :domain_uuid
 	AND extension_uuid = :extension_uuid
 	AND webtexting_threads.group_uuid = webtexting_groups.group_uuid
-	AND webtexting_groups.name  LIKE  LOWER('%'||:query_string||'%' );";
+	AND webtexting_groups.name  LIKE  LOWER('%'||:query_string||'%' ) LIMIT :query_limit;";
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['query_string'] = $query_string;
+$parameters['query_limit'] = $query_limit_string;
+
 $groups = $database->select($sql, $parameters, 'all');
 unset($parameters);
 
 if($groups){
     foreach ($groups as $group) {
-        $threadPreviews[$z]['group_uuid'] = $group['group_uuid'];
+        $threadPreviews[$z]['groupUUID'] = $group['group_uuid'];
         $threadPreviews[$z]['groupMembers'] = $group['members']; 
         if ($group['name'] != null) {
             $display_name = $group['name'];
@@ -171,50 +182,23 @@ if($groups){
             }
             $member_index++;        
         } 
-        $threadPreviews[$z]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&group_uuid=".$group['group_uuid'];
+        $threadPreviews[$z]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&group=".$group['group_uuid'];
         $threadPreviews[$z]['ownNumber'] = $ownNumber;
         $threadPreviews[$z]['timestamp'] = $group['last_message'];
+        $threadPreviews[$z]['displayName'] = $display_name;
         $z++;
     }
 }
 
-//this is where we search for threads by number
-$sql = "SELECT *
-FROM webtexting_threads
-WHERE webtexting_threads.domain_uuid = :domain_uuid
-AND webtexting_threads.local_number = :local_number
-AND webtexting_threads.remote_number LIKE  LOWER('%'||:query_string||'%' )   ;";
-$parameters['domain_uuid'] = $domain_uuid;
-$parameters['local_number'] = $ownNumber;
-$parameters['query_string'] = $query_string;
-$number_results = $database->select($sql, $parameters, 'all');
-unset($parameters);
-if($number_results){
-    foreach ($number_results as $result) {
-        if($usedNumbers[$result['remote_number']]){ //duplicate entry protection for numbers that are contacts
-            continue;
-        }
-        else{
-            $threadPreviews[$z]['remoteNumber'] = $result['remote_number'];
-            $threadPreviews[$z]['displayName']= $result['remote_number'];
-            $threadPreviews[$z]['contactEditLink'] = "/app/contacts/contact_edit.php";
-        
-            $threadPreviews[$z]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&number=".$result['remote_number'];
-            $threadPreviews[$z]['ownNumber'] = $ownNumber;
-            $threadPreviews[$z]['timestamp'] = $result['last_message'];
-            $z++;
-        }
-        
-    }
-}
+
 
 //this is where we fetch and attach the bodyPreviews
 $z=0;
 foreach($threadPreviews as $preview){
     $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
-    if ($preview['group_uuid'] != null) {
+    if ($preview['groupUUID'] != null) {
         $sql .= "group_uuid = :group_uuid";
-        $parameters['group_uuid'] = $preview['group_uuid'];
+        $parameters['group_uuid'] = $preview['groupUUID'];
     } else {
         $sql .= "(from_number = :number OR to_number = :number) AND group_uuid IS NULL";
         $parameters['number'] = $preview['remoteNumber'];

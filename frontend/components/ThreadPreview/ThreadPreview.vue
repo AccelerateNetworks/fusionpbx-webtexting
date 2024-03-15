@@ -7,7 +7,7 @@ export type ThreadPreviewInterface = {
         type: String,
     },
     bodyPreview: {
-        type: string,
+        type: String,
     },
     link: {
         type: String,
