@@ -28,6 +28,7 @@ export default{
     },
     watch:{
         searchString(newString, oldString){
+            newString = newString.trim();
             this.threadSearch(newString);
             emitter.emit("update-filter-string",newString);
         }

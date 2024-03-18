@@ -53,7 +53,7 @@ export default {
             emitter.emit('thread-change',newThread);
         },
         filteredAndSortedPreviews() {
-            if(this.loaded){            
+            if(this.loaded && this.threadPreviews){            
                 return new Map([...this.threadPreviews].filter(([key, value]) => {
                     //console.log(value)
                     if (value == null) {
@@ -247,6 +247,8 @@ export default {
     position:relative;
     float: center;
     margin-top: 0.5rem;
+    right:-8rem;
+    bottom:2rem;
 }
 
 .dot-center{

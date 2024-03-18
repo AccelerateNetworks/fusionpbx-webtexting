@@ -28,12 +28,10 @@ export async function searchPreviews(queryString: string, extensionUUID: string)
     let temp;
     try {
         let params: threadPreviewQuery = {  query_string: queryString, extension_uuid: extensionUUID };
-        
+        queryString = queryString.trim();
        // console.log(params)
-        const response = await fetch('/app/webtexting/previews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
-        if(response.length){
-            console.log("received", response.length, "preview from database");
-        }
+        const response = await fetch('/app/webtexting/searchpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
+        
         temp = response;
         // for (let i = 0; i < response.length; i++) {
         //     let m = response[i];
@@ -96,8 +94,7 @@ export async function loadPreviews(extensionUUID:string) {
     try {
         let params: loadPreviewQuery = {  extension_uuid: extensionUUID };
         
-        console.log('/app/webtexting/previews.php?' + new URLSearchParams(params).toString())
-        const initialResponse =  await fetch('/app/webtexting/previews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
+        const initialResponse =  await fetch('/app/webtexting/loadpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         temp = initialResponse;
         //console.log("received", initialResponse.length, "preview from database");
         // for (let i = 0; i < response.length; i++) {

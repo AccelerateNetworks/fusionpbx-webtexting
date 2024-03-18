@@ -25,6 +25,9 @@ $sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :do
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $ownNumber = $database->select($sql, $parameters, 'column');
 unset($parameters);
+if($ownNumber[0]=='+'){
+    $ownNumber = subStr($ownNumber,1);
+}
 if (!$ownNumber) {
     echo "To use Web Texting purchase the service at <a href='https://acceleratenetworks.com/services/'>https://acceleratenetworks.com/services/</a> then <a href='mailto:https://acceleratenetworks.com/support/'>Contact Support</a>";
     echo "<br> No SMS-enabled number for this extension.";
@@ -36,13 +39,12 @@ if (!$ownNumber) {
 if($_GET['query_string'] != null){
     $query_string = $_GET['query_string'];
     if(strlen($query_string)>2){
-        $query_limit_string = '10';
     }
 }
 else{
     $query_string = '';
-    $query_limit_string = '10';
 }
+
 
 $sql = "SELECT *
 FROM webtexting_threads,v_contacts , v_contact_phones
@@ -52,10 +54,9 @@ AND v_contact_phones.contact_uuid = v_contacts.contact_uuid
 AND webtexting_threads.remote_number = v_contact_phones.phone_number
 AND LOWER(CONCAT(v_contacts.contact_organization , ' ' ,v_contacts.contact_name_given , ' ' , v_contacts.contact_name_middle , 
             ' ' , v_contacts.contact_name_family , ' ' , v_contacts.contact_nickname, ' ', v_contacts.contact_title, ' ', 
-            v_contacts.contact_role) ) LIKE  LOWER('%'||:query_string||'%' )   LIMIT :query_limit;";
+            v_contacts.contact_role) ) LIKE  LOWER('%'||:query_string||'%' )   ;";
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['query_string'] = $query_string;
-$parameters['query_limit'] = $query_limit_string;
 $solo_conversations = $database->select($sql, $parameters, 'all');
 unset($parameters);
 $z = 0;
@@ -111,11 +112,10 @@ where webtexting_groups.domain_uuid = :domain_uuid
 	AND  webtexting_threads.domain_uuid = :domain_uuid
 	AND extension_uuid = :extension_uuid
 	AND webtexting_threads.group_uuid = webtexting_groups.group_uuid
-	AND webtexting_groups.name  LIKE  LOWER('%'||:query_string||'%' ) LIMIT :query_limit;";
+	AND LOWER(webtexting_groups.name)  LIKE  LOWER('%'||:query_string||'%' ) ";
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['query_string'] = $query_string;
-$parameters['query_limit'] = $query_limit_string;
 
 $groups = $database->select($sql, $parameters, 'all');
 unset($parameters);

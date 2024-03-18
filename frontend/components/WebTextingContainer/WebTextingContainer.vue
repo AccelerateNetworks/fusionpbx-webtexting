@@ -203,7 +203,7 @@ export default {
                 this.loaded = false;
                 this.loadedPreviews = false;
                 console.log("we've got a route")
-                searchPreviews(queryString,this.$route.query.extension_uuid);
+                await searchPreviews(queryString,this.$route.query.extension_uuid);
                 console.log(this.state.previews);
             }
             else{
