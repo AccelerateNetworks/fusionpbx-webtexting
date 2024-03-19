@@ -110,6 +110,7 @@ $sql = "SELECT *
 from webtexting_groups,webtexting_threads
 where webtexting_groups.domain_uuid = :domain_uuid
 	AND  webtexting_threads.domain_uuid = :domain_uuid
+    AND webtexting_threads.domain_uuid = webtexting_groups.domain_uuid
 	AND extension_uuid = :extension_uuid
 	AND webtexting_threads.group_uuid = webtexting_groups.group_uuid
 	AND LOWER(webtexting_groups.name)  LIKE  LOWER('%'||:query_string||'%' ) ";

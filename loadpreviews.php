@@ -37,8 +37,10 @@ if (!$ownNumber) {
 $query_limit = 20;
 
 //this is for Limiting the list of threads on initial load
-$sql = "SELECT * FROM webtexting_threads WHERE domain_uuid = :domain_uuid ORDER BY last_message DESC LIMIT :query_limit ;";
+$sql = "SELECT * FROM webtexting_threads WHERE domain_uuid = :domain_uuid 
+AND local_number = :local_number ORDER BY last_message DESC LIMIT :query_limit ;";
 $parameters['domain_uuid'] = $domain_uuid;
+$parameters['local_number'] = $ownNumber;
 $parameters['query_limit'] = $query_limit;
 $conversations = $database->select($sql,$parameters, 'all');
 unset($parameters);
