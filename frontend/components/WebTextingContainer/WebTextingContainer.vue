@@ -195,7 +195,7 @@ export default {
             //console.log("time to fetch");
         });
         emitter.on("update-last-message", (message: MessageData) => {
-            this.updateLastMessage(message);
+            //this.updateLastMessage(message);
 
         });
         emitter.on("thread-search-request", async (queryString: string) =>{
