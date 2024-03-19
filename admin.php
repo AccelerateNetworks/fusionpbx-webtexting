@@ -164,7 +164,16 @@ foreach($extensions as $extension) {
         $problems = array();
 
         try {
-            $inboundRouting = AccelerateNetworks::GetInboundSMSRouting($sms_number);
+            if($sms_number[0]=='+'){
+                $sms_number= substr($sms_number,1);
+            }
+            if(strlen($sms_number)!=11){
+                $problems[] = "Desired number has incorrect number of digits. Expected 11 digits but ". $sms_number. " isn't 11 digits";
+            }
+            else{
+                $inboundRouting = AccelerateNetworks::GetInboundSMSRouting($sms_number);
+
+            }
 
             if($inboundRouting->callbackUrl != $desiredWebhookURL) {
                 $problems[] = "webhook URL is wrong: <code>".$inboundRouting->callbackUrl."</code> should be <code>".$desiredWebhookURL."</code>";

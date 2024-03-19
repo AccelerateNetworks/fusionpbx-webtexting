@@ -192,7 +192,7 @@ export default {
                         //console.log('emitting message', message);
                         emitter.emit('outbound-message', message);
                         setTimeout(() => 
-                            location.reload(), 500
+                            console.log("duplicate send prevention timeout"), 500
                         )
                         this.enteredText = "";
                     }

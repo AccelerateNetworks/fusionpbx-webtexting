@@ -232,7 +232,7 @@ export default {
     /*border-spacing: 1em; */
     direction: rtl;
     overflow-y: auto;
-    height: 70vh;
+    height: 69dvh;
     width: 100%;
     table-layout: fixed;
     padding-left: 3px;
@@ -247,8 +247,6 @@ export default {
     position:relative;
     float: center;
     margin-top: 0.5rem;
-    right:-8rem;
-    bottom:2rem;
 }
 
 .dot-center{
@@ -291,7 +289,7 @@ export default {
         z-index:7;
     }
     .table {
-        height: 80vh;
+        height: 79dvh;
     }
     .hide-if-small{
         display:none;
