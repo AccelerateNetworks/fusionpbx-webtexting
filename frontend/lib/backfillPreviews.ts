@@ -1,4 +1,4 @@
-import { MessageData, emitter, state , addPreview} from './global';
+import { MessageData, emitter, state , addPreview, queryLimit} from './global';
 import moment from 'moment';
 import ThreadPreviewInterface from '../components/ThreadPreview/ThreadPreview.vue';
 
@@ -12,7 +12,8 @@ type threadPreviewQuery = {
 }
 
 type loadPreviewQuery = {
-    extension_uuid: string
+    extension_uuid: string,
+    older_than?: string
 }
 
 let fetching = false;
@@ -83,7 +84,7 @@ export function insertPreview() {
 }
 
 
-export async function loadPreviews(extensionUUID:string) {
+export async function loadPreviews(extensionUUID:string, older_than:string) {
     if (fetching) {
         console.log("skipping duplicate search request");
         return;
@@ -92,8 +93,10 @@ export async function loadPreviews(extensionUUID:string) {
     emitter.emit("previews-loading");
     let temp;
     try {
-        let params: loadPreviewQuery = {  extension_uuid: extensionUUID };
-        
+        let params: loadPreviewQuery = {  extension_uuid: extensionUUID, };
+        if(older_than){
+            params.older_than = older_than;
+        }
         const initialResponse =  await fetch('/app/webtexting/loadpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         temp = initialResponse;
         //console.log("received", initialResponse.length, "preview from database");
@@ -115,6 +118,9 @@ export async function loadPreviews(extensionUUID:string) {
         fetching = false;
         console.log('load preview error:', e);
     }finally{
+        if(temp.length< queryLimit){
+            emitter.emit("no-more-previews");
+        }
         console.log(temp);
         emitter.emit('backfill-preview-complete',temp);
         fetching= false;
@@ -152,6 +158,9 @@ export const buildPreviews =  function buildPreviews(previews ) {
         }
     }
     console.log("emitting PDL");
-    emitter.emit("previews-done-loading");
+    emitter.emit("previews-done-loading");  
+    //below not for deployment       
+    emitter.emit('inital-load-complete');
+
     return ;
 }

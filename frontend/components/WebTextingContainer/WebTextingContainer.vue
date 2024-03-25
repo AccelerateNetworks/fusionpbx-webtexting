@@ -180,10 +180,10 @@ export default {
     async created() {
         //getPreviews();
         console.log(this.state);
-        loadPreviews(this.extensionUUID);
+        loadPreviews(this.extensionUUID,state.oldestMessage);
     },
     mounted() {
-        console.log(this.$route.query.extension_uuid);
+        //console.log(this.$route.query.extension_uuid);
         emitter.on('thread-change', (payload: ThreadChangePayload) => {
             this.contactEditLink = payload.editLink;
             console.log(`wtc thread change ${payload.key}`)
@@ -210,10 +210,13 @@ export default {
                 alert("No Extension detected. Reload the page")
             }
         });
-        emitter.on("previews-built-and-loaded",() =>{
+        emitter.on("previews-built-and-loaded",() => {
             this.loadedPreviews=true;
             this.load = true;
         });
+        emitter.on("backfill-previews-requested",() => {
+            loadPreviews(this.extensionUUID,state.oldestMessage);
+        })
         
     },
 

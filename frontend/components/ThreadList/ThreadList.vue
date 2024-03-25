@@ -1,7 +1,9 @@
 <script lang="ts" >
 import ThreadSearch from '../ThreadSearch/ThreadSearch.vue';
 import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
-import {emitter, ThreadChangePayload} from '../../lib/global'
+import PaginatorButton from '../PaginatorButton/PaginatorButton.vue';
+import {emitter, ThreadChangePayload} from '../../lib/global';
+
 
 
 
@@ -17,12 +19,13 @@ export default {
         newThreadView: Boolean,
         previewsLoaded: Boolean
     },
-    components: { ThreadPreview, ThreadSearch },
+    components: { ThreadPreview, ThreadSearch, PaginatorButton },
     data() {
         return { activeThread: '',
                     filterString: '',
                     displaySearch: false,
-                    loaded: false }
+                    loaded: false,
+                    backfillPreviewAvailable: true,}
     },
     computed: {
         recieveEmit(threadChangeObject:ThreadChangePayload) {
@@ -46,6 +49,7 @@ export default {
         if (this.threadPreviews){
             this.loaded = true;
         }
+        
     },
     methods:{
         dumpSelectedThread(){
@@ -77,34 +81,14 @@ export default {
         else{
             return new Map<string,ThreadPreviewInterface>();
         }
-    }
+    },
+
         
         
     },
     mounted(){
-        emitter.on('thread-change', (threadChangeObject:ThreadChangePayload) => {
-            //console.log("TL event get", activeConversation);
-            this.activeThread = threadChangeObject.key;
-            return this.activeThread;
-        })
-        emitter.on("update-last-message", ()=>{
-            const temp = this.activeThread;
-            this.activeThread = "";
-            this.activeThread = temp;
-
-        })
-        emitter.on("update-filter-string",(filterString)=>{
-            this.filterString = filterString;
-        });
-        emitter.on("previews-loading",()=> {
-            this.loaded= false;
-        })
-        emitter.on("previews-done-loading",()=>{
-            console.log("loaded" );
-            this.loaded= null;
-            this.loaded = true;
-        })
-
+        
+        
         let touchstartY = 0;
         const refreshElement = document.getElementsByClassName("threadlist-header")[0];
         refreshElement.addEventListener('touchstart', e => {
@@ -128,6 +112,29 @@ export default {
             location.reload();
         }
         });
+        emitter.on('thread-change', (threadChangeObject:ThreadChangePayload) => {
+            //console.log("TL event get", activeConversation);
+            this.activeThread = threadChangeObject.key;
+            return this.activeThread;
+        })
+        emitter.on("update-last-message", ()=>{
+            const temp = this.activeThread;
+            this.activeThread = "";
+            this.activeThread = temp;
+
+        })
+        emitter.on("update-filter-string",(filterString)=>{
+            this.filterString = filterString;
+        });
+        emitter.on("previews-loading",()=> {
+            this.loaded= false;
+        })
+        emitter.on("previews-done-loading",()=>{
+            console.log("loaded" );
+            this.loaded= null;
+            this.loaded = true;
+        })
+            
     },
     beforeDestroy() {
         const refreshElement = document.getElementsByClassName("thread-header")[0];
@@ -158,14 +165,16 @@ export default {
         <ThreadSearch v-if='true'></ThreadSearch>
         <div class='threadlist-table'>
             <div class="preview_list_container">
-                <div class="conditional_container" v-if="this.loaded">
+
+                <div class="conditional_container" v-if="this.loaded" ref="conditional_container" @scroll="onScroll">
                     <ThreadPreview   v-for="[key,value] in filteredAndSortedPreviews()" :key="key"
                     v-bind="value" :activeThread="this.activeThread"  />
+                    
                 </div>
                 <div v-else>
-                    <img src="../../../loading-spinner.svg" alt="loading animation" width="200" height="200"/>
+                    <img src="../../../loading-spinner.svg" alt="loading animation" width="150" height="150"/>
                 </div>
-                 
+                <PaginatorButton/>
             </div>
         </div>
         <div class="link-container-container">

@@ -28,14 +28,19 @@ type GlobalState = {
     conversations: ConversationData,
     connectivityStatus: String,
     connected: Boolean,
-    previews: PreviewData
+    previews: PreviewData,
+    page: number,
+    oldestMessage: Number,
 };
+const queryLimit = 5;
 
 const state = reactive<GlobalState>({
     conversations:  {},
     connectivityStatus: 'loading',
     connected: false,
     previews: null,
+    page:0,
+    oldestMessage: null
 });
 
 const emitter = mitt();
@@ -100,6 +105,7 @@ function addPreview(preview : ThreadPreviewInterface){
             //don't add duplicates
         }
         else{
+            updateOldestMessage(Date.parse(new Date(preview.timestamp)));
             state.previews.set(conversationKey,preview);
         }
     }
@@ -111,4 +117,22 @@ function addPreview(preview : ThreadPreviewInterface){
 function previewsContainKey(keyQuery:string){
     return state.previews.has(keyQuery);
 }
-export { state, emitter, MessageData, GlobalState, addMessage, ThreadChangePayload, addPreview }
+
+function updatePageNumber(){
+    state.page = state.page+1;
+    return state.page;
+}
+function updateOldestMessage(newOldestTimestamp: Number){
+    if(state.oldestMessage){
+        if(newOldestTimestamp < state.oldestMessage){
+            state.oldestMessage = newOldestTimestamp;
+        }
+    }
+    else{
+        state.oldestMessage = newOldestTimestamp;
+    }
+    console.log(newOldestTimestamp)
+    console.log(state.oldestMessage)
+    return state.oldestMessage;
+}
+export { state, emitter, queryLimit, MessageData, GlobalState, ThreadChangePayload, addMessage, addPreview, updatePageNumber  }

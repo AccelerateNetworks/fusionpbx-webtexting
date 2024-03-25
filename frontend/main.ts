@@ -90,6 +90,9 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
         console.log("error from within vue:", info, err, instance);
         console.error(err);
     }
+    if(opts.ownNumber[0] === '+'){
+        opts.ownNumber = opts.ownNumber.substring(1);
+    }
     app.use(router);
     app.mount("#TEST_DIV_FOR_TESTING_WEBTEXTING");
 
@@ -111,7 +114,9 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
         else{
             console.log("ignoring backfill request with no key");
         }
-        
+    })
+    emitter.on(('backfill-previews-requested') ,() =>{ 
+        console.log("backfilling previews");
     })
 }
 
