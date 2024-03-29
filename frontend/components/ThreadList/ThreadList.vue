@@ -71,11 +71,12 @@ export default {
                     return value.displayName.toLowerCase().includes(this.filterString.toLowerCase())
                 }
                 )
-                // .sort(([a, b]) => {
-                //     //console.log(b.timestamp);
-                //   //  console.log(Date.parse(b.timestamp));
-                //     return Date.parse(b.timestamp);
-                // })
+                //.sort(function(a,b) {
+                    //console.log(b.timestamp);
+                  //  console.log(Date.parse(b.timestamp));
+
+                //    return new Date(a.timestamp) - new Date(b.timestamp);
+                //})
                 );
         }
         else{
@@ -171,7 +172,7 @@ export default {
                     v-bind="value" :activeThread="this.activeThread"  />
                     
                 </div>
-                <div v-else>
+                <div class="load-animation-container" v-else>
                     <img src="../../../loading-spinner.svg" alt="loading animation" width="150" height="150"/>
                 </div>
                 <PaginatorButton/>
@@ -286,6 +287,11 @@ export default {
  .link-container-container{
     justify-content: center;
     display:flex;
+}
+.load-animation-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 

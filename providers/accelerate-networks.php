@@ -67,8 +67,13 @@ function _send(array $body)
             'json' => $body,
         ],
     );
-
-    error_log("got ".$res->getStatusCode()." ".$res->getReasonPhrase()."\n");
-    $responseBody = json_decode($res->getBody()->getContents());
-    error_log("response body: ".print_r($responseBody, true)."\n");
+    if($res->getStatusCode() == 200){
+        //everything's fine do nothing.
+    }
+    else{
+        error_log("got ".$res->getStatusCode()." ".$res->getReasonPhrase()."\n");
+        $responseBody = json_decode($res->getBody()->getContents());
+        error_log("response body: ".print_r($responseBody, true)."\n");
+    }
 }
+    
