@@ -58,7 +58,7 @@ export default {
         },
         filteredAndSortedPreviews() {
             if(this.loaded && this.threadPreviews){            
-                return new Map([...this.threadPreviews].filter(([key, value]) => {
+                return new Map<string,ThreadPreviewInterface>([...this.threadPreviews].filter(([key, value]) => {
                     //console.log(value)
                     if (value == null) {
                         console.log("key for null value ", key)
@@ -71,12 +71,11 @@ export default {
                     return value.displayName.toLowerCase().includes(this.filterString.toLowerCase())
                 }
                 )
-                //.sort(function(a,b) {
-                    //console.log(b.timestamp);
-                  //  console.log(Date.parse(b.timestamp));
-
-                //    return new Date(a.timestamp) - new Date(b.timestamp);
-                //})
+                .sort(function(a,b) {
+                    // console.log(a[1].timestamp);
+                    // console.log(b[1].timestamp);
+                    return  new Date(b[1].timestamp) - new Date(a[1].timestamp);
+                })
                 );
         }
         else{
