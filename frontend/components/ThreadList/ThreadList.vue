@@ -72,9 +72,9 @@ export default {
                 }
                 )
                 .sort(function(a,b) {
-                    // console.log(a[1].timestamp);
-                    // console.log(b[1].timestamp);
-                    return  new Date(b[1].timestamp) - new Date(a[1].timestamp);
+
+                   return Date.parse(b[1].timestamp) - Date.parse(a[1].timestamp) ;
+
                 })
                 );
         }
