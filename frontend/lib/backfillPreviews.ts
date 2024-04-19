@@ -121,7 +121,7 @@ export async function loadPreviews(extensionUUID:string, older_than:string) {
         if(temp.length< queryLimit){
             emitter.emit("no-more-previews");
         }
-        console.log(temp);
+        //console.log(temp);
         emitter.emit('backfill-preview-complete',temp);
         fetching= false;
         
@@ -131,7 +131,7 @@ export async function loadPreviews(extensionUUID:string, older_than:string) {
 }
 
 export const buildPreviews =  function buildPreviews(previews ) {
-    console.log( previews)
+    //console.log( previews)
     //let threadPreviewMap = new Map<String, ThreadPreviewInterface>();
     if(previews && previews.length){
         for(let x = 0; x < previews.length; x++){

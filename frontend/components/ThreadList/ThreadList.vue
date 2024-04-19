@@ -71,12 +71,9 @@ export default {
                     return value.displayName.toLowerCase().includes(this.filterString.toLowerCase())
                 }
                 )
-                //.sort(function(a,b) {
-                    //console.log(b.timestamp);
-                  //  console.log(Date.parse(b.timestamp));
-
-                //    return new Date(a.timestamp) - new Date(b.timestamp);
-                //})
+                .sort(function(a,b) {
+                   return Date.parse(b[1].timestamp) - Date.parse(a[1].timestamp) ;
+                })
                 );
         }
         else{

@@ -47,12 +47,12 @@ export default {
     methods: {
         calculateDisplayName() {
             if (this.$route.query.group) {
-                for (let m in this.$props.threadPreviews) {
+                for (let m in this.state.previews) {
                     console.log(`group: ${m}`);
                 }
             }
             else {
-                for (let m in this.$props.threadPreviews) {
+                for (let m in this.state.previews) {
                     console.log(`contact: ${m}`);
                 }
             }
@@ -70,7 +70,7 @@ export default {
             //console.log(message)
             if (message.contentType == "message/cpim") {
                 //console.log(message.cpim.headers['group-uuid']);
-                // console.log(this.threadPreviews.get(message.cpim.headers['group-uuid']));
+                // console.log(this.state.previews.get(message.cpim.headers['group-uuid']));
                 //bump this thread somehow?
                 //this mightnot work for a new message 
                 // console.log(message.cpim.headers["group-uuid"])
@@ -82,46 +82,46 @@ export default {
                 //outbound message case
                 if (message.direction == 'outgoing') {
                     if (message.cpim.headers['group-uuid']) {
-                        let temp = this.threadPreviews.get(message.cpim.headers['group-uuid']);
+                        let temp = this.state.previews.get(message.cpim.headers['group-uuid']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
-                        this.threadPreviews.set(message.cpim.headers['group-uuid'], temp);
+                        this.state.previews.set(message.cpim.headers['group-uuid'], temp);
                     } else if (message.cpim.headers["Group-UUID"]) {
-                        let temp = this.threadPreviews.get(message.cpim.headers['Group-UUID']);
+                        let temp = this.state.previews.get(message.cpim.headers['Group-UUID']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
-                        this.threadPreviews.set(message.cpim.headers['Group-UUID'], temp);
+                        this.state.previews.set(message.cpim.headers['Group-UUID'], temp);
                     }
                     else {
                         if (this.$route.query.number) {
-                            let temp = this.threadPreviews.get(this.$route.query.number);
-                            console.log(this.threadPreviews.get(this.$route.query.number), " ", this.$route.query.number);
+                            let temp = this.state.previews.get(this.$route.query.number);
+                            console.log(this.state.previews.get(this.$route.query.number), " ", this.$route.query.number);
                             temp.bodyPreview = "New MMS Message";
                             temp.timestamp = now;
-                            this.threadPreviews.set(this.$route.query.number, temp);
+                            this.state.previews.set(this.$route.query.number, temp);
                         }
 
                     }
                 }
                 else if (message.direction == 'incoming') {
                     if (message.cpim.headers['group-uuid']) {
-                        let temp = this.threadPreviews.get(message.cpim.headers['group-uuid']);
+                        let temp = this.state.previews.get(message.cpim.headers['group-uuid']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
-                        this.threadPreviews.set(message.cpim.headers['group-uuid'], temp);
+                        this.state.previews.set(message.cpim.headers['group-uuid'], temp);
                     } else if (message.cpim.headers["Group-UUID"]) {
-                        let temp = this.threadPreviews.get(message.cpim.headers['Group-UUID']);
+                        let temp = this.state.previews.get(message.cpim.headers['Group-UUID']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
-                        this.threadPreviews.set(message.cpim.headers['Group-UUID'], temp);
+                        this.state.previews.set(message.cpim.headers['Group-UUID'], temp);
                     }
                     else {
                         if (this.$route.query.number) {
-                            let temp = this.threadPreviews.get(this.$route.query.number);
-                            console.log(this.threadPreviews.get(this.$route.query.number), " ", this.$route.query.number);
+                            let temp = this.state.previews.get(this.$route.query.number);
+                            console.log(this.state.previews.get(this.$route.query.number), " ", this.$route.query.number);
                             temp.bodyPreview = "New MMS Message";
                             temp.timestamp = now;
-                            this.threadPreviews.set(this.$route.query.number, temp);
+                            this.state.previews.set(this.$route.query.number, temp);
                         }
 
                     }
@@ -130,25 +130,24 @@ export default {
             else {
                 //console.log("not message.cpim")
                 if (message.from == this.ownNumber) {
-                    //console.log(this.threadPreviews.get(message.to))
-                    //set this.threadPreviews.get(message.to)bodyPreview to message.body
-                    if (this.threadPreviews.get(message.to)) {
-                        let temp = this.threadPreviews.get(message.to);
+                    //console.log(this.state.previews.get(message.to))
+                    //set this.state.previews.get(message.to)bodyPreview to message.body
+                    if (this.state.previews.get(message.to)) {
+                        let temp = this.state.previews.get(message.to);
                         temp.bodyPreview = message.body;
                         temp.timestamp = now.toString();
-                        this.threadPreviews.set(message.to, temp);
+                        this.state.previews.set(message.to, temp);
                     }
 
                 }
                 else if (message.to == undefined) {
-                    // console.log(this.threadPreviews.get(message.from))
-                    //set this.threadPreviews.get(message.from)bodyPreview to message.body
-                    if (this.threadPreviews.get(message.from)) {
-                        let temp = this.threadPreviews.get(message.from);
+                    // console.log(this.state.previews.get(message.from))
+                    //set this.state.previews.get(message.from)bodyPreview to message.body
+                    if (this.state.previews.get(message.from)) {
+                        let temp = this.state.previews.get(message.from);
                         temp.bodyPreview = message.body;
                         temp.timestamp = now.toString();
-
-                        this.threadPreviews.set(message.from, temp);
+                        this.state.previews.set(message.from, temp);
                     }
 
                 }
@@ -195,7 +194,7 @@ export default {
             //console.log("time to fetch");
         });
         emitter.on("update-last-message", (message: MessageData) => {
-            //this.updateLastMessage(message);
+            this.updateLastMessage(message);
 
         });
         emitter.on("thread-search-request", async (queryString: string) =>{

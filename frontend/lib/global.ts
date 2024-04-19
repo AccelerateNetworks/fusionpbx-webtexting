@@ -105,7 +105,8 @@ function addPreview(preview : ThreadPreviewInterface){
             //don't add duplicates
         }
         else{
-            updateOldestMessage(Date.parse(new Date(preview.timestamp)));
+            console.log(Date.parse(preview.timestamp))
+            updateOldestMessage(Date.parse(preview.timestamp));
             state.previews.set(conversationKey,preview);
         }
     }
@@ -116,6 +117,11 @@ function addPreview(preview : ThreadPreviewInterface){
 }
 function previewsContainKey(keyQuery:string){
     return state.previews.has(keyQuery);
+}
+//input: key for ThreadPreview that needs updating
+//input: timestamp to update ThreadPreview with
+function updatePreviewTimestamp(previewKey: string){
+    //update the timestamp of the preview who's key matches previewKey
 }
 
 function updatePageNumber(){
@@ -131,8 +137,8 @@ function updateOldestMessage(newOldestTimestamp: Number){
     else{
         state.oldestMessage = newOldestTimestamp;
     }
-    console.log(newOldestTimestamp)
-    console.log(state.oldestMessage)
+    //console.log(newOldestTimestamp)
+    //console.log(state.oldestMessage)
     return state.oldestMessage;
 }
 export { state, emitter, queryLimit, MessageData, GlobalState, ThreadChangePayload, addMessage, addPreview, updatePageNumber  }
