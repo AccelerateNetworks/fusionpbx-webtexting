@@ -34,7 +34,7 @@ if (!$ownNumber) {
     include_once "footer.php";
     die();
 }
-$query_limit = 5;
+$query_limit = 20;
 
 //this is for Limiting the list of threads on initial load
 $sql = 'SELECT * FROM webtexting_threads WHERE domain_uuid = :domain_uuid AND local_number = :local_number ';

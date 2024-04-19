@@ -1,4 +1,4 @@
-import { MessageData, emitter, state , addPreview, queryLimit} from './global';
+import { MessageData, emitter, state , addPreview, query_limit} from './global';
 import moment from 'moment';
 import ThreadPreviewInterface from '../components/ThreadPreview/ThreadPreview.vue';
 
@@ -118,7 +118,7 @@ export async function loadPreviews(extensionUUID:string, older_than:string) {
         fetching = false;
         console.log('load preview error:', e);
     }finally{
-        if(temp.length< queryLimit){
+        if(temp.length< query_limit){
             emitter.emit("no-more-previews");
         }
         //console.log(temp);
