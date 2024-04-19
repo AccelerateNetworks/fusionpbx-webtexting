@@ -82,6 +82,7 @@ export default {
                 //outbound message case
                 if (message.direction == 'outgoing') {
                     if (message.cpim.headers['group-uuid']) {
+
                         let temp = this.state.previews.get(message.cpim.headers['group-uuid']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
@@ -99,12 +100,14 @@ export default {
                             temp.bodyPreview = "New MMS Message";
                             temp.timestamp = now;
                             this.state.previews.set(this.$route.query.number, temp);
+
                         }
 
                     }
                 }
                 else if (message.direction == 'incoming') {
                     if (message.cpim.headers['group-uuid']) {
+
                         let temp = this.state.previews.get(message.cpim.headers['group-uuid']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
@@ -122,6 +125,7 @@ export default {
                             temp.bodyPreview = "New MMS Message";
                             temp.timestamp = now;
                             this.state.previews.set(this.$route.query.number, temp);
+
                         }
 
                     }
@@ -130,17 +134,19 @@ export default {
             else {
                 //console.log("not message.cpim")
                 if (message.from == this.ownNumber) {
-                    //console.log(this.state.previews.get(message.to))
+                  //console.log(this.state.previews.get(message.to))
                     //set this.state.previews.get(message.to)bodyPreview to message.body
                     if (this.state.previews.get(message.to)) {
                         let temp = this.state.previews.get(message.to);
                         temp.bodyPreview = message.body;
                         temp.timestamp = now.toString();
                         this.state.previews.set(message.to, temp);
+
                     }
 
                 }
                 else if (message.to == undefined) {
+
                     // console.log(this.state.previews.get(message.from))
                     //set this.state.previews.get(message.from)bodyPreview to message.body
                     if (this.state.previews.get(message.from)) {
@@ -148,6 +154,7 @@ export default {
                         temp.bodyPreview = message.body;
                         temp.timestamp = now.toString();
                         this.state.previews.set(message.from, temp);
+
                     }
 
                 }

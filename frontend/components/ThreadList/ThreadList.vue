@@ -58,7 +58,7 @@ export default {
         },
         filteredAndSortedPreviews() {
             if(this.loaded && this.threadPreviews){            
-                return new Map([...this.threadPreviews].filter(([key, value]) => {
+                return new Map<string,ThreadPreviewInterface>([...this.threadPreviews].filter(([key, value]) => {
                     //console.log(value)
                     if (value == null) {
                         console.log("key for null value ", key)
@@ -72,7 +72,9 @@ export default {
                 }
                 )
                 .sort(function(a,b) {
+
                    return Date.parse(b[1].timestamp) - Date.parse(a[1].timestamp) ;
+
                 })
                 );
         }

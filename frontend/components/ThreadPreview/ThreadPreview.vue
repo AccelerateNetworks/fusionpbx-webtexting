@@ -70,6 +70,9 @@ export default {
         },
         isFiltered:{
             type: Boolean,
+        },
+        newMessages:{
+            type: Number
         }
     },
     components: { Conversation },
