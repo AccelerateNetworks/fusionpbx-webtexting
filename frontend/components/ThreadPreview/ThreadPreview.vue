@@ -118,6 +118,9 @@ export default {
                 payload.key=this.groupUUID;
 
             }
+            if(this.threadUUID){
+                payload.threadUUID = this.threadUUID;
+            }
             //console.log(`here's the link to edit a contact ${this.contactEditLink}`)
             payload.editLink = this.contactEditLink;
             //console.log(payload);

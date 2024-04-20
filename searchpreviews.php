@@ -21,7 +21,8 @@ if (!$extension) {
 
 $database = new database;
 // get user's number
-$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";$parameters['domain_uuid'] = $domain_uuid;
+$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
+$parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $ownNumber = $database->select($sql, $parameters, 'column');
 unset($parameters);

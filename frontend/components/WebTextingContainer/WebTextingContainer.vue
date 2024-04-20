@@ -8,7 +8,6 @@ import { RouterView } from 'vue-router';
 import {useMatchMedia} from '../../lib/matchMedia';
 import { emitter, MessageData, ThreadChangePayload,state} from '../../lib/global';
 import {searchPreviews,loadPreviews} from '../../lib/backfillPreviews';
-
 //TODO: changing threads and threadpreviews to Map<String,Object>
 //      this should change how ThreadList/ThreadPreview and Conversation components interact with the threads and threadPreviews props
 export default {
@@ -194,6 +193,8 @@ export default {
             this.contactEditLink = payload.editLink;
             console.log(`wtc thread change ${payload.key}`)
             this.title = payload.key;
+            const updateUserLastSeenObject = {threadUUID: payload.key, extensionUUID: this.$route.query.extension_uuid} 
+            emitter.emit("conversation-accessed",updateUserLastSeenObject)
             emitter.emit('thread-changed', payload.key);
         });
         emitter.on("new-message-ingested", (message: MessageData) => {

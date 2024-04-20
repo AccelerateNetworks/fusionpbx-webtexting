@@ -60,6 +60,11 @@ type WebTextingContainerOptions = {
     refreshLink?: string,
 }
 
+type updateUserLastSeenOptions = {
+    extension_uuid: string,
+    thread_uuid: string,
+}
+
 /* This is going to be where we build and mount the app once it's been configured to run from ThreadLists worklow
 */
 export const initializeWebTextingContainer = function initializeWebTextingContainerJS(opts: WebTextingContainerOptions){
@@ -117,6 +122,9 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
     })
     emitter.on(('backfill-previews-requested') ,() =>{ 
         console.log("backfilling previews");
+    })
+    emitter.on(('conversation-accessed'), (updateUserLastSeenObject:updateUserLastSeenOptions) => {
+        console.log("this is where we call updateLastSeen", updateUserLastSeenObject);
     })
 }
 
