@@ -14,7 +14,7 @@ let backoff = 0;
 
 function calculatePlainThreadID(message:Message, direction:string, originalTo: string, messageFromUser: string){
     //console.log(`calculatePlainThreadID: ${message}`)
-    //console.log(message);
+    console.log(message);
 
     switch(direction){
         case "incoming":{

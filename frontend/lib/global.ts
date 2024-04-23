@@ -100,7 +100,7 @@ function addThread(key:string, message?:MessageData){
 }
 function addPreview(preview : ThreadPreviewInterface){
     //console.log(preview)
-    const conversationKey:String = preview.groupUUID ? preview.groupUUID : preview.remoteNumber;
+    const conversationKey:string = preview.groupUUID ? preview.groupUUID : preview.remoteNumber;
     if(state.previews){
         if(previewsContainKey(conversationKey)){
             //don't add duplicates
