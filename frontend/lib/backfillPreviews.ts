@@ -1,24 +1,19 @@
 import { MessageData, emitter, state , addPreview, query_limit} from './global';
-import moment from 'moment';
-import ThreadPreviewInterface from '../components/ThreadPreview/ThreadPreview.vue';
-
-
-
 
 
 type threadPreviewQuery = {
-    query_string:string,
-    extension_uuid: string
+    query_string:String,
+    extension_uuid: String
 }
 
 type loadPreviewQuery = {
-    extension_uuid: string,
-    older_than?: string
+    extension_uuid: String,
+    older_than?: String
 }
 
 let fetching = false;
 
-export async function searchPreviews(queryString: string, extensionUUID: string) {
+export async function searchPreviews(queryString: String, extensionUUID: String) {
     emitter.emit("previews-loading");
 
     if (fetching) {

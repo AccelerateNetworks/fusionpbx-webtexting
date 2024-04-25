@@ -21,7 +21,8 @@ if (!$extension) {
 
 $database = new database;
 // get user's number
-$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";$parameters['domain_uuid'] = $domain_uuid;
+$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
+$parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $ownNumber = $database->select($sql, $parameters, 'column');
 unset($parameters);
@@ -52,9 +53,9 @@ WHERE webtexting_threads.domain_uuid = :domain_uuid
 AND webtexting_threads.domain_uuid = v_contacts.domain_uuid
 AND v_contact_phones.contact_uuid = v_contacts.contact_uuid
 AND webtexting_threads.remote_number = v_contact_phones.phone_number
-AND LOWER(CONCAT(v_contacts.contact_organization , ' ' ,v_contacts.contact_name_given , ' ' , v_contacts.contact_name_middle , 
+AND (LOWER(CONCAT(v_contacts.contact_organization , ' ' ,v_contacts.contact_name_given , ' ' , v_contacts.contact_name_middle , 
             ' ' , v_contacts.contact_name_family , ' ' , v_contacts.contact_nickname, ' ', v_contacts.contact_title, ' ', 
-            v_contacts.contact_role) ) LIKE  LOWER('%'||:query_string||'%' )   ;";
+            v_contacts.contact_role) ) LIKE  LOWER('%'||:query_string||'%' )  or v_contact_phones.phone_number LIKE '%'||:query_string||'%') ;";
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['query_string'] = $query_string;
 $solo_conversations = $database->select($sql, $parameters, 'all');
@@ -190,7 +191,33 @@ if($groups){
         $z++;
     }
 }
-
+//if no group and no contact check if a non-contact non-group thread exists
+else{
+    //if(!$solo_conversations){
+        $sql = "SELECT *
+            FROM webtexting_threads
+            WHERE webtexting_threads.domain_uuid = :domain_uuid
+            AND webtexting_threads.local_number = :own_number
+            AND webtexting_threads.remote_number LIKE  LOWER('%'||:query_string||'%' )   ;";
+            $parameters['domain_uuid'] = $domain_uuid;
+            $parameters['own_number'] = $ownNumber;
+            $parameters['query_string'] = $query_string;
+            $local_to_remote_conversations = $database->select($sql, $parameters, 'all');
+            unset($parameters);
+            if($local_to_remote_conversations){
+                foreach ($local_to_remote_conversations as $local_to_remote) {
+                    $usedNumbers[$local_to_remote['remote_number']] = true;
+                    $threadPreviews[$z]['remoteNumber'] = $local_to_remote['remote_number'];
+                    $threadPreviews[$z]['displayName']= $local_to_remote['remote_number'];
+                    $threadPreviews[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$local_to_remote['contact_uuid'];
+                    $threadPreviews[$z]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&number=".$local_to_remote['remote_number'];
+                    $threadPreviews[$z]['ownNumber'] = $ownNumber;
+                    $threadPreviews[$z]['timestamp'] = $local_to_remote['last_message'];
+                    $z++;
+                }
+            }
+    //}
+}
 
 
 //this is where we fetch and attach the bodyPreviews

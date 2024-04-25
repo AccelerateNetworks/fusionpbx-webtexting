@@ -9,7 +9,8 @@ type PreviewData = Map<String, ThreadPreviewInterface>;
 type ThreadChangePayload = {
   key: String, 
 
-  editLink?:  string;
+  editLink?:  string,
+  threadUUID?: string
   
 };
 

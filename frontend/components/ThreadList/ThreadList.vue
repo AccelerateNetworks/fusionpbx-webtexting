@@ -58,7 +58,7 @@ export default {
         },
         filteredAndSortedPreviews() {
             if(this.loaded && this.threadPreviews){            
-                return new Map<string,ThreadPreviewInterface>([...this.threadPreviews].filter(([key, value]) => {
+                return new Map<String,ThreadPreviewInterface>([...this.threadPreviews].filter(([key, value]) => {
                     //console.log(value)
                     if (value == null) {
                         console.log("key for null value ", key)
@@ -68,7 +68,9 @@ export default {
                         console.log("key for null value.displayName", key)
                         return false;
                     }
-                    return value.displayName.toLowerCase().includes(this.filterString.toLowerCase())
+                    //or contains number fragment
+                    console.log(typeof key , key)
+                    return (value.displayName.toLowerCase().includes(this.filterString.toLowerCase()) || key.includes(this.filterString))
                 }
                 )
                 .sort(function(a,b) {
