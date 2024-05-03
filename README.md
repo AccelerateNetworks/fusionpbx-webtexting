@@ -31,6 +31,12 @@ location /ws {
 
 ## Developing
 Frontend build requires a bunch of javascript stuff. To do it without installing a bunch of javascript stuff, install podman and use `build-frontend.sh`
+1. Use VSCode, install the SSH manager extenion.
+2. SSH into the dev box from VSCode to the webtexting folder. Talk to Dan to get your SSH credentials setup.
+3. Make your changes.
+4. Publish those changes so you can play with them, by building the front end. In a terminal from the the webtexting folder, run the command ./build-frontend.sh.
+6. Once the build completes you can see you changes on FusionPBX dev site, you maybe need to refresh/log out and log in.
+
 ## Debugger
 To add a debugger to the project you'll need to set one up.
 if you're using VS Code you'll want to download the PHP Debug extension https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug
