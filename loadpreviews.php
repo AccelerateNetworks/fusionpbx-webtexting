@@ -21,7 +21,8 @@ if (!$extension) {
 
 $database = new database;
 // get user's number
-$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";$parameters['domain_uuid'] = $domain_uuid;
+$sql = "SELECT phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid";
+$parameters['domain_uuid'] = $domain_uuid;
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $ownNumber = $database->select($sql, $parameters, 'column');
 unset($parameters);
@@ -34,9 +35,11 @@ if (!$ownNumber) {
     include_once "footer.php";
     die();
 }
+//this is for Limiting the list of threads on initial load
+
 $query_limit = 20;
 
-//this is for Limiting the list of threads on initial load
+
 $sql = 'SELECT * FROM webtexting_threads WHERE domain_uuid = :domain_uuid AND local_number = :local_number ';
 if($_GET['older_than'] ){
     $sql .= 'AND last_message < to_timestamp(:older_than/1000.00)';
@@ -200,7 +203,7 @@ if($conversations){
                 }
                 
                 else{
-                    //maybe this needs to be where we search based on remote number instead of nonsense you goof
+                    //this could probably be a row instead of an all select
                     $sql = "SELECT *
                         FROM webtexting_threads
                         WHERE webtexting_threads.domain_uuid = :domain_uuid
@@ -212,7 +215,7 @@ if($conversations){
                     $result = $database->select($sql, $parameters, 'all');
                     unset($parameters);
                     if($result){
-                            if($usedNumbers[$result['remote_number']]){ //duplicate entry protection for numbers that are contacts
+                            if($usedNumbers[$result[0]['remote_number']]){ //duplicate entry protection for numbers that are contacts
                                 continue;
                             }
                             else{
