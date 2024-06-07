@@ -39,9 +39,10 @@ export default {
     data() {
         let contactEditLink = null;
         let title = '';
+        let threadUUID='';
         let smallScreen = useMatchMedia('(width<=700px)');
         let loadedPreviews = false;
-        return { contactEditLink, title, smallScreen, state:state, previews: state.previews, loadedPreviews };
+        return { contactEditLink, title, smallScreen, state:state, previews: state.previews, loadedPreviews,threadUUID };
     },
     methods: {
         calculateDisplayName() {
@@ -191,9 +192,10 @@ export default {
         //console.log(this.$route.query.extension_uuid);
         emitter.on('thread-change', (payload: ThreadChangePayload) => {
             this.contactEditLink = payload.editLink;
-            console.log(`wtc thread change ${payload.key}`)
+            this.threadUUID = payload.threadUUID;
+            console.log(`wtc thread change ${payload.threadUUID}`)
             this.title = payload.key;
-            const updateUserLastSeenObject = {threadUUID: payload.key, extensionUUID: this.$route.query.extension_uuid} 
+            const updateUserLastSeenObject = {thread_uuid: payload.threadUUID, extension_uuid: this.$route.query.extension_uuid} 
             emitter.emit("conversation-accessed",updateUserLastSeenObject)
             emitter.emit('thread-changed', payload.key);
         });
@@ -247,7 +249,7 @@ The blank space should notify the user that they can select a thread to display 
                 <RouterView name="rightSide" :extension_uuid="this.$route.query.extension_uuid"
                     :remoteNumber="this.$route.query.number" :groupUUID="this.$route.query.group"
                     :ownNumber="this.$props.ownNumber" :displayName="this.title" :selectedConvo="this.conversationSelected"
-                    :contactEditLink="contactEditLink" :title="this.title" />
+                    :contactEditLink="contactEditLink" :title="this.title" :threadUUID="this.threadUUID"/>
             </suspense>
             <link type="text/css" href="../../../js/style.css">
         </div>

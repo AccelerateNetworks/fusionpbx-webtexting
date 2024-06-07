@@ -69,7 +69,7 @@ export default {
                         return false;
                     }
                     //or contains number fragment
-                    console.log(typeof key , key)
+                    //console.log(typeof key , key)
                     return (value.displayName.toLowerCase().includes(this.filterString.toLowerCase()) || key.includes(this.filterString))
                 }
                 )

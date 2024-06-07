@@ -30,7 +30,10 @@ export type ThreadPreviewInterface = {
     },
     groupMembers: {
         type: Array<String>,
-    }
+    },
+    threadUUID:{
+            type:String
+        }
 }
 
 
@@ -73,6 +76,9 @@ export default {
         },
         newMessages:{
             type: Number
+        },
+        threadUUID:{
+            type:String
         }
     },
     components: { Conversation },

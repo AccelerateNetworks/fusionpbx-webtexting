@@ -82,6 +82,7 @@ if($conversations){
                 unset($parameters);
     
                 if($group){
+                        $threadPreviews[$i]['threadUUID'] = $group['thread_uuid'];
                         $threadPreviews[$i]['groupUUID'] = $group['group_uuid'];
                         $threadPreviews[$i]['groupMembers'] = $group['members']; 
                         if ($group['name'] != null) {
@@ -166,7 +167,8 @@ if($conversations){
                         $threadPreviews[$i]['remoteNumber'] = $solo['phone_number'];
                         $threadPreviews[$i]['displayName']= $solo['phone_number'];
                         $threadPreviews[$i]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$solo['contact_uuid'];
-                    
+                        $threadPreviews[$i]['threadUUID'] = $solo['thread_uuid'];
+
                         $threadPreviews[$i]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&number=".$solo['phone_number'];
                         $threadPreviews[$i]['ownNumber'] = $ownNumber;
                         $threadPreviews[$i]['timestamp'] = $solo['last_message'];
@@ -222,7 +224,7 @@ if($conversations){
                                 $threadPreviews[$i]['remoteNumber'] = $result[0]['remote_number'];
                                 $threadPreviews[$i]['displayName']= $result[0]['remote_number'];
                                 $threadPreviews[$i]['contactEditLink'] = "/app/contacts/contact_edit.php";
-    
+                                $threadPreviews[$i]['threadUUID'] = $result[0]['thread_uuid'];
                                 $threadPreviews[$i]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&number=".$result[0]['remote_number'];
                                 $threadPreviews[$i]['ownNumber'] = $ownNumber;
                                 $threadPreviews[$i]['timestamp'] = $result[0]['last_message'];

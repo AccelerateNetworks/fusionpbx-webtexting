@@ -108,6 +108,9 @@ export default {
         selectedConvo: {
             type: Boolean,
         },
+        threadUUID:{
+            type: String
+        },
     },
     components: { Message, SendBox },
 

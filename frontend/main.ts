@@ -6,6 +6,7 @@ import { RunSIPConnection } from './lib/SIP';
 import WebTextingContainer from './components/WebTextingContainer/WebTextingContainer.vue';
 import { backfillMessages } from './lib/backfill';
 import { emitter , addPreview} from './lib/global';
+import { updateLastSeen,updateUserLastSeenOptions } from './lib/updateLastSeen';
 import { stringify } from 'querystring';
 // these are passed to initializeThreadJS from php when initializeThreadJS() is called in thread.php
 type ThreadOptions = {
@@ -60,10 +61,7 @@ type WebTextingContainerOptions = {
     refreshLink?: string,
 }
 
-type updateUserLastSeenOptions = {
-    extension_uuid: string,
-    thread_uuid: string,
-}
+
 
 /* This is going to be where we build and mount the app once it's been configured to run from ThreadLists worklow
 */
@@ -125,6 +123,7 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
     })
     emitter.on(('conversation-accessed'), (updateUserLastSeenObject:updateUserLastSeenOptions) => {
         console.log("this is where we call updateLastSeen", updateUserLastSeenObject);
+        updateLastSeen(updateUserLastSeenObject)
     })
 }
 

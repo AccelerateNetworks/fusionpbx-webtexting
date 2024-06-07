@@ -2,7 +2,7 @@ import { Moment } from 'moment';
 import { reactive } from 'vue'
 import { CPIM } from './CPIM';
 import mitt from 'mitt';
-import { ThreadPreviewInterface } from '@/components/ThreadPreview/ThreadPreview.vue';
+import { ThreadPreviewInterface } from '../components/ThreadPreview/ThreadPreview.vue';
 
 type ConversationData = Record<string,Array<MessageData>>;
 type PreviewData = Map<String, ThreadPreviewInterface>;

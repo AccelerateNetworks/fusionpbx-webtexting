@@ -15,43 +15,50 @@ foreach ($_SESSION['user']['extension'] as $ext) {
   
 if (!$extension) {
     echo "invalid extension, please <a href='index.php'>try again</a>";
-    include_once "footer.php";
+    http_response_code(400);
+    echo json_encode(array("error" => "invalid or unauthorized extension"));
+    //include_once "footer.php";
     die();
 }
 
 $database = new database;
-$sql = "SELECT * FROM webtexting_threads_users  WHERE extension_uuid = :extension_uuid AND thread_uuid = :thread_uuid AND domain_uuid = :domain_uuid ;";
+$sql = "SELECT * FROM webtexting_threads_last_seen  WHERE extension_uuid = :extension_uuid AND thread_uuid = :thread_uuid AND domain_uuid = :domain_uuid ;";
 $parameters["extension_uuid"] = $extension['extension_uuid'];
 $parameters["thread_uuid"] = $_GET['thread_uuid'];
 $parameters["domain_uuid"] = $domain_uuid;
 $row_exists = $database->select($sql, $parameters, 'all');
 
 if($row_exists){
-    $sql = "UPDATE webtexting_threads_users SET last_seen_timestamp = NOW() WHERE extension_uuid = :extension_uuid AND thread_uuid = :thread_uuid AND domain_uuid = :domain_uuid ;";
+    $sql = "UPDATE webtexting_threads_last_seen SET last_seen_timestamp = NOW() WHERE extension_uuid = :extension_uuid AND thread_uuid = :thread_uuid AND domain_uuid = :domain_uuid ;";
     $parameters["extension_uuid"] = $extension['extension_uuid'];
     $parameters["thread_uuid"] = $_GET['thread_uuid'];
     $parameters["domain_uuid"] = $domain_uuid;
-    $updated_last_seen  = $database->select($sql, $parameters, 'all');
+    $updated_last_seen  = $database->execute($sql, $parameters);
     if($updated_last_seen){
         //succeeded 
+        echo("Update Success");
     }
     else{
         //failed
+        echo("Update Failed");
     }
 }
 //else 
 // insert row
 else{
-    $sql = "INSERT INTO webtexting_threads_users (last_seen_timestamp, extension_uuid,  thread_uuid, domain_uuid) VALUES ( NOW(), :extension_uuid, :thread_uuid, :domain_uuid)";
+    $sql = "INSERT INTO webtexting_threads_last_seen (timestamp, extension_uuid,  thread_uuid, domain_uuid) VALUES ( NOW(), :extension_uuid, :thread_uuid, :domain_uuid)";
     $parameters["extension_uuid"] = $extension['extension_uuid'];
     $parameters["thread_uuid"] = $_GET['thread_uuid'];
     $parameters["domain_uuid"] = $domain_uuid;
-    $insert_last_seen = $database->select($sql, $parameters, 'all');
+    $insert_last_seen = $database->execute($sql, $parameters);
     if($insert_last_seen){
         //succeeded
+        //echo("New User_Thread Creation Success");
     }
     else{
         //failed
+        //echo("New User_Thread Creation Failed");
+
     }
 }
 

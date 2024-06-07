@@ -54,7 +54,7 @@ if (!$destination) {
 <?php
 $page = 0;
 $page_size = 25;
-$sql = "SELECT remote_number, group_uuid, last_message FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message DESC";
+$sql = "SELECT remote_number, group_uuid, last_message, thread_uuid FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message DESC";
 
 
 // if($_GET['page']) {
@@ -97,6 +97,7 @@ foreach ($threads as $thread) {
     $thread_preview_opts[$z]['remoteNumber'] = $number;
     $group_uuid = $thread['group_uuid'];
     $thread_preview_opts[$z]['groupUUID'] = $group_uuid;
+    $thread_preview_opts[$z]['threadUUID'] = $thread['thread_uuid'];
     // get the latest message from this thread
     $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
     if ($group_uuid != null) {

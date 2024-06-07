@@ -119,7 +119,7 @@ export async function loadPreviews(extensionUUID:string, older_than:string) {
         //console.log(temp);
         emitter.emit('backfill-preview-complete',temp);
         fetching= false;
-        
+        console.log(temp)
         return  buildPreviews( temp);
     }
 
