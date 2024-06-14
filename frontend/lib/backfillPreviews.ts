@@ -1,4 +1,4 @@
-import { MessageData, emitter, state , addPreview, QUERY_LIMIT} from './global';
+import { emitter , addPreview, QUERY_LIMIT} from './global';
 
 
 type threadPreviewQuery = {
@@ -13,6 +13,10 @@ type loadPreviewQuery = {
 
 let fetching = false;
 
+//Grab the data we need to create the thread previews from the database
+//INPUTS: extensionUUID = the user's extension we want to build previews for
+//        queryString = the user's string that they want to search their threads for
+//OUTPUT: None (buildPreviews calls addPreviews which constructs the previews map for global state)
 export async function searchPreviews(queryString: String, extensionUUID: String) {
     emitter.emit("previews-loading");
 
@@ -29,15 +33,6 @@ export async function searchPreviews(queryString: String, extensionUUID: String)
         const response = await fetch('/app/webtexting/searchpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         
         temp = response;
-        // for (let i = 0; i < response.length; i++) {
-        //     let m = response[i];
-        //     //console.log(m)
-        //             //insertPreview();
-        //     }
-        
-
-        // fetching = false;
-        // //console.log('backfill request complete');
 
         // if (response.length == 0) {
         //     emitter.emit('no-previews-found');
@@ -53,32 +48,12 @@ export async function searchPreviews(queryString: String, extensionUUID: String)
         return buildPreviews( temp);
     }
 }
-//what identifiers and data do we need
-//maybe threadpreviewinterface
-export function insertPreview() {
-    //check for Preview in previewList
-    if(state.conversations[key]){
-        for (let i = 0; i < state.conversations[key].length; i++) {
-            if (state.conversations[key][i].id == message.id) {
-                state.conversations[key][i] = message;
-                return;
-            }
-    
-            if (state.conversations[key][i].timestamp.isAfter(message.timestamp)) {
-                state.conversations[key].splice(i, 0, message);
-                return;
-            }
-        }
-    }
-    //add a new preview if no preview is found
-    else{
-        state.conversations[key] = new Array<MessageData>();
-    }
-    // no existing message matched, append to end    
-    state.conversations[key].push(message);
-}
 
 
+//Grab the data we need to create the thread previews from the database
+//INPUTS: extensionUUID = string representation of the user's extension we want to build previews for
+//        (optional) older_than = string representation of a timestamp that we want to check if previews are older than (used for loading older previews)
+//OUTPUT: None (buildPreviews calls addPreviews which constructs the previews map for global state)
 export async function loadPreviews(extensionUUID:string, older_than:string) {
     if (fetching) {
         console.log("skipping duplicate search request");
@@ -94,16 +69,10 @@ export async function loadPreviews(extensionUUID:string, older_than:string) {
         }
         const initialResponse =  await fetch('/app/webtexting/loadpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         temp = initialResponse;
-        //console.log("received", initialResponse.length, "preview from database");
-        // for (let i = 0; i < response.length; i++) {
-        //     let m = response[i];
-        //     //console.log(m)
-        //             //insertPreview();
-        //     }
         
 
         fetching = false;
-        //console.log('backfill request complete');
+        //console.log('backfillPreviews request complete');
 
         // if (initialResponse.length == 0) {
         //     emitter.emit('no-previews-found');
@@ -116,7 +85,6 @@ export async function loadPreviews(extensionUUID:string, older_than:string) {
         if(temp.length< QUERY_LIMIT){
             emitter.emit("no-more-previews");
         }
-        //console.log(temp);
         emitter.emit('backfill-preview-complete',temp);
         fetching= false;
         console.log(temp)
@@ -125,37 +93,29 @@ export async function loadPreviews(extensionUUID:string, older_than:string) {
 
 }
 
+//Calls addPreview for each object in a supplied rpeviews array
+//INPUTS: previews = untyped array of objects that contain the data needed to construct a valid ThreadPreview component
+//OUTPUTS: None (the threadPreviews state object is constructed/updated in addPreview ) 
 export const buildPreviews =  function buildPreviews(previews ) {
     //console.log( previews)
-    //let threadPreviewMap = new Map<String, ThreadPreviewInterface>();
     if(previews && previews.length){
         for(let x = 0; x < previews.length; x++){
-            //console.log(opts[x])
             if(previews[x].groupUUID){
-                // if(opts[x].groupMembers){
-                //     //php delviers us a string of comma separated values instead of an array the rest of the app expects an array of strings
-                //     console.log(opts[x].groupMembers);
-                //     opts[x].groupMembers = opts[x].groupMembers.split(", ")
-                //     console.log(opts[x].groupMembers);
-                // }
-               // console.log(previews[x]);
-               // threadPreviewMap.set(previews[x].groupUUID, previews[x])
                 addPreview(previews[x]);
             }
             else if(previews[x].remoteNumber){
-             //   threadPreviewMap.set(previews[x].remoteNumber, previews[x])
-               // console.log(previews[x])
                 addPreview(previews[x]);
             }
             else{
                 console.log(("Contact has no identifier. Missing Group UUID and Phone Number"));
+                console.log(previews[x]);
             }
         }
     }
     console.log("emitting PDL");
     emitter.emit("previews-done-loading");  
     //below not for deployment       
-    emitter.emit('inital-load-complete');
+    //emitter.emit('inital-load-complete');
 
     return ;
 }

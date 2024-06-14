@@ -33,7 +33,7 @@ type GlobalState = {
     page: number,
     oldestMessage: Number,
 };
-const QUERY_LIMIT = 20;  //this limits the nubmer of threadpreview results per load request
+const QUERY_LIMIT = 20;  //this limits the number of threadpreview results per load request
 
 const state = reactive<GlobalState>({
     conversations:  {},

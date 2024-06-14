@@ -1,4 +1,7 @@
 let updatingLastSeen = false;
+//this function is called when a user selects a threadpreview and the conversation component is rendered
+//when this function is called it updates the database so that we can keep track of messages recieved since the last time a user accessed that conversations
+//this is how we keep track of persistent unreads
 export async function updateLastSeen(updateULSObject:updateUserLastSeenOptions){
     if(updatingLastSeen){
         console.log("skipping duplicate userLastSeen update")

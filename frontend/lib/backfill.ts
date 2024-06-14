@@ -31,12 +31,6 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         console.log("skipping duplicate backfill request");
         return;
     }
-    if(group){
-        //console.log(`group = ${group}`);
-    }
-    if(remoteNumber){
-        //console.log(`group = ${remoteNumber}`);
-    }
     fetching = true;
     try {
         let params: backfillQuery = { extension_uuid: extensionUUID };
@@ -48,16 +42,12 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         if (group) {
             params.group = group;
         }
-        //console.log(`backfilling conversations array, ${state.conversations}`)
-        //console.log(`backfill key: ${key}`)
         //if state.conversations[key] exists we have already backfilled at least once
         const stateMessages = state.conversations[key];
         if(stateMessages){
             if (stateMessages.length > 0 && stateMessages[0].id) {
                 params.older_than = stateMessages[0].id;
             }
-            //console.log(stateMessages[0])
-            //console.log(stateMessages[stateMessages.length-1])
         }
         else{
 
@@ -137,5 +127,4 @@ export function insertMessageInHistory(key:string, message: MessageData) {
     }
     // no existing message matched, append to end    
     state.conversations[key].push(message);
-    //console.log("after:", state.conversations[key]);
 }

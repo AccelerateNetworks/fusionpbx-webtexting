@@ -8,8 +8,8 @@ import { RouterView } from 'vue-router';
 import {useMatchMedia} from '../../lib/matchMedia';
 import { emitter, MessageData, ThreadChangePayload,state} from '../../lib/global';
 import {searchPreviews,loadPreviews} from '../../lib/backfillPreviews';
-//TODO: changing threads and threadpreviews to Map<String,Object>
-//      this should change how ThreadList/ThreadPreview and Conversation components interact with the threads and threadPreviews props
+
+//this component kind of functions as a partial state controller for the app
 export default {
     name: 'WebTextingContainer',
     props: {

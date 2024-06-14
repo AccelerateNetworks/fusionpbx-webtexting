@@ -100,10 +100,10 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
     app.mount("#TEST_DIV_FOR_TESTING_WEBTEXTING");
 
     RunSIPConnection(opts.username, opts.password, opts.server, opts.ownNumber, opts.remoteNumber, opts.groupUUID);
-
+// any event that needs absolute global scope should be listened for here
     emitter.on('backfill-requested', (key:string) => {
         console.log(`main.ts backfill key ${key}`)
-        //key is either a uuid or phone number. uuid length is at least 16
+        //key is either a uuid or phone number. uuid length is  16
         if(key){
             if(key.length<15){
                 console.log(`backfill using remotenumber: ${key}`)

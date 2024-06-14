@@ -35,15 +35,12 @@ if($row_exists){
     $parameters["domain_uuid"] = $domain_uuid;
     $updated_last_seen  = $database->execute($sql, $parameters);
     if($updated_last_seen){
-        //succeeded 
         echo(json_encode(["Update Success",$updated_last_seen]));
     }
     else{
-        //failed
         echo(json_encode(["Update Failed",$updated_last_seen]));
     }
 }
-//else 
 // insert row
 else{
     $sql = "INSERT INTO webtexting_threads_last_seen (timestamp, extension_uuid,  thread_uuid, domain_uuid) VALUES ( NOW(), :extension_uuid, :thread_uuid, :domain_uuid)";
@@ -52,11 +49,9 @@ else{
     $parameters["domain_uuid"] = $domain_uuid;
     $insert_last_seen = $database->execute($sql, $parameters);
     if($insert_last_seen){
-        //succeeded
         echo(json_encode(["New User_Thread Creation Success",$insert_last_seen]));
     }
     else{
-        //failed
         echo(json_encode(["New User_Thread Creation Failed",$insert_last_seen]));
 
     }

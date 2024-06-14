@@ -11,7 +11,7 @@ export default{
     },
     methods:{
 
-    funnyClickFunction(){
+    paginatorClickFunction(){
             const buttonData = document.getElementById('MORE-PREVIEWS');
             console.log("Button data:  ", buttonData);
             emitter.emit("backfill-previews-requested");
@@ -32,7 +32,7 @@ export default{
 <template>
     <div class="paginator_container" >
         
-        <a id='MORE-PREVIEWS' class="paginator" role="button" v-if="this.morePreviewsAvailable" @click="funnyClickFunction" :data-oldest-message="oldestMessage">
+        <a id='MORE-PREVIEWS' class="paginator" role="button" v-if="this.morePreviewsAvailable" @click="paginatorClickFunction" :data-oldest-message="oldestMessage">
             <span class="paginator-link">Load More</span>
         </a>
 
