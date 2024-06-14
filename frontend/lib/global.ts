@@ -33,7 +33,7 @@ type GlobalState = {
     page: number,
     oldestMessage: Number,
 };
-const query_limit = 20;  //this limits the nubmer of threadpreview results per load request
+const QUERY_LIMIT = 20;  //this limits the nubmer of threadpreview results per load request
 
 const state = reactive<GlobalState>({
     conversations:  {},
@@ -142,4 +142,4 @@ function updateOldestMessage(newOldestTimestamp: Number){
     //console.log(state.oldestMessage)
     return state.oldestMessage;
 }
-export { state, emitter, query_limit, MessageData, GlobalState, ThreadChangePayload, addMessage, addPreview, updatePageNumber  }
+export { state, emitter, QUERY_LIMIT, MessageData, GlobalState, ThreadChangePayload, addMessage, addPreview, updatePageNumber  }

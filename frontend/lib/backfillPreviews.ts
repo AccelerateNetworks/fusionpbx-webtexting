@@ -1,4 +1,4 @@
-import { MessageData, emitter, state , addPreview, query_limit} from './global';
+import { MessageData, emitter, state , addPreview, QUERY_LIMIT} from './global';
 
 
 type threadPreviewQuery = {
@@ -113,7 +113,7 @@ export async function loadPreviews(extensionUUID:string, older_than:string) {
         fetching = false;
         console.log('load preview error:', e);
     }finally{
-        if(temp.length< query_limit){
+        if(temp.length< QUERY_LIMIT){
             emitter.emit("no-more-previews");
         }
         //console.log(temp);

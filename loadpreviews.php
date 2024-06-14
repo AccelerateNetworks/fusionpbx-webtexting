@@ -37,20 +37,20 @@ if (!$ownNumber) {
 }
 //this is for Limiting the list of threads on initial load
 
-$query_limit = 20;
+$QUERY_LIMIT = 20;
 
 
 $sql = 'SELECT * FROM webtexting_threads WHERE domain_uuid = :domain_uuid AND local_number = :local_number ';
 if($_GET['older_than'] ){
     $sql .= 'AND last_message < to_timestamp(:older_than/1000.00)';
 }
-$sql.= ' ORDER BY last_message DESC LIMIT :query_limit ;';
+$sql.= ' ORDER BY last_message DESC LIMIT :QUERY_LIMIT ;';
 $parameters['domain_uuid'] = $domain_uuid;
 $parameters['local_number'] = $ownNumber;
 if($_GET['older_than'] ){
     $parameters['older_than'] = $_GET['older_than'];
 }
-$parameters['query_limit'] = $query_limit;
+$parameters['QUERY_LIMIT'] = $QUERY_LIMIT;
 
 $conversations = $database->select($sql,$parameters, 'all');
 unset($parameters);
@@ -238,6 +238,7 @@ if($conversations){
         $i++;
     }
     // //this is where we fetch and attach the bodyPreviews
+    // this is also where we may want to do our initial unread notification calculation
     $i=0;
     foreach($threadPreviews as $preview){
         $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
@@ -261,6 +262,41 @@ if($conversations){
     
         }
         $last_message = false;
+        if($preview['threadUUID'] ){
+        
+            $sql = "SELECT timestamp from webtexting_threads_last_seen WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND thread_uuid = :thread_uuid;";
+            $parameters['extension_uuid'] = $extension['extension_uuid'];
+            $parameters['domain_uuid'] = $domain_uuid;
+            $parameters['thread_uuid'] = $preview['threadUUID'] ;
+            $last_seen_stamp = $database->select($sql, $parameters, 'row');
+            unset($parameters);
+            if($last_seen_stamp['timestamp']){
+                //here is where we would want to prepare and execute the count since last seen query
+                $sql = "SELECT COUNT(*) from webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND
+                (start_stamp BETWEEN :last_seen_stamp AND NOW()) AND ";
+                if ($preview['groupUUID'] != null) {
+                    $sql .= "group_uuid = :group_uuid AND (to_number = :own_number AND NOT (from_number = to_number));";
+                    $parameters['own_number'] = $ownNumber;
+                    $parameters['group_uuid'] = $preview['groupUUID'];
+                } else {
+                    $sql .= "(to_number = :own_number AND  from_number = :remote_number AND group_uuid IS NULL)";
+                    $parameters['own_number'] = $ownNumber;
+                    $parameters['remote_number'] = $preview['remoteNumber'];
+                }
+                $parameters['extension_uuid'] = $extension['extension_uuid'];
+                $parameters['domain_uuid'] = $domain_uuid;
+                $parameters['last_seen_stamp'] = $last_seen_stamp['timestamp'];
+                $count_since_last_seen = $database->select($sql, $parameters, 'row');
+                unset($parameters);
+    
+                if($count_since_last_seen['count']){
+                    $threadPreviews[$i]['newMessages'] = $count_since_last_seen['count'];
+                }
+                $count_since_last_seen = 0;
+            }
+            $last_seen_stamp = false;
+            
+        }
         $i++;
     }
 }

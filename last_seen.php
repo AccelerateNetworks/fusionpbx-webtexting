@@ -29,18 +29,18 @@ $parameters["domain_uuid"] = $domain_uuid;
 $row_exists = $database->select($sql, $parameters, 'all');
 
 if($row_exists){
-    $sql = "UPDATE webtexting_threads_last_seen SET last_seen_timestamp = NOW() WHERE extension_uuid = :extension_uuid AND thread_uuid = :thread_uuid AND domain_uuid = :domain_uuid ;";
+    $sql = "UPDATE webtexting_threads_last_seen SET timestamp = NOW() WHERE extension_uuid = :extension_uuid AND thread_uuid = :thread_uuid AND domain_uuid = :domain_uuid ;";
     $parameters["extension_uuid"] = $extension['extension_uuid'];
     $parameters["thread_uuid"] = $_GET['thread_uuid'];
     $parameters["domain_uuid"] = $domain_uuid;
     $updated_last_seen  = $database->execute($sql, $parameters);
     if($updated_last_seen){
         //succeeded 
-        echo("Update Success");
+        echo(json_encode(["Update Success",$updated_last_seen]));
     }
     else{
         //failed
-        echo("Update Failed");
+        echo(json_encode(["Update Failed",$updated_last_seen]));
     }
 }
 //else 
@@ -53,11 +53,11 @@ else{
     $insert_last_seen = $database->execute($sql, $parameters);
     if($insert_last_seen){
         //succeeded
-        //echo("New User_Thread Creation Success");
+        echo(json_encode(["New User_Thread Creation Success",$insert_last_seen]));
     }
     else{
         //failed
-        //echo("New User_Thread Creation Failed");
+        echo(json_encode(["New User_Thread Creation Failed",$insert_last_seen]));
 
     }
 }

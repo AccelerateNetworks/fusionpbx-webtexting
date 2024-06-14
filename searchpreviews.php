@@ -67,7 +67,8 @@ if($solo_conversations){
         $threadPreviews[$z]['remoteNumber'] = $solo['phone_number'];
         $threadPreviews[$z]['displayName']= $solo['phone_number'];
         $threadPreviews[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$solo['contact_uuid'];
-    
+        $threadPreviews[$z]['threadUUID'] = $solo['thread_uuid'];
+
         $threadPreviews[$z]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&number=".$solo['phone_number'];
         $threadPreviews[$z]['ownNumber'] = $ownNumber;
         $threadPreviews[$z]['timestamp'] = $solo['last_message'];
@@ -126,6 +127,8 @@ if($groups){
     foreach ($groups as $group) {
         $threadPreviews[$z]['groupUUID'] = $group['group_uuid'];
         $threadPreviews[$z]['groupMembers'] = $group['members']; 
+        $threadPreviews[$z]['threadUUID'] = $group['thread_uuid'];
+
         if ($group['name'] != null) {
             $display_name = $group['name'];
         } else {
@@ -209,6 +212,8 @@ else{
                     $usedNumbers[$local_to_remote['remote_number']] = true;
                     $threadPreviews[$z]['remoteNumber'] = $local_to_remote['remote_number'];
                     $threadPreviews[$z]['displayName']= $local_to_remote['remote_number'];
+                    $threadPreviews[$z]['threadUUID'] = $local_to_remote['thread_uuid'];
+
                     $threadPreviews[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$local_to_remote['contact_uuid'];
                     $threadPreviews[$z]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&number=".$local_to_remote['remote_number'];
                     $threadPreviews[$z]['ownNumber'] = $ownNumber;
@@ -221,6 +226,7 @@ else{
 
 
 //this is where we fetch and attach the bodyPreviews
+//we could modify this to provide our initial unread message count as well
 $z=0;
 foreach($threadPreviews as $preview){
     $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
@@ -244,6 +250,48 @@ foreach($threadPreviews as $preview){
 
     }
     $last_message = false;
+    //this is where we find out when the user last accessed each thread
+    //If they've opened a thread before they have a thread_uuid 
+    //else they haven't and we don't need to calculate unreads
+    if($threadPreviews[$z]['threadUUID']){
+        
+        $sql = "SELECT timestamp from webtexting_threads_last_seen WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND thread_uuid = :thread_uuid;";
+        $parameters['extension_uuid'] = $extension['extension_uuid'];
+        $parameters['domain_uuid'] = $domain_uuid;
+        $parameters['thread_uuid'] = $threadPreviews[$z]['threadUUID'];
+        $last_seen_stamp = $database->select($sql, $parameters, 'row');
+        unset($parameters);
+
+        if($last_seen_stamp['timestamp']){
+            //here is where we would want to prepare and execute the count since last seen query
+            $sql = "SELECT COUNT(*) from webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND
+            (start_stamp BETWEEN :last_seen_stamp AND NOW()) AND ";
+            if ($preview['groupUUID'] != null) {
+                $sql .= "group_uuid = :group_uuid AND (to_number = :own_number AND NOT (from_number = to_number));";
+                $parameters['own_number'] = $ownNumber;
+                $parameters['group_uuid'] = $preview['groupUUID'];
+            } else {
+                $sql .= "(to_number = :own_number AND  from_number = :remote_number AND group_uuid IS NULL)";
+                $parameters['own_number'] = $ownNumber;
+                $parameters['remote_number'] = $preview['remoteNumber'];
+            }
+            $parameters['extension_uuid'] = $extension['extension_uuid'];
+            $parameters['domain_uuid'] = $domain_uuid;
+            $parameters['last_seen_stamp'] = $last_seen_stamp['timestamp'];
+            $count_since_last_seen = $database->select($sql, $parameters, 'row');
+            unset($parameters);
+
+            if($count_since_last_seen['count']){
+                $threadPreviews[$z]['newMessages'] = $count_since_last_seen['count'];
+            }
+            $count_since_last_seen = 0;
+        }
+        $last_seen_stamp = false;
+        
+    }
+    
+
+    
     $z++;
 }
 echo(json_encode($threadPreviews));

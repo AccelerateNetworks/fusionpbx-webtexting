@@ -33,7 +33,10 @@ export type ThreadPreviewInterface = {
     },
     threadUUID:{
             type:String
-        }
+        },
+        unreads:{
+            type:number
+        },
 }
 
 
@@ -79,12 +82,15 @@ export default {
         },
         threadUUID:{
             type:String
-        }
+        },
+        unreads:{ 
+            type:Number 
+        },
     },
     components: { Conversation },
     data() {
         return{
-            newMessages:0
+            newMessages:this.$props.newMessages
         }
     },
     computed: {
