@@ -156,9 +156,11 @@ if($conversations){
                         AND webtexting_threads.domain_uuid = v_contacts.domain_uuid
                         AND v_contact_phones.contact_uuid = v_contacts.contact_uuid
                         AND v_contact_phones.phone_number = :phone_number
+                        AND webtexting_threads.local_number = :own_number
                         AND webtexting_threads.remote_number = v_contact_phones.phone_number;";
                 $parameters['domain_uuid'] = $domain_uuid;
                 $parameters['phone_number'] = $conversation['remote_number'];
+                $parameters['own_number'] = $ownNumber;
                 $solo = $database->select($sql, $parameters, 'row');
                 unset($parameters);
     
