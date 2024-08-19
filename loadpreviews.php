@@ -149,7 +149,6 @@ if($conversations){
         }
         else{
             //make a solo preview
-            if($conversation['remote_number'])
                 $sql = "SELECT *
                         FROM webtexting_threads,v_contacts , v_contact_phones
                         WHERE webtexting_threads.domain_uuid = :domain_uuid

@@ -87,8 +87,8 @@ export default {
         async send() {
             //we need to fail  phone numbers that are not 11 digits long
             if(this.location === 'Conversation'){
-             
-                if((this.remoteNumber && phoneNumbertoPhoneString(this.remoteNumber).length===11)  || this.groupUUID)
+                const phoneString = phoneNumbertoPhoneString(this.remoteNumber);
+                if((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5  || phoneString.length === 6)  || this.groupUUID)
                 {
                     console.log(this.enteredText);
                     if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
@@ -142,7 +142,7 @@ export default {
                 }
                 else{
                     let errorString = "Outbound number is invalid, not enough digits or invalid groupUUID. \n";
-                    if(this.remoteNumber.toString().length!=11){
+                    if(this.remoteNumber.toString().length != 11 && this.remoteNumber.toString().length != 6 && this.remoteNumber.toString().length != 5 ){
                         errorString += `Outbound Number: ${this.remoteNumber}`;
                     }
                     else{
@@ -157,7 +157,8 @@ export default {
             }
         },
         async sendNewMessage(){
-            if((this.remoteNumber && phoneNumbertoPhoneString(this.remoteNumber).length===11)  || this.groupUUID)
+            const phoneString = phoneNumbertoPhoneString(this.remoteNumber);
+            if((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6)  || this.groupUUID)
                 {
                     //console.log(this.enteredText);
                     if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
@@ -199,7 +200,7 @@ export default {
                 }
                 else{
                     let errorString = "Outbound number is invalid, not enough digits or invalid groupUUID. \n";
-                    if(this.remoteNumber.toString().length!=11){
+                    if(this.remoteNumber.toString().length!=11 && this.remoteNumber.toString().length != 5 && this.remoteNumber.toString().length != 6){
                         errorString += `Outbound Number: ${this.remoteNumber}`;
                     }
                     else{
