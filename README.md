@@ -31,13 +31,29 @@ location /ws {
 
 ## Developing
 Frontend build requires a bunch of javascript stuff. To do it without installing a bunch of javascript stuff, install podman and use `build-frontend.sh`
-To test that everything works:
-Creeate a new conversation
-- Too many numbers (more than 11)
-- Too few Numbers (less than 11)
-- Correct 11 digit number
-- Group Conversation
+1. Use VSCode, install the SSH manager extenion.
+2. SSH into the dev box from VSCode to the webtexting folder. Talk to Dan to get your SSH credentials setup.
+3. Make your changes.
+4. Publish those changes so you can play with them, by building the front end. In a terminal from the the webtexting folder, run the command ./build-frontend.sh.
+6. Once the build completes you can see you changes on FusionPBX dev site, you maybe need to refresh/log out and log in.
 
-Test inbound and outbound texting (SMS, MMS Text, Image, GIF):
-- 11 digit numbers (one to one conversations)
-- Group Conversations
+## Debugger
+To add a debugger to the project you'll need to set one up.
+if you're using VS Code you'll want to download the PHP Debug extension https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug
+to get started with xdebug you'll want to install xdebug.
+I highly recommend you make a simple test.php file, put a phpinfo(); statement in there, then copy the output and paste it into the Xdebug installation wizard (https://xdebug.org/wizard.php). 
+It will analyze it and give you tailored installation instructions for your environment.
+
+After xdebug is installed you need to get php configured to use xdebug.
+Do this by following the steps here https://xdebug.org/docs/install#configure-php
+
+for debugging on a remote machine you need to modify the php.ini you found in the last step.
+
+
+For Xdebug v3.x.x You'll need to edit the php.ini to add:
+
+xdebug.mode = debug
+xdebug.start_with_request = yes
+
+this should prompt the debugger to start when it first encounters a breakpoint
+
