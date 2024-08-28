@@ -4,6 +4,9 @@ import ThreadList from '@/components/ThreadList/ThreadList.vue';
 import NewMessage from '@/components/NewMessage.vue';
 import ConversationVue from '@/components/conversation/Conversation.vue';
 import ConvoPlaceholderVue from '@/components/ConvoPlaceholder.vue';
+import MenuPlaceHolder from '@/components/MenuPlaceholder/MenuPlaceholder.vue';
+import MenuList from '../components/MenuList/MenuList.vue';
+import TemplatesMenu from '@/components/TemplatesMenu/TemplatesMenu.vue';
 
 export const router = createRouter({
     history: createWebHistory("/app/webtexting/"),
@@ -34,6 +37,20 @@ export const router = createRouter({
                     rightSide: NewMessage,
                 }
                     
+            },
+            {
+                path:'/menu.php',
+                components:{
+                    leftSide: MenuList,
+                    rightSide: MenuPlaceHolder,
+                }
+            },
+            {
+                path:"/templates.php",
+                components:{
+                    leftSide:MenuList,
+                    rightSide: TemplatesMenu,
+                }
             },
             
         ]

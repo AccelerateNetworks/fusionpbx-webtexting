@@ -484,4 +484,5 @@ table {
         height: 80vh;
     }
 
-}</style>
+}
+</style>

@@ -13,6 +13,9 @@ type ThreadChangePayload = {
   threadUUID?: string
   
 };
+type MenuChangePayload = {
+    name: String
+}
 
 type MessageData = {
     direction: string;
@@ -142,4 +145,4 @@ function updateOldestMessage(newOldestTimestamp: Number){
     //console.log(state.oldestMessage)
     return state.oldestMessage;
 }
-export { state, emitter, QUERY_LIMIT, MessageData, GlobalState, ThreadChangePayload, addMessage, addPreview, updatePageNumber  }
+export { state, emitter, QUERY_LIMIT, MessageData, GlobalState, ThreadChangePayload, MenuChangePayload, addMessage, addPreview, updatePageNumber  }

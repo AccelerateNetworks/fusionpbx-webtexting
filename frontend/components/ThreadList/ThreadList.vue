@@ -161,6 +161,7 @@ export default {
                 <h6 class="m-auto">Conversations</h6>
             </div>
             <div class="mr-05">
+                <router-link to="/menu.php" id="SETTINGS-BTN" role="button" class="fas fa-cog f btn btn-large"> </router-link>
                 <a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f btn btn-large" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
             </div>
         </div>
