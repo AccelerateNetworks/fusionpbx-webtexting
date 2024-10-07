@@ -7,6 +7,8 @@ import ConvoPlaceholderVue from '@/components/ConvoPlaceholder.vue';
 import MenuPlaceHolder from '@/components/MenuPlaceholder/MenuPlaceholder.vue';
 import MenuList from '../components/MenuList/MenuList.vue';
 import TemplatesMenu from '@/components/TemplatesMenu/TemplatesMenu.vue';
+import TemplatesForm from '@/components/TemplatesForm/TemplatesForm.vue';
+import EmailForwardMenu from '@/components/EmailForwardMenu/EmailForwardMenu.vue';
 
 export const router = createRouter({
     history: createWebHistory("/app/webtexting/"),
@@ -50,6 +52,20 @@ export const router = createRouter({
                 components:{
                     leftSide:MenuList,
                     rightSide: TemplatesMenu,
+                }
+            },
+            {
+                path:"/manage_templates.php",
+                components:{
+                    leftSide:MenuList,
+                    rightSide: TemplatesForm,
+                }
+            },
+            {
+                path:"/email_forwarding.php",
+                components:{
+                    leftSide:MenuList,
+                    rightSide:EmailForwardMenu
                 }
             },
             

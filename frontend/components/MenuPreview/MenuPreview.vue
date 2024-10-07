@@ -31,14 +31,9 @@ export default {
                 <div class="menu-preview-container" >
                     <span class='menu-name' >{{
                         this.name }}</span>
-                    <span class='timestamp' 
-                        :data-timestamp="this.timestamp"></span>
 
                     <span class='menu-last-message' >{{
                         this.description }}</span>
-                        <div class="new-messages">
-                            <span class="new-message-alert-dot bgc-AN-orange" v-if="newMessages>0">{{this.newMessages}}</span>
-                        </div>
                 </div>
 
 
@@ -108,13 +103,7 @@ export default {
     color: white;
 }
 
-.text-center {
-    margin: 0;
-    position: relative;
-    top: 50%;
-    -ms-transform: translateY(-50%);
-    transform: translateY(-50%);
-}
+
 
 .activeMenu {
     color: white;

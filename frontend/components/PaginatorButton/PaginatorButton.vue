@@ -6,7 +6,7 @@ export default{
     props:{
     },
     data(){
-        return {oldestMessage: state.oldestMessage,
+        return {
                 morePreviewsAvailable: true}
     },
     methods:{
@@ -32,7 +32,7 @@ export default{
 <template>
     <div class="paginator_container" >
         
-        <a id='MORE-PREVIEWS' class="paginator" role="button" v-if="this.morePreviewsAvailable" @click="paginatorClickFunction" :data-oldest-message="oldestMessage">
+        <a id='MORE-PREVIEWS' class="paginator" role="button" v-if="this.morePreviewsAvailable" @click="paginatorClickFunction" >
             <span class="paginator-link">Load More</span>
         </a>
 

@@ -32,11 +32,11 @@ export type ThreadPreviewInterface = {
         type: Array<String>,
     },
     threadUUID:{
-            type:String
-        },
-        unreads:{
-            type:number
-        },
+        type:String
+    },
+    unreads:{
+        type:number
+    },
 }
 
 
@@ -90,7 +90,7 @@ export default {
     components: { Conversation },
     data() {
         return{
-            newMessages:this.$props.newMessages
+            newMessagesData:this.$props.newMessages
         }
     },
     computed: {
@@ -137,12 +137,12 @@ export default {
             payload.editLink = this.contactEditLink;
             //console.log(payload);
             console.log(payload.key)
-            this.newMessages=0;
+            this.newMessagesData=0;
             emitter.emit("thread-change",payload)
         },
         newMessageHandler(){
             if(this.currentThread=='activeThread'){
-                this.newMessages = 0;
+                this.newMessagesData = 0;
             }
         }
     },
@@ -157,14 +157,14 @@ export default {
 
                 if( message.cpim.headers["group-uuid"]){
                     if(message.direction =='incoming' && this.groupUUID == message.cpim.headers["group-uuid"] ){
-                        this.newMessages++;
+                        this.newMessagesData++;
                     }
                 }
                 else{
                     console.log(this.remoteNumber, " ", message.from)
 
                     if(message.direction=='incoming' && this.remoteNumber == message.from){
-                        this.newMessages++;
+                        this.newMessagesData++;
                     }
                 }
             }
@@ -172,8 +172,8 @@ export default {
                 if(message.direction == 'incoming' && message.from == this.remoteNumber ){
                     console.log(this.remoteNumber, " ", message.from)
                     if(this.currentThread != 'activeThread'){
-                        this.newMessages++;
-                        console.log(this.newMessages);
+                        this.newMessagesData++;
+                        console.log(this.newMessagesData);
                     }
                 }
             }                
@@ -268,13 +268,7 @@ export default {
     color: white;
 }
 
-.text-center {
-    margin: 0;
-    position: relative;
-    top: 50%;
-    -ms-transform: translateY(-50%);
-    transform: translateY(-50%);
-}
+
 
 .activeThread {
     color: white;

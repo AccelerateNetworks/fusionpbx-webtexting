@@ -182,7 +182,7 @@ export default {
         </div>
         <div class="link-container-container">
             <div class="link-container">
-                <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none" aria-label="new contact" @click="dumpSelectedThread()">＋</router-link>
+                <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none fa fa-plus" aria-label="new contact" @click="dumpSelectedThread()"></router-link>
             </div>
         </div>
         

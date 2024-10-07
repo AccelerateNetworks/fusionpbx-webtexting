@@ -5,9 +5,14 @@ import { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
 import moment from 'moment';
 import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
+import {saveTemplate, saveTemplateQuery} from '../../lib/saveTemplates';
 import {useMatchMedia} from '../../lib/matchMedia';
 import { emitter, MessageData, ThreadChangePayload,state} from '../../lib/global';
 import {searchPreviews,loadPreviews} from '../../lib/backfillPreviews';
+import {loadTemplates, loadTemplateQuery} from '../../lib/loadTemplates';
+import { deleteTemplateQuery,deleteTemplate} from '../../lib/deleteTemplate';
+import {registerForwardAddress, registerForwardingRequest } from '../../lib/messageForwarding';
+
 
 //this component kind of functions as a partial state controller for the app
 export default {
@@ -225,8 +230,32 @@ export default {
         });
         emitter.on("backfill-previews-requested",() => {
             loadPreviews(this.extensionUUID,state.oldestMessage);
-        })
-        
+        });
+        emitter.on("add-template", async (queryString: saveTemplateQuery) =>{
+            //console.log(queryString)
+            if(queryString.template_uuid){
+                queryString.template_uuid = null;
+            }
+            queryString.extension_uuid = this.extensionUUID;
+            await saveTemplate(queryString);
+        });
+        emitter.on("edit-template", async (queryString: saveTemplateQuery) =>{
+            //console.log(queryString);
+            queryString.extension_uuid = this.extensionUUID;
+            await saveTemplate(queryString);
+        });
+        emitter.on("load-templates", async (queryString:loadTemplateQuery) =>{
+            queryString.extension_uuid = this.extensionUUID;
+            await loadTemplates(queryString);
+        });
+        emitter.on("delete-template-request", async (args: deleteTemplateQuery) =>{
+            args.extension_uuid = this.extensionUUID;
+            await deleteTemplate(args);
+        });
+        emitter.on("register-email-forwarding", async (args: registerForwardingRequest) =>{
+            args.extension_uuid = this.extensionUUID;
+            await registerForwardAddress(args)
+        });
     },
 
 }

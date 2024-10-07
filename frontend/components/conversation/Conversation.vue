@@ -423,7 +423,7 @@ export default {
     color: white;
 }
 
-td:active {
+/* td:active {
     background-color: #3178B1;
     color: white;
 }
@@ -431,7 +431,7 @@ td:active {
 td:hover {
     background-color: aliceblue;
 }
-
+*/
 table {
     width: 100%;
     table-layout: fixed;
@@ -442,16 +442,13 @@ table {
     font-size: 8pt;
     padding-left: 0.5em;
 }
-
+/*
 td {
     border: solid #3178b1;
     border-radius: 1em;
 }
+*/
 
-table {
-    width: 100%;
-    table-layout: fixed;
-}
 
 .thread-container {
     border: solid #5f9fd3 2px;

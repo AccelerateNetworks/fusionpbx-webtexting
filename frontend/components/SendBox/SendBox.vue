@@ -359,6 +359,7 @@ export default {
             <button class="btn btn-send"
                 :disabled="(pendingAttachments.length == 0 && enteredText.length == 0 ) || !state.connected"
                 v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
+                <button class="btn btn-send"><span class="fas">T</span></button>
         </div>
         <div class="char-counter-box">
             <div class="char-counter-display">{{ enteredText.length }} / 160</div>

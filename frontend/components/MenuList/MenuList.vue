@@ -33,9 +33,8 @@ export default {
                 <h6 class="m-auto">Settings</h6>
             </div>
         </div>
-        <MenuPreview name="templates" link='templates.php' descriptions="Manage Message Templates" 
-                   ></MenuPreview>
-
+        <MenuPreview name="Templates" link='templates.php' descriptions="Manage Message Templates" ></MenuPreview>
+        <MenuPreview name="Email Forwarding" link='email_forwarding.php' descriptions="Manage Email Forwarding"></MenuPreview>
         <div class="threadlist-table">
             <div class="preview_list_container">
                 
