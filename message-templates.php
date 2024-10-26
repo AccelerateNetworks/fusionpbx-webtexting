@@ -27,7 +27,7 @@ if($_GET['template_uuid']){
     
         //do an add template
         $database = new database;
-        $sql = "INSERT INTO webtexting_message_templates (domain_uuid, template_language, template_category, template_subcategory, template_subject, template_body, template_type, template_enabled, template_description)  VALUES (:domain_uuid, :template_lang, :template_cat, :template_subcat, :template_subject, :template_body, :template_type, :template_enabled, :template_desc)";
+        $sql = "INSERT INTO webtexting_message_templates (domain_uuid, template_language, template_category, template_subcategory, template_subject, template_body, template_type, template_enabled, template_description, template_name)  VALUES (:domain_uuid, :template_lang, :template_cat, :template_subcat, :template_subject, :template_body, :template_type, :template_enabled, :template_desc, :template_name)";
         $parameters['domain_uuid'] = $domain_uuid;
         $parameters['template_lang'] = $_GET['language'];
         $parameters['template_cat'] = $_GET['category'];
@@ -37,6 +37,8 @@ if($_GET['template_uuid']){
         $parameters['template_type'] = $_GET['templateType'];
         $parameters['template_enabled'] = $_GET['enabled'];
         $parameters['template_desc'] = $_GET['description'];
+        $parameters['template_name'] = $_GET['templateName'];
+
         if($database->execute($sql, $parameters)) {
             message::add("Template Added.");
         } else {
@@ -48,7 +50,7 @@ if($_GET['template_uuid']){
         //valid template_uuid = update instead of add
         $database = new database;
 
-        $sql = "UPDATE webtexting_message_templates SET template_language = :template_lang, template_category = :template_cat, template_subcategory = :template_subcat, template_subject = :template_subject, template_body = :template_body, template_type = :template_type, template_enabled = :template_enabled, template_description = :template_desc         WHERE email_template_uuid = :template_uuid AND domain_uuid = :domain_uuid";
+        $sql = "UPDATE webtexting_message_templates SET template_language = :template_lang, template_category = :template_cat, template_subcategory = :template_subcat, template_subject = :template_subject, template_body = :template_body, template_type = :template_type, template_enabled = :template_enabled, template_description = :template_desc,  template_name = :template_name        WHERE email_template_uuid = :template_uuid AND domain_uuid = :domain_uuid";
             $parameters['template_uuid'] = $_GET['template_uuid'];
             $parameters['domain_uuid'] = $domain_uuid;
             $parameters['template_lang'] = $_GET['language'];
@@ -59,6 +61,7 @@ if($_GET['template_uuid']){
             $parameters['template_type'] = $_GET['templateType'];
             $parameters['template_enabled'] = $_GET['enabled'];
             $parameters['template_desc'] = $_GET['description'];
+            $parameters['template_name'] = $_GET['templateName'];
         if($database->execute($sql, $parameters)) {
             message::add("template edited.");
         } else {

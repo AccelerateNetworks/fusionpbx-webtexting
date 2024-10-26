@@ -12,6 +12,8 @@ import {searchPreviews,loadPreviews} from '../../lib/backfillPreviews';
 import {loadTemplates, loadTemplateQuery} from '../../lib/loadTemplates';
 import { deleteTemplateQuery,deleteTemplate} from '../../lib/deleteTemplate';
 import {registerForwardAddress, registerForwardingRequest } from '../../lib/messageForwarding';
+import {computePosition} from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.11/+esm';
+
 
 
 //this component kind of functions as a partial state controller for the app
@@ -47,6 +49,7 @@ export default {
         let threadUUID='';
         let smallScreen = useMatchMedia('(width<=700px)');
         let loadedPreviews = false;
+        let remoteNumber = '';
         return { contactEditLink, title, smallScreen, state:state, previews: state.previews, loadedPreviews,threadUUID };
     },
     methods: {
@@ -246,7 +249,7 @@ export default {
         });
         emitter.on("load-templates", async (queryString:loadTemplateQuery) =>{
             queryString.extension_uuid = this.extensionUUID;
-            await loadTemplates(queryString);
+            return await loadTemplates(queryString);
         });
         emitter.on("delete-template-request", async (args: deleteTemplateQuery) =>{
             args.extension_uuid = this.extensionUUID;
@@ -271,7 +274,7 @@ The blank space should notify the user that they can select a thread to display 
         <div v-if="smallScreen" class="pull-to-refresh"><div class="spinner-border"></div></div>
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
                 :threadPreviews="this.state.previews" :previewsLoaded="this.loadedPreviews" :selectedConvo="this.conversationSelected"
-                :newThreadView="this.newThreadSelected" />
+                :newThreadView="this.newThreadSelected" :extensionUUID="this.extensionUUID" />
 
 
             <suspense>

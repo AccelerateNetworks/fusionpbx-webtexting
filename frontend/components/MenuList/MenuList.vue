@@ -4,8 +4,12 @@ import {emitter, MenuChangePayload} from '../../lib/global';
 export default {
     name:"MenuList",
     components: { MenuPreview },
+    props:{
+        extensionUUID: String
+    },
     data(){
-        return {selectedMenu:false,}
+        return {selectedMenu:false,
+        backLink:'/threadlist.php?extension_uuid='+ this.extensionUUID}
     },
     //mounted emitter.on for menuPreview click emits
     mounted(){
@@ -26,9 +30,9 @@ export default {
 </script>
 <template>
     <div class="list_container" v-bind:class="(this.selectedMenu) ? 'hide-if-small': 'no-menu-selected'" id="THREADLIST">
-        <div class="threadlist-header d-flex justify-content-between align-items-center">
-            <div class="ml-05">
-                <router-link class="fa fa-arrow-left btn btn-large " to="`/threadlist.php`" aria="Go Back to threadlist!"></router-link>
+        <div class="thread-header d-flex justify-content-between align-items-center">
+            <div class="row">
+                <router-link class="fa fa-arrow-left btn btn-large " :to='this.backLink' aria="Go Back to threadlist!"></router-link>
 
                 <h6 class="m-auto">Settings</h6>
             </div>

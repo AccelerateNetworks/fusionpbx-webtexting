@@ -31,6 +31,7 @@ export default {
                 templateType : values.template_type,
                 enabled : values.template_enabled,
                 description : values.template_description,
+                templateName: values.template_name,
             }
             console.log(tempPreview)
                 
@@ -70,13 +71,13 @@ export default {
     <div id="TEMPLATES_MENU">
         <div class="templates-container">
             <div class="thread-header new-message-header">
-                <div class="thread-header-container  d-flex justify-content-between align-items-center">
-                    <div class="'ml-05">
-                        <router-link class="fa fa-arrow-left btn btn-large " :to="`/menu.php`"
+                <div class="thread-header-container  d-flex justify-content-between align-middle align-items-center">
+                    <div class="row align-items-center align-middle">
+                        <router-link class="fa fa-arrow-left btn btn-large align-middle" :to="`/menu.php`"
                             @click="backArrowClickHandler" aria="Go Back to Settings Menu"></router-link>
 
-                        <div class="new-message-headline">
-                            <h6>Templates</h6>
+                        <div class="">
+                            <h6 class="mb-0">Templates</h6>
                         </div>
 
                     </div>
@@ -94,10 +95,10 @@ export default {
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                <th scope='col'>Name</th>
                                 <th scope='col'>Type</th>
                                 <th scope='col'>Description</th>
-                                <th scope='col'>Edit Template</th>
-                                <th scope='col'>Delete Template</th>
+                                <th scope='col'>Manage Templates</th>
                             </tr>
                         </thead> 
                         <tbody class="overflow-scroll">

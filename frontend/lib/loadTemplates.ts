@@ -16,6 +16,7 @@ export type loadTemplateResponse = {
     template_type: String;
     template_enabled: String;
     template_description: String;
+    template_name: String;
     insert_date: String;
     insert_user: String;
     update_date: String;

@@ -28,6 +28,9 @@ export type TemplatePreviewInterface = {
         templateType:{
             type: String
         },
+        templateName:{
+            type: String
+        },
         enabled:{
             type: String
         },
@@ -72,6 +75,9 @@ export default {
         description: {
             type: String
         },
+        templateName:{
+            type: String
+        },
     },
     methods:{
         menuLinkClickHandler(){
@@ -90,21 +96,23 @@ export default {
 
 </script>
 <template>
-        <tr>
-            <th scope='col' >{{this.category }}</th>
-            <th scope='col' >
-                {{this.description }}
-            </th>
-            <th scope="col">
-                <router-link :to="this.link" class="template-preview-link" v-bind="this.props" @click="menuLinkClickHandler">
-                    Edit Template
-                </router-link>    
-            </th>
-            <td scope="col" class="align-middle text-center" >
-                <div class="btn-danger p-2 rounded align-middle text-center" @click="deleteTemplateRequest">
-                    <span>Delete</span>
+        <tr class="align-middle">
+            <th scope='col' class="align-middle">{{this.templateName}}</th>
+            <th scope='col' class="align-middle">{{this.category }}</th>
+            <th scope='col' class="align-middle">{{this.description}}</th>
+            <th scope="col" class="align-items-center align-middle">
+                <div class='m-auto'>
+                    <router-link aria="Edit Template Button" :to="this.link" class="btn-primary p-2 btn rounded align-middle text-center" v-bind="this.props" @click="menuLinkClickHandler">
+                        <span class="fa fa-cog"></span>
+    
+                    </router-link>    
+                
+                    <div aria="Delete Template Button" class="btn-danger btn p-2 rounded align-middle text-center " @click="deleteTemplateRequest">
+                        <span class="fa fa-trash"></span>
+                    </div>
                 </div>
-            </td>
+                
+            </th>
         </tr>
     
 </template>

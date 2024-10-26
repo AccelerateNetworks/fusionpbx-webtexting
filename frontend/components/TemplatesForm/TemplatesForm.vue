@@ -26,6 +26,9 @@ export default {
         templateType:{
             type: String
         },
+        templateName:{
+            type: String
+        },
         enabled:{
             type: String
         },
@@ -38,7 +41,7 @@ export default {
     },
     methods: {
         backArrowClickHandler() {
-            emitter.emit('menu-change');
+            emitter.emit('menu-change','templates');
         },
         requestTemplateSave(event){
             event.preventDefault();
@@ -56,7 +59,8 @@ export default {
                 subcategory:this.$route.query.template_subcategory,
                 subject:this.$route.query.template_subject,
                 body:this.$route.query.template_body,
-                templateType:this.$route.query.template_templateType,
+                templateType:"Quick Response",
+                templateName:this.$route.query.template_name,
                 enabled:this.$route.query.template_enabled,
                 description:this.$route.query.template_description,
             }
@@ -74,13 +78,13 @@ export default {
     <div id="TEMPLATES_MENU">
         <div class="templates-container">
             <div class="thread-header new-message-header">
-                <div class="thread-header-container  d-flex justify-content-between align-items-center">
-                    <div class="'ml-05">
+                <div class="thread-header-container d-flex justify-content-between align-middle align-items-center">
+                    <div class="row align-items-center align-middle">
                         <router-link class="fa fa-arrow-left btn btn-large " :to="`/templates.php`"
                             @click="backArrowClickHandler" aria="Go Back to Templates Menu"></router-link>
 
-                        <div class="new-message-headline">
-                            <h6>Templates</h6>
+                        <div class="">
+                            <h6 class="mb-0 align-middle">Manage Template</h6>
                         </div>
 
                     </div>
@@ -93,7 +97,7 @@ export default {
             <!-- for now we need to make sure the app -> db connection works so we'll hard code -->
 
             <div class="template-form ">
-                <div class="mt-form-row">
+                <div class="mt-form-row d-none">
                     <div class="category-template-uuid">Template UUID</div>
                     <div class="area-for-text"> <textarea v-model="formInputs.template_uuid"></textarea></div>
 
@@ -101,6 +105,11 @@ export default {
                 <div class="mt-form-row">
                     <div class="category-desc">Language</div>
                     <div class="area-for-text"> <textarea v-model="formInputs.language"></textarea></div>
+
+                </div>
+                <div class="mt-form-row">
+                    <div class="category-desc mandatory">Template Name</div>
+                    <div class="area-for-text"> <textarea v-model="formInputs.templateName"></textarea></div>
 
                 </div>
                 <div class="mt-form-row">
@@ -123,7 +132,7 @@ export default {
                     <div class="area-for-text"> <textarea v-model="formInputs.body"></textarea></div>
 
                 </div>
-                <div class="mt-form-row">
+                <div class="mt-form-row d-none">
                     <div class="category-desc">Type</div>
                     <div class="area-for-text"> <textarea v-model="formInputs.templateType"></textarea></div>
 

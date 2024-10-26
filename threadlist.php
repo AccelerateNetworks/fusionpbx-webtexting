@@ -248,7 +248,7 @@ foreach ($threads as $thread) {
  }
  $frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
 ?>
-
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js"></script>
 <script src="js/webtexting.umd.js"></script>
 <script type="text/javascript">
     window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;

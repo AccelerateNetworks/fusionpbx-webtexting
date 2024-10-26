@@ -2,6 +2,7 @@
 import { uploadText } from '../../lib/upload';
 import { CPIM } from '../../lib/CPIM';
 import { MessageData, GlobalState, emitter, state } from '../../lib/global';
+import TemplateDropUpItem from '../TemplateDropUp/TemplateDropUpItem.vue';
 import moment from 'moment';
 
 type PendingAttachment = {
@@ -29,7 +30,7 @@ function verifyFileSize(file: File) {
     }
     return false;
 }
-function phoneNumbertoPhoneString(number:Number){
+function phoneNumbertoPhoneString(number: Number) {
     return number.toString().replace(/[^\d+]/g, "");
 }
 
@@ -38,14 +39,18 @@ export default {
         enteredText: string,
         pendingAttachments: PendingAttachment[],
         state: GlobalState,
+        templates: Array<Object>,
+
     } {
         return {
             enteredText: "",
             pendingAttachments: [],
             state: state,
+            templates: [],
         }
     },
     name: "SendBox",
+    components:{TemplateDropUpItem },
     props: {
         remoteNumber: {
             type: String,
@@ -57,12 +62,19 @@ export default {
             type: String,
             required: true,
         },
-        location:{
+        location: {
             type: String,
             required: true
         }
     },
     methods: {
+        loadTemplates() {
+            document.getElementById("myDropdown").classList.toggle("show");
+            if(this.templates.length === 0){
+                emitter.emit("load-templates", {});
+
+            }
+        },
         keypress(e: KeyboardEvent) {
             if (e.key == "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -86,10 +98,9 @@ export default {
         },
         async send() {
             //we need to fail  phone numbers that are not 11 digits long
-            if(this.location === 'Conversation'){
+            if (this.location === 'Conversation') {
                 const phoneString = phoneNumbertoPhoneString(this.remoteNumber);
-                if((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5  || phoneString.length === 6)  || this.groupUUID)
-                {
+                if ((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6) || this.groupUUID) {
                     console.log(this.enteredText);
                     if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
                         this.$refs.textbox.focus();
@@ -140,79 +151,78 @@ export default {
                         this.enteredText = "";
                     }
                 }
-                else{
+                else {
                     let errorString = "Outbound number is invalid, not enough digits or invalid groupUUID. \n";
-                    if(this.remoteNumber.toString().length != 11 && this.remoteNumber.toString().length != 6 && this.remoteNumber.toString().length != 5 ){
+                    if (this.remoteNumber.toString().length != 11 && this.remoteNumber.toString().length != 6 && this.remoteNumber.toString().length != 5) {
                         errorString += `Outbound Number: ${this.remoteNumber}`;
                     }
-                    else{
-                        errorString+=`GroupUUID: ${this.groupUUID}`;
+                    else {
+                        errorString += `GroupUUID: ${this.groupUUID}`;
                     }
-                    
+
                     alert(errorString)
-                }   
+                }
             }
-            else{
+            else {
                 this.sendNewMessage();
             }
         },
-        async sendNewMessage(){
+        async sendNewMessage() {
             const phoneString = phoneNumbertoPhoneString(this.remoteNumber);
-            if((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6)  || this.groupUUID)
-                {
-                    //console.log(this.enteredText);
-                    if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
-                        this.$refs.textbox.focus();
-                        return;
-                    }
-                    for( let attachment of this.pendingAttachments){
-                        this.removeAttachment(attachment);
-                    }
-                    this.pendingAttachments= [];
-
-                    if (this.enteredText.length > 0) {
-                        let message = this.getMessageData();
-                        if (this.groupUUID) {
-                            const url = await uploadText(this.enteredText);
-                            const cpim = new CPIM(url, 'text/plain');
-                            cpim.bodyText = this.enteredText;
-
-                            if (this.groupUUID) {
-                                cpim.headers["Group-UUID"] = this.groupUUID;
-                            }
-
-                            console.log('outgoing cpim', cpim);
-
-                            message.contentType = "message/cpim";
-                            message.cpim = cpim;
-                            message.body = cpim.serialize();
-                        } else {
-                            message.contentType = "text/plain";
-                            message.body = this.enteredText;
-                        }
-                        //console.log('emitting message', message);
-                        emitter.emit('outbound-message', message);
-                        setTimeout(() => 
-                            console.log("duplicate send prevention timeout"), 500
-                        )
-                        this.enteredText = "";
-                    }
+            if ((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6) || this.groupUUID) {
+                //console.log(this.enteredText);
+                if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
+                    this.$refs.textbox.focus();
+                    return;
                 }
-                else{
-                    let errorString = "Outbound number is invalid, not enough digits or invalid groupUUID. \n";
-                    if(this.remoteNumber.toString().length!=11 && this.remoteNumber.toString().length != 5 && this.remoteNumber.toString().length != 6){
-                        errorString += `Outbound Number: ${this.remoteNumber}`;
+                for (let attachment of this.pendingAttachments) {
+                    this.removeAttachment(attachment);
+                }
+                this.pendingAttachments = [];
+
+                if (this.enteredText.length > 0) {
+                    let message = this.getMessageData();
+                    if (this.groupUUID) {
+                        const url = await uploadText(this.enteredText);
+                        const cpim = new CPIM(url, 'text/plain');
+                        cpim.bodyText = this.enteredText;
+
+                        if (this.groupUUID) {
+                            cpim.headers["Group-UUID"] = this.groupUUID;
+                        }
+
+                        console.log('outgoing cpim', cpim);
+
+                        message.contentType = "message/cpim";
+                        message.cpim = cpim;
+                        message.body = cpim.serialize();
+                    } else {
+                        message.contentType = "text/plain";
+                        message.body = this.enteredText;
                     }
-                    else{
-                        errorString+=`GroupUUID: ${this.groupUUID}`;
-                    }
-                    
-                    alert(errorString)
-                } 
+                    //console.log('emitting message', message);
+                    emitter.emit('outbound-message', message);
+                    setTimeout(() =>
+                        console.log("duplicate send prevention timeout"), 500
+                    )
+                    this.enteredText = "";
+                }
+            }
+            else {
+                let errorString = "Outbound number is invalid, not enough digits or invalid groupUUID. \n";
+                if (this.remoteNumber.toString().length != 11 && this.remoteNumber.toString().length != 5 && this.remoteNumber.toString().length != 6) {
+                    errorString += `Outbound Number: ${this.remoteNumber}`;
+                }
+                else {
+                    errorString += `GroupUUID: ${this.groupUUID}`;
+                }
+
+                alert(errorString)
+            }
         },
         onAttach(e: Event) {
             //console.log(e.target.files);
-            if(this.verifyValidLocation()){
+            if (this.verifyValidLocation()) {
                 const target = e.target as HTMLInputElement;
                 //console.log(target);
                 for (const file of target.files) {
@@ -232,7 +242,7 @@ export default {
                     }
                 }
             }
-            else{
+            else {
                 //alert('Attachments not supported for new conversations at this time.')
             }
         },
@@ -242,10 +252,10 @@ export default {
             this.pendingAttachments.splice(position, 1);
         },
         async uploadAttachment(attachment: PendingAttachment): Promise<void> {
-            if(this.verifyValidLocation()){
+            if (this.verifyValidLocation()) {
                 const uploadTarget = await fetch("upload.php", {
-                method: "POST",
-                body: JSON.stringify({ filename: attachment.file.name })
+                    method: "POST",
+                    body: JSON.stringify({ filename: attachment.file.name })
                 }).then(r => r.json());
 
                 attachment.uploadedURL = uploadTarget.download_url;
@@ -259,19 +269,19 @@ export default {
                 attachment.progress = 100;
 
                 console.log("uploaded: ", resp);
-            }else{
+            } else {
                 //alert('Attachments not supported for new conversations at this time.')
             }
-            
+
         },
-        verifyValidLocation(){
-            if(this.location ==='Conversation'){
+        verifyValidLocation() {
+            if (this.location === 'Conversation') {
                 return true;
             }
-            else if(this.location ==='New-Message'){
+            else if (this.location === 'New-Message') {
                 //alert('Attachments not supported for new conversations at this time.');
             }
-            else{
+            else {
                 alert('Invalid SendBox location.')
             }
             return false;
@@ -300,32 +310,32 @@ export default {
             for (const item of items) {
                 switch (item.type) {
                     case "image/png":
-                        if(this.verifyValidLocation()){
+                        if (this.verifyValidLocation()) {
                             const file = item.getAsFile();
                             this.attachPendingAttachment(file);
                             break;
                         }
-                        else{
+                        else {
                             alert('Attachments not supported for new conversations at this time.');
                             break;
                         }
-                        
+
                     case "image/jpg":
-                        if(this.verifyValidLocation()){
+                        if (this.verifyValidLocation()) {
                             const file = item.getAsFile();
                             this.attachPendingAttachment(file);
                             break;
-                        }else{
+                        } else {
                             alert('Attachments not supported for new conversations at this time.');
                             break;
                         }
 
                     case "image/jpeg":
-                        if(this.verifyValidLocation()){
+                        if (this.verifyValidLocation()) {
                             const file = item.getAsFile();
                             this.attachPendingAttachment(file);
                             break;
-                        }else{
+                        } else {
                             alert('Attachments not supported for new conversations at this time.');
                             break;
                         }
@@ -336,6 +346,30 @@ export default {
                 }
             }
         }
+    }, 
+    mounted(){
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropbtn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content-menu");
+                var i;
+                for (i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+        emitter.on('dropup-selection-recieved',(payload:String) =>{
+            console.log('Selection Recieved. You selected: ' + payload);
+            this.enteredText= payload;
+        });
+        emitter.on('backfill-template-complete',(payload) =>{
+            this.templates = payload;
+        });
+
+        
     }
 }
 </script>
@@ -350,16 +384,27 @@ export default {
             </div>
         </div>
         <div class="sendbox">
-            <textarea maxlength="160" rows="3" class="textentry" autofocus="true" @keypress="keypress" v-model.trim="enteredText"
-                ref="textbox" v-on:paste="onPaste" name="text-message-entry-box"></textarea>
-            <label v-if="location==='Conversation'" for="attachment-upload" class="btn btn-attach">
-                <span v-if="location==='Conversation'" class="fas fa-paperclip fa-fw"></span>
+            <textarea maxlength="160" rows="3" class="textentry" autofocus="true" @keypress="keypress"
+                v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste" name="text-message-entry-box"></textarea>
+
+
+            <label v-if="location === 'Conversation'" for="attachment-upload" class="btn btn-attach">
+                <span v-if="location === 'Conversation'" class="fas fa-paperclip fa-fw"></span>
             </label>
-            <input v-if="location==='Conversation'" type="file" id="attachment-upload" style="display: none;" v-on:change="onAttach" multiple />
+            <input v-if="location === 'Conversation'" type="file" id="attachment-upload" style="display: none;"
+                v-on:change="onAttach" multiple />
             <button class="btn btn-send"
-                :disabled="(pendingAttachments.length == 0 && enteredText.length == 0 ) || !state.connected"
+                :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected"
                 v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
-                <button class="btn btn-send"><span class="fas">T</span></button>
+            <div class="dropmedown">
+                <button class="btn btn-load dropdown-toggle dropbtn" data-toggle="dropmedown" aria-haspopup="true" aria-expanded="false" @click="loadTemplates">
+                    <i class="fa-clipboard dropbtn" aria-hidden="true"></i>
+                </button>
+                <div id="myDropdown" class="dropdown-content-menu"> 
+                    <TemplateDropUpItem v-for="(message) in this.templates" :templateName="message.template_name" :templateText="message.template_body" :key="message.template_name" />
+                </div>
+            </div>
+
         </div>
         <div class="char-counter-box">
             <div class="char-counter-display">{{ enteredText.length }} / 160</div>
@@ -462,4 +507,46 @@ export default {
     bottom: 1em;
     right: 1em;
 }
+/* DROPDOWN MENU */
+
+.dropbtn {
+    /*
+    background-color: #3498DB;
+    color: white;
+    */
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+
+  
+  .dropmedown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dropdown-content-menu {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    bottom:4rem;
+    left:-95px;
+  }
+  
+  .dropdown-content-menu a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .dropmedown a:hover {background-color: #ddd;}
+  
+  .show {display: block;}
+
 </style>
