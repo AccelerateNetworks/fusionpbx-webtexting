@@ -19,23 +19,33 @@ export default {
             emitter.emit('edit-template',this.formInputs)
         },
         buildTemplatePreview(values: loadTemplateResponse){
-            console.log(values);
+            //console.log(values);
             let tempPreview:TemplatePreviewInterface = {
                 link: '/manage_templates.php?'+ new URLSearchParams(values).toString(),
-                template_uuid : values.email_template_uuid,
-                body : values.template_body,
-                category : values.template_category,
-                subcategory : values.template_subcategory,
-                language : values.template_language,
-                subject : values.template_subject,
-                templateType : values.template_type,
-                enabled : values.template_enabled,
-                description : values.template_description,
-                templateName: values.template_name,
+                template_uuid : values.email_template_uuid.trim(),
+                body : values.template_body.trim(),
+                category : values.template_category.trim(),
+                subcategory : values.template_subcategory.trim(),
+                language : values.template_language.trim(),
+                subject : values.template_subject.trim(),
+                templateType : values.template_type.trim(),
+                enabled : values.template_enabled.trim(),
+                description : values.template_description.trim(),
+                templateName: values.template_name.trim(),
             }
-            console.log(tempPreview)
-                
+            //console.log(tempPreview)                
             return tempPreview
+        },
+        removeTemplate(targetUUID: string){
+            let index = 0;
+            for(let value in this.templatePreviews){
+                console.log(this.templatePreviews[value].template_uuid);
+                if(this.templatePreviews[value].template_uuid===targetUUID){
+                    this.templatePreviews.splice(index,1);
+                    console.log("match found removing template from list")
+                }
+                index++;
+            }
         }
     },
     data(){
@@ -60,11 +70,11 @@ export default {
             this.templatesLoaded = true;
             this.templatePreviews = typedTemplatesArray;
         });
-        
+        emitter.on('delete-template-complete',(temp:string) => {
+            console.log( temp);
+            this.removeTemplate(temp);
+        });        
     },
-    
-
-
 }
 </script>
 <template>

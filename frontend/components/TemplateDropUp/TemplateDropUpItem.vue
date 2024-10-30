@@ -1,7 +1,10 @@
 
 <script lang="ts">
 import {emitter} from '../../lib/global';
-
+type TemplateDropUpProps ={
+    templateName:String,
+    templateText:String
+}
 
 export default {
     name: 'TemplateDropUpItem',

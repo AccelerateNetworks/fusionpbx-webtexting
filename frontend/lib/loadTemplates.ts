@@ -1,5 +1,6 @@
 import { emitter } from './global';
-
+import TemplateDropUpProps from '../components/TemplateDropUp/TemplateDropUpItem.vue';
+type TemplateDropUpProps = typeof TemplateDropUpProps;
 export type loadTemplateQuery = {
     extension_uuid: String
     older_than?: String
@@ -23,7 +24,7 @@ export type loadTemplateResponse = {
     update_user: String;
 };
 
-let temp;
+let temp:Array<TemplateDropUpProps> ;
 let fetching = false;
 export async function loadTemplates(args:loadTemplateQuery) {
     console.log("loading template Previews");
@@ -34,7 +35,6 @@ export async function loadTemplates(args:loadTemplateQuery) {
     fetching = true;
     emitter.emit("template-previews-loading");
     try {
-        // console.log(args);
         if(args){
             console.log(args);
             let params: loadTemplateQuery;
@@ -45,15 +45,15 @@ export async function loadTemplates(args:loadTemplateQuery) {
               params.older_than = args.older_than;
             }
             const initialResponse =  await fetch('/app/webtexting/loadtemplates.php?' + new URLSearchParams(params).toString()).then(r => r.json());
-            temp = initialResponse;
-            console.log(temp);
+            temp= initialResponse;
     
             fetching = false;
             //console.log('backfillPreviews request complete');
     
-            // if (initialResponse.length == 0) {
-            //     emitter.emit('no-previews-found');
-            // }
+            if (temp.length == 0) {
+                emitter.emit('no-templates-found');
+                console.log("No Message Templates found")
+            }
             
         }
         
@@ -63,10 +63,10 @@ export async function loadTemplates(args:loadTemplateQuery) {
         console.log('load template error:', e);
     }finally{
         
-        emitter.emit('backfill-template-complete',temp);
+        emitter.emit('backfill-template-complete',temp );
         fetching= false;
         console.log(temp)
-        return  ( temp);
+        return  ( temp[0]);
     }
 
 }

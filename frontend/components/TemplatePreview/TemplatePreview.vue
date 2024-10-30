@@ -1,13 +1,13 @@
 <script lang='ts'>
 //lets add a delete button and an edit button
 import {emitter} from '../../lib/global';
-export type TemplatePreviewInterface = {
+type TemplatePreviewInterface = {
         link:{
             type:String,
             optional: true
         },
         template_uuid:{
-            type: String,
+            type: string,
             optional: true
         },
         body:{
@@ -89,7 +89,6 @@ export default {
         }
     },
     mounted(){
-        console.log(this.link);
     },
     //mounted click event emitter
 }
@@ -102,7 +101,7 @@ export default {
             <th scope='col' class="align-middle">{{this.description}}</th>
             <th scope="col" class="align-items-center align-middle">
                 <div class='m-auto'>
-                    <router-link aria="Edit Template Button" :to="this.link" class="btn-primary p-2 btn rounded align-middle text-center" v-bind="this.props" @click="menuLinkClickHandler">
+                    <router-link aria="Edit Template Button" :to="this.link" class="btn-primary p-2 btn rounded align-middle text-center"  @click="menuLinkClickHandler">
                         <span class="fa fa-cog"></span>
     
                     </router-link>    

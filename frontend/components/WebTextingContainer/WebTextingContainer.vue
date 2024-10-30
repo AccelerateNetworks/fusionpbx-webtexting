@@ -255,6 +255,7 @@ export default {
             args.extension_uuid = this.extensionUUID;
             await deleteTemplate(args);
         });
+        
         emitter.on("register-email-forwarding", async (args: registerForwardingRequest) =>{
             args.extension_uuid = this.extensionUUID;
             await registerForwardAddress(args)

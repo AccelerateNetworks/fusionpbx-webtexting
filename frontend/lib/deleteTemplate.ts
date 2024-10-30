@@ -19,7 +19,7 @@ export async function deleteTemplate(args:deleteTemplateQuery) {
     try {
         // console.log(args);
         if(args){
-            console.log(args);
+            //console.log(args);
             let params: deleteTemplateQuery;
             if (args.template_uuid) {
               params = { template_uuid: args.template_uuid };
@@ -29,7 +29,6 @@ export async function deleteTemplate(args:deleteTemplateQuery) {
             }
             const initialResponse =  await fetch('/app/webtexting/deletetemplate.php?' + new URLSearchParams(params).toString()).then(r => r.json());
             temp = initialResponse;
-            console.log(temp);
     
             fetching = false;
             //console.log('backfillPreviews request complete');
@@ -46,9 +45,8 @@ export async function deleteTemplate(args:deleteTemplateQuery) {
         console.log('delete template error:', e);
     }finally{
         
-        emitter.emit('delete-template-complete',temp);
+        emitter.emit('delete-template-complete',(args.template_uuid));
         fetching= false;
-        console.log(temp)
         return  ( temp);
     }
 

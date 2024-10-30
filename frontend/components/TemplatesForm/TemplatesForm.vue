@@ -45,9 +45,18 @@ export default {
         },
         requestTemplateSave(event){
             event.preventDefault();
-            //console.log(this.formInputs)
-
-            emitter.emit('edit-template',this.formInputs)
+            console.log(this.formInputs)
+            if(this.formInputs.templateName  || this.formInputs.body ){
+                if(this.formInputs.body.length>160){
+                    alert("Error Submitting Form. Quick Response templates must contain less than 160 characters");
+                }
+                else if( this.formInputs.templateName.length > 0 && this.formInputs.body.length > 0){
+                    emitter.emit('edit-template',this.formInputs)
+                }                
+            }
+            else{
+                alert("Error Submitting Form. Quick Response Templates must include a Name and Body text.");
+            }
         }
     },
     data(){
@@ -66,8 +75,22 @@ export default {
             }
         }
     },
-    created(){
-
+    mounted(){
+        emitter.on('template-save-complete',() => {
+            this.formInputs = {
+                template_uuid:this.$route.query.email_template_uuid,
+                language: this.$route.query.template_language,
+                category:this.$route.query.template_category,
+                subcategory:this.$route.query.template_subcategory,
+                subject:this.$route.query.template_subject,
+                body:this.$route.query.template_body,
+                templateType:"Quick Response",
+                templateName:this.$route.query.template_name,
+                enabled:this.$route.query.template_enabled,
+                description:this.$route.query.template_description,
+            }
+            alert("Template Saved.")
+        })
     },
     
 
@@ -96,58 +119,58 @@ export default {
             <!-- template-form should probably be a component as well -->
             <!-- for now we need to make sure the app -> db connection works so we'll hard code -->
 
-            <div class="template-form ">
+            <div class=" form-group  justify-content-between align-middle align-items-center">
                 <div class="mt-form-row d-none">
                     <div class="category-template-uuid">Template UUID</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.template_uuid"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.template_uuid"></textarea></div>
 
                 </div>
                 <div class="mt-form-row">
                     <div class="category-desc">Language</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.language"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.language"></textarea></div>
 
                 </div>
                 <div class="mt-form-row">
                     <div class="category-desc mandatory">Template Name</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.templateName"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.templateName"></textarea></div>
 
                 </div>
                 <div class="mt-form-row">
                     <div class="category-desc mandatory">Category</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.category"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.category"></textarea></div>
 
                 </div>
                 <div class="mt-form-row">
                     <div class="category-desc">Subcategory</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.subcategory"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.subcategory"></textarea></div>
 
                 </div>
                 <div class="mt-form-row">
                     <div class="category-desc">Subject</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.subject"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.subject"></textarea></div>
 
                 </div>
                 <div class="mt-form-row">
                     <div class="category-desc mandatory">Body</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.body"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.body"></textarea></div>
 
                 </div>
                 <div class="mt-form-row d-none">
                     <div class="category-desc">Type</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.templateType"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.templateType"></textarea></div>
 
                 </div>
                 <div class="mt-form-row">
                     <div class="category-desc">Enabled</div>
                     <input type="checkbox" id="ENABLED_CHECKBOX" v-model="formInputs.enabled" />
-                    <label for="ENABLED_CHECKBOX">{{ formInputs.enabled }}</label> 
+                    <label for="ENABLED_CHECKBOX"></label> 
 
                 </div>
                 <div class="mt-form-row">
                     <div class="category-desc">Description</div>
-                    <div class="area-for-text"> <textarea v-model="formInputs.description"></textarea></div>
+                    <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.description"></textarea></div>
                 </div>
-                <button class="submit" @click="requestTemplateSave">Submit</button>
+                <button class="submit btn btn-primary" @click="requestTemplateSave">Submit</button>
 
             </div>
  

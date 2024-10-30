@@ -26,12 +26,12 @@ if (!$extension) {
          $parameters['template_uuid'] = $_GET['template_uuid'];
          $deleted = $database->select($sql, $parameters, 'all');
       if($deleted){
-          message::add("template deleted.");
+          //message::add("template deleted.");
       } else {
           message::add("error deleting template.", 'negative');
       }
-      echo(json_encode($templates));
-      return json_encode($templates);
+      echo(json_encode($deleted));
+      return json_encode($deleted);
 //       unset($parameters);
 //         //do an edit template
 //         //$domain_uuid;

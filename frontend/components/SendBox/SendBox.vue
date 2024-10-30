@@ -2,7 +2,8 @@
 import { uploadText } from '../../lib/upload';
 import { CPIM } from '../../lib/CPIM';
 import { MessageData, GlobalState, emitter, state } from '../../lib/global';
-import TemplateDropUpItem from '../TemplateDropUp/TemplateDropUpItem.vue';
+import TemplateDropUpItem from '../TemplateDropUp/TemplateDropUpItem.vue'; 
+import TemplateDropUpProps from '../TemplateDropUp/TemplateDropUpItem.vue';
 import moment from 'moment';
 
 type PendingAttachment = {
@@ -12,6 +13,8 @@ type PendingAttachment = {
     upload: Promise<void>,
     uploadedURL: string,
 }
+
+type TemplateDropUpProps = typeof TemplateDropUpProps;
 
 // createRandomToken borrowed from sip.js, which does not export it :(
 // https://github.com/onsip/SIP.js/blob/main/src/core/messages/utils.ts#L85
@@ -365,8 +368,11 @@ export default {
             console.log('Selection Recieved. You selected: ' + payload);
             this.enteredText= payload;
         });
-        emitter.on('backfill-template-complete',(payload) =>{
-            this.templates = payload;
+        emitter.on('backfill-template-complete',(payload:Array<TemplateDropUpProps>) =>{
+            if(payload.length >0){
+                this.templates = payload;
+
+            }
         });
 
         
@@ -383,25 +389,27 @@ export default {
                 <span class="attachment-upload-progress">{{ attachment.progress }}%</span>
             </div>
         </div>
-        <div class="sendbox">
+        <div class="sendbox ">
             <textarea maxlength="160" rows="3" class="textentry" autofocus="true" @keypress="keypress"
                 v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste" name="text-message-entry-box"></textarea>
 
-
-            <label v-if="location === 'Conversation'" for="attachment-upload" class="btn btn-attach">
-                <span v-if="location === 'Conversation'" class="fas fa-paperclip fa-fw"></span>
-            </label>
-            <input v-if="location === 'Conversation'" type="file" id="attachment-upload" style="display: none;"
-                v-on:change="onAttach" multiple />
-            <button class="btn btn-send"
-                :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected"
-                v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
-            <div class="dropmedown">
-                <button class="btn btn-load dropdown-toggle dropbtn" data-toggle="dropmedown" aria-haspopup="true" aria-expanded="false" @click="loadTemplates">
-                    <i class="fa-clipboard dropbtn" aria-hidden="true"></i>
-                </button>
-                <div id="myDropdown" class="dropdown-content-menu"> 
-                    <TemplateDropUpItem v-for="(message) in this.templates" :templateName="message.template_name" :templateText="message.template_body" :key="message.template_name" />
+            <div class="btn-group align-middle dropup">
+                <label v-if="location === 'Conversation'" for="attachment-upload" class="btn btn-attach">
+                    <span v-if="location === 'Conversation'" class="fas fa-paperclip fa-fw"></span>
+                </label>
+                <input v-if="location === 'Conversation'" type="file" id="attachment-upload" style="display: none;"
+                    v-on:change="onAttach" multiple />
+                <button class="btn btn-send"
+                    :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected"
+                    v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
+                    <button class="btn dropdown-toggle dropbtn " data-toggle="dropmedown" aria-haspopup="true" aria-expanded="false" @click="loadTemplates">
+                        <span class=" dropbtn fas fa-comment-dots" aria-hidden="true"></span>
+                    </button>
+                <div class="dropmedown dropup">
+                    
+                    <div id="myDropdown" class="dropdown-content-menu"> 
+                        <TemplateDropUpItem v-for="(message) in this.templates" :templateName="message.template_name" :templateText="message.template_body" :key="message.template_name" />
+                    </div>
                 </div>
             </div>
 
@@ -514,16 +522,14 @@ export default {
     background-color: #3498DB;
     color: white;
     */
-    padding: 16px;
-    font-size: 16px;
     border: none;
     cursor: pointer;
   }
 
   
   .dropmedown {
-    position: relative;
-    display: inline-block;
+    /*position: relative; 
+    display: inline-block;*/
   }
   
   .dropdown-content-menu {
@@ -535,7 +541,7 @@ export default {
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
     bottom:4rem;
-    left:-95px;
+    left:-160px;
   }
   
   .dropdown-content-menu a {
