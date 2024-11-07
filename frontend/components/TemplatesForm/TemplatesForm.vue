@@ -48,14 +48,14 @@ export default {
             console.log(this.formInputs)
             if(this.formInputs.templateName  || this.formInputs.body ){
                 if(this.formInputs.body.length>160){
-                    alert("Error Submitting Form. Quick Response templates must contain less than 160 characters");
+                    console.error('Error Submitting Form. Quick Response templates must contain less than 160 characters')
                 }
                 else if( this.formInputs.templateName.length > 0 && this.formInputs.body.length > 0){
                     emitter.emit('edit-template',this.formInputs)
                 }                
             }
             else{
-                alert("Error Submitting Form. Quick Response Templates must include a Name and Body text.");
+                console.error('Error Submitting Form. Quick Response Templates must include a Name and Body text.')
             }
         }
     },

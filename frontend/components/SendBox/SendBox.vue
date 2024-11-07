@@ -102,9 +102,9 @@ export default {
         async send() {
             //we need to fail  phone numbers that are not 11 digits long
             if (this.location === 'Conversation') {
-                const phoneString = phoneNumbertoPhoneString(this.remoteNumber);
-                if ((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6) || this.groupUUID) {
-                    console.log(this.enteredText);
+                const phoneString = this.remoteNumber;
+                if ((this.remoteNumber && (phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6)) || this.groupUUID) {
+                    //console.log(this.enteredText);
                     if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
                         this.$refs.textbox.focus();
                         return;
@@ -171,7 +171,7 @@ export default {
             }
         },
         async sendNewMessage() {
-            const phoneString = phoneNumbertoPhoneString(this.remoteNumber);
+            const phoneString = this.remoteNumber;
             if ((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6) || this.groupUUID) {
                 //console.log(this.enteredText);
                 if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {

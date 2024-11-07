@@ -1,16 +1,22 @@
 <?php
-
+use GuzzleHttp\Client;
 require_once "root.php";
 require_once "resources/require.php";
 require_once "resources/check_auth.php";
 require_once "header.php";
 require_once "resources/paging.php";
+require_once __DIR__."/vendor/autoload.php";
+
+
 
 if(!$_SESSION['user']['extension']) {
 	echo "no extensions assigned to user";
 	include_once "footer.php";
 	die();
 }
+
+
+
 
 if(sizeof($_SESSION['user']['extension']) == 1) {
 	echo "<script type='text/javascript'>window.location.href = 'threadlist.php?extension_uuid=".$_SESSION['user']['extension'][0]['extension_uuid']."'; </script>";
@@ -22,9 +28,17 @@ echo "	<div style='clear: both;'></div>\n";
 echo "</div>\n";
 echo "<p>Select extension:</p>";
 echo "<table class='table'>\n";
-
+$sql = "SELECT extension_uuid, phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid";
+$parameters['domain_uuid'] = $domain_uuid;
+foreach($database->select($sql, $parameters, 'all') as $d) {
+    $smsenabled_extensions[$d['extension_uuid']] = $d;
+}
+unset($parameters);
 foreach($_SESSION['user']['extension'] as $extension) {
 	if($extension['user_context'] != $_SESSION['domain_name']) {
+		continue;
+	}
+	else if(!$smsenabled_extensions[$extension['extension_uuid']]){
 		continue;
 	}
 	echo "<tr>";

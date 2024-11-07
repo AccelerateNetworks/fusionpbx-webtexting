@@ -1,4 +1,4 @@
-<script lang="js">
+<script lang="ts">
 import SendBox from './SendBox/SendBox.vue';
 export default {
     name: 'NewMessage',
@@ -9,6 +9,11 @@ export default {
     data() {
         return {
             number: '',
+        }
+    },
+    methods:{
+        numberPaste(e: ClipboardEvent) {
+            console.log(e);
         }
     },
     mounted() {
@@ -60,7 +65,7 @@ export default {
                     </div>
                 </div>
                 <span class='new-thread-message'>Enter Number:
-                    <input type="number" size="11" min="10000000000" max="19999999999" v-model="number" id="new-thread-number" name="new-thread-number" placeholder="12065551212" />
+                    <input type="tel" size="11" min="10000000000" max="19999999999" @paste="this.numberPaste" v-model="number" id="new-thread-number" name="new-thread-number" placeholder="12065551212" />
                 </span>
                 <br>
                 <br>
