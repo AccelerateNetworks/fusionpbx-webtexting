@@ -47,8 +47,8 @@ export default{
                 </div>
                     <div class="template-form align-content-center">
                         <div class="mt-form-row">
-                            <label for="exampleFormControlSelect1">Select the number to register for Email forwarding.</label>
-                            <select>
+                            <label for="formSelect1">Select the number to register for Email forwarding.</label>
+                            <select id="formSelect1">
                                 <option>{{this.$props.ownNumber}}</option>
                             </select>
                         </div>
