@@ -4,11 +4,12 @@ export default{
     name:"ForwardingPlaceholder",
     props:{
         selectedConvo: Boolean,
+        ownNumber: String
     },
     data(){
         return{
             emailForwardFormInputs:{
-                phoneNumber:'',
+                phoneNumber:this.$props.ownNumber,
                 emailAddress:''
             }
         }
@@ -18,7 +19,7 @@ export default{
             event.preventDefault();
             const params = {
                 email: this.$data.emailForwardFormInputs.emailAddress.trim(),
-                dialedNumber: this.$data.emailForwardFormInputs.phoneNumber
+                dialedNumber: this.$props.ownNumber
             }
             emitter.emit("register-email-forwarding",params);
         },
@@ -44,11 +45,12 @@ export default{
                         </div>
                     </div>
                 </div>
-                    <div class="template-form ">
+                    <div class="template-form align-content-center">
                         <div class="mt-form-row">
-                            <div class="category-template-uuid">Your phone number</div>
-                            <div class="area-for-text"> <textarea v-model="emailForwardFormInputs.phoneNumber"></textarea></div>
-
+                            <label for="exampleFormControlSelect1">Select the number to register for Email forwarding.</label>
+                            <select>
+                                <option>{{this.$props.ownNumber}}</option>
+                            </select>
                         </div>
                         <div class="mt-form-row">
                             <div class="category-desc">Email Address to forward messages to.</div>
