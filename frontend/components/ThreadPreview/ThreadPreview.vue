@@ -90,7 +90,7 @@ export default {
     components: { Conversation },
     data() {
         return{
-            newMessagesData:this.$props.newMessages
+            newMessagesData:this.$props.newMessages ? this.$props.newMessages : 0
         }
     },
     computed: {
@@ -173,7 +173,7 @@ export default {
                     console.log(this.remoteNumber, " ", message.from)
                     if(this.currentThread != 'activeThread'){
                         this.newMessagesData++;
-                        console.log(this.newMessagesData);
+                        //console.log(this.newMessagesData);
                     }
                 }
             }                
@@ -197,7 +197,7 @@ export default {
                     <span class='thread-last-message' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{
                         this.bodyPreview }}</span>
                         <div class="new-messages">
-                            <span class="new-message-alert-dot bgc-AN-orange" v-if="newMessages>0">{{this.newMessages}}</span>
+                            <span class="new-message-alert-dot bgc-AN-orange" v-if="newMessagesData>0">{{this.newMessagesData}}</span>
                         </div>
                 </div>
 

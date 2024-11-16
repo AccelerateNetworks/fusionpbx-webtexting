@@ -28,12 +28,21 @@ echo "	<div style='clear: both;'></div>\n";
 echo "</div>\n";
 echo "<p>Select extension:</p>";
 echo "<table class='table'>\n";
+echo "<thead>";
+echo "<tr>";
+echo "<th scope='col'>Extension</th>";
+echo "<th scope='col'>Extension Name</th>";
+echo "<th scope='col'>Phone Number</th>";
+echo "<th scope='col'>Description</th>";
+echo "</tr>";
+echo "</thead>";
 $sql = "SELECT extension_uuid, phone_number FROM webtexting_destinations WHERE domain_uuid = :domain_uuid";
 $parameters['domain_uuid'] = $domain_uuid;
 foreach($database->select($sql, $parameters, 'all') as $d) {
     $smsenabled_extensions[$d['extension_uuid']] = $d;
 }
 unset($parameters);
+$matched_smsenabled_extensions=0;
 foreach($_SESSION['user']['extension'] as $extension) {
 	if($extension['user_context'] != $_SESSION['domain_name']) {
 		continue;
@@ -44,15 +53,22 @@ foreach($_SESSION['user']['extension'] as $extension) {
 	echo "<tr>";
 	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$extension['user']."</a></td>";
 	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$extension['outbound_caller_id_name']."</a></td>";
-	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$extension['outbound_caller_id_number']."</a></td>";
+	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$smsenabled_extensions[$extension['extension_uuid']]['phone_number']."</a></td>";
 	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$extension['description']."</a></td>";
 	echo "</tr>";
+	$matched_smsenabled_extensions++;
 }
 
 echo "</table>";
 
 if (if_group("superadmin")) {
     echo "<br /><a href='githook.php'>Check for app updates</a> | <a href='admin.php'>Number Administration</a><br />\n";
+}
+if($matched_smsenabled_extensions>1){
+	$_SESSION['user']['multiple_wt_extensions'] = true;
+}
+else{
+	$_SESSION['user']['multiple_wt_extensions'] = false;
 }
 
 require_once "footer.php";

@@ -247,6 +247,10 @@ foreach ($threads as $thread) {
     $z++;
  }
  $frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
+ if($_SESSION['user']['multiple_wt_extensions']){
+    $frontendOpts['multiple_wt_extensions'] =true;
+ }
+
 ?>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js"></script>
 <script src="js/webtexting.umd.js"></script>
@@ -281,7 +285,7 @@ require_once "footer.php";
       <input type='hidden' name='key_uuid' id='key_uuid'/>
     </form>
   
-<script type="text/javascript">
+<script type="text/javascript">    
 window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'], "remote_identifier" => $number)); ?>;
 WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); ?>);
 </script>
@@ -302,7 +306,7 @@ WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); 
 
 #WEB_TEXT_ROOT {
     display:grid;
-    grid-template-columns: 30% 1fr;
+    grid-template-columns: 4fr 6fr;
     grid-template-rows: auto;
 }
 @media screen and (width <= 700px) {

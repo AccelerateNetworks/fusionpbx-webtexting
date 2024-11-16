@@ -17,7 +17,9 @@ export default {
         threadPreviews: Map<String, ThreadPreviewInterface>,
         selectedConvo: Boolean,
         newThreadView: Boolean,
-        previewsLoaded: Boolean
+        previewsLoaded: Boolean,
+        multipleWebTextingExtensions: Boolean,
+
     },
     components: { ThreadPreview, ThreadSearch, PaginatorButton },
     data() {
@@ -153,14 +155,18 @@ export default {
 <template>
 
     <div class="threadlist_container active" id="THREADLIST" v-bind:class="(selectedConvo || newThreadView) ? 'hide-if-small': 'no-convo-selected'">
-        <div class="threadlist-header d-flex justify-content-between align-items-center"> 
+        <div class="threadlist-header d-flex justify-content-between align-middle"> 
             <!-- <div class="m-auto">
                 <a class="fas fa-info-circle fa-fw menu-icon btn btn-large" aria-label="Accelerate Networks support page" role="link" target="_blank" href="https://acceleratenetworks.com/support/"></a>
             </div> -->
-            <div class="ml-05">
-                <h6 class="m-auto">Conversations</h6>
+            <div v-if='this.multipleWebTextingExtensions' class="d-flex justify-content-between align-middle">
+                <a  href="/app/webtexting/index.php" id="EXIT-BTN" role="button" class="fa fa-arrow-left btn btn-large"> </a>
+                <div class="d-flex justify-content-between align-middle"><h6 class="m-auto">Conversations</h6> </div>
             </div>
-            <div class="mr-05">
+            <div v-else class="ml-05 d-flex justify-content-between align-middle">
+                <div class="d-flex justify-content-between align-middle"><h6 class="m-auto">Conversations</h6> </div>
+            </div>
+            <div class="mr-05 d-flex justify-content-between align-middle">
                 <router-link to="/menu.php" id="SETTINGS-BTN" role="button" class="fas fa-cog f btn btn-large"> </router-link>
                 <a id="notification-btn" role="button" class="fas fa-bell-slash fa-fw f btn btn-large" onclick="toggleNotifications()" aria-label="toggle notifications"></a>
             </div>
@@ -223,6 +229,7 @@ export default {
     padding-right: 0.25rem;
     border-radius: 0.5rem;
     border-color: none;
+    max-width: 320px;
 }
 .hide-if-small{
 }
@@ -311,6 +318,8 @@ export default {
     .hide-if-small{
         display:none;
     }
-    
+    .threadlist_container{
+        max-width: none;
+    }
 }
 </style>

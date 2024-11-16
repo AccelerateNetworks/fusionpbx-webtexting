@@ -158,7 +158,6 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     }
 
     let registerer: Registerer = null;
-
     userAgent.transport.stateChange.addListener(async (data: TransportState) => {
         //console.log("transport state changeed to", data, "registerer=", registerer);
         switch(data) {
@@ -227,7 +226,6 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         const m = message;
         //if plain/text use to number as key
         //if it's cpim 
-        addMessage(message.to,m);
         if(message.cpim) {
             message.body = message.cpim.serialize();
             console.log(`serialized cpim message ${message.body}`)
@@ -245,9 +243,11 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         //console.log(`Messager: `);
         //console.log(messager);
         //console.log(userAgent)
-        
+       
 
         const response = await messager.message();
+        addMessage(message.to,m);
+        
         //console.log(response);
         //updateLastMessage goes here?
         //emitter.emit('scroll-to-bottom');

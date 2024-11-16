@@ -24,7 +24,8 @@ export default {
         username: String,
         threads: Array<Object>,
         extensionUUID: String,
-        threadPreviews: Map<String, ThreadPreviewInterface>
+        threadPreviews: Map<String, ThreadPreviewInterface>,
+        multipleWebTextingExtensions: Boolean,
     },
     computed: {
         conversationSelected() {
@@ -275,7 +276,7 @@ The blank space should notify the user that they can select a thread to display 
         <div v-if="smallScreen" class="pull-to-refresh"><div class="spinner-border"></div></div>
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
                 :threadPreviews="this.state.previews" :previewsLoaded="this.loadedPreviews" :selectedConvo="this.conversationSelected"
-                :newThreadView="this.newThreadSelected" :extensionUUID="this.extensionUUID" />
+                :newThreadView="this.newThreadSelected" :extensionUUID="this.extensionUUID" :multipleWebTextingExtensions="this.multipleWebTextingExtensions"/>
 
 
             <suspense>

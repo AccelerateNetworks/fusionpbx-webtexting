@@ -59,6 +59,7 @@ type WebTextingContainerOptions = {
     remoteNumber?: string,
     groupUUID?: string,
     refreshLink?: string,
+    multiple_wt_extensions?: boolean
 }
 
 
@@ -81,7 +82,8 @@ export const initializeWebTextingContainer = function initializeWebTextingContai
         contactEditLink: opts.contactEditLink,
         groupMembers: opts.groupMembers,
         threads: opts.threads,
-        threadPreviews: threadPreviewMap
+        threadPreviews: threadPreviewMap,
+        multipleWebTextingExtensions: opts.multiple_wt_extensions,
     }
     
     
