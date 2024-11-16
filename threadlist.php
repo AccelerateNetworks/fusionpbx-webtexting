@@ -306,7 +306,7 @@ WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); 
 
 #WEB_TEXT_ROOT {
     display:grid;
-    grid-template-columns: 4fr 6fr;
+    grid-template-columns: 320px auto;
     grid-template-rows: auto;
 }
 @media screen and (width <= 700px) {
