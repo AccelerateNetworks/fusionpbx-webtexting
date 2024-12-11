@@ -2,7 +2,7 @@
 import Conversation from '../conversation/Conversation.vue';
 import { MessageData, emitter, ThreadChangePayload } from '../../lib/global'
 
-export type ThreadPreviewInterface = {
+export type ThreadPreviewData = {
     displayName: {
         type: String,
     },
@@ -217,24 +217,28 @@ export default {
 }
 
 .timestamp {
+    display:inline-grid;
     grid-column-start: 3;
-    grid-column-end: 3;
+    grid-column-end: 5;
     grid-row: 1;
     justify-self: end;
+    text-align: center;
 }
 
 .thread-last-message {
     color: darkgray;
     grid-row-start: 2;
-    grid-column: 1;
+    grid-column-start: 1;
+    grid-column-end: 3;
     justify-self: start;
     overflow:hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    max-width:235px;
 }
 .new-messages{
     grid-row:2;
-    grid-column: 3;
+    grid-column: 4;
     display: inline-block;
     justify-content: right;
     justify-self: right;
@@ -247,7 +251,7 @@ export default {
          display: inline-block;
          font-weight: bold;
          line-height: 22px;
-         margin-right: 1.5rem;
+         margin-right: 2vw;
          text-align: center;
          width: 22px;
  
@@ -279,7 +283,7 @@ export default {
     padding: 0.5625em;
     display: grid;
     grid-template-rows: auto;
-    grid-template-columns: 0 auto auto;
+    grid-template-columns: 0 minmax(0,75vw) 5vw 10vw;
 }
 .tr_replace{
     max-height: 6rem;
@@ -317,5 +321,10 @@ export default {
 .tr_replace:last-child {
     border-bottom-left-radius: 0.5rem;
     border-bottom-right-radius: 0.5rem;
+}
+@media screen and (width <=700px) {
+    .thread-last-message{
+        max-width: 70vw;
+    }    
 }
 </style>

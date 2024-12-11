@@ -106,7 +106,6 @@ export default {
     height: 69dvh;
     width: 100%;
     table-layout: fixed;
-    padding-left: 3px;
 }
 .link-container{
     font-size: 2rem;

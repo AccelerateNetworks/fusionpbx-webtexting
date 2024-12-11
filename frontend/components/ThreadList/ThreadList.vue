@@ -1,6 +1,6 @@
 <script lang="ts" >
 import ThreadSearch from '../ThreadSearch/ThreadSearch.vue';
-import ThreadPreview, { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
+import ThreadPreview, { ThreadPreviewData } from '../ThreadPreview/ThreadPreview.vue';
 import PaginatorButton from '../PaginatorButton/PaginatorButton.vue';
 import {emitter, ThreadChangePayload} from '../../lib/global';
 
@@ -14,11 +14,12 @@ export default {
         displayName: String,
         ownNumber: String,
         threads: Array<Object>,
-        threadPreviews: Map<String, ThreadPreviewInterface>,
+        threadPreviews: Map<String, ThreadPreviewData>,
         selectedConvo: Boolean,
         newThreadView: Boolean,
         previewsLoaded: Boolean,
         multipleWebTextingExtensions: Boolean,
+        extensionUUID: String,
 
     },
     components: { ThreadPreview, ThreadSearch, PaginatorButton },
@@ -60,7 +61,7 @@ export default {
         },
         filteredAndSortedPreviews() {
             if(this.loaded && this.threadPreviews){            
-                return new Map<String,ThreadPreviewInterface>([...this.threadPreviews].filter(([key, value]) => {
+                return new Map<String,ThreadPreviewData>([...this.threadPreviews].filter(([key, value]) => {
                     //console.log(value)
                     if (value == null) {
                         console.log("key for null value ", key)
@@ -83,7 +84,7 @@ export default {
                 );
         }
         else{
-            return new Map<string,ThreadPreviewInterface>();
+            return new Map<string,ThreadPreviewData>();
         }
     },
 
@@ -188,7 +189,7 @@ export default {
         </div>
         <div class="link-container-container">
             <div class="link-container">
-                <router-link :to="'/createthread.php'" class="thread-link dot-center dot bgc-none fa fa-plus" aria-label="new contact" @click="dumpSelectedThread()"></router-link>
+                <router-link :to="`/createthread.php?extension_uuid=${this.$route.query.extension_uuid}`" class="thread-link dot-center dot bgc-none fa fa-plus" aria-label="new contact" @click="dumpSelectedThread()"></router-link>
             </div>
         </div>
         
@@ -254,7 +255,6 @@ export default {
     height: 69dvh;
     width: 100%;
     table-layout: fixed;
-    padding-left: 3px;
 }
 .link-container{
     font-size: 2rem;

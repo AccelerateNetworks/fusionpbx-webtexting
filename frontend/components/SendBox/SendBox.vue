@@ -68,6 +68,9 @@ export default {
         location: {
             type: String,
             required: true
+        },
+        extensionUUID:{
+            type: String,
         }
     },
     methods: {
@@ -113,9 +116,8 @@ export default {
                     while (this.pendingAttachments.length > 0) {
                         const attachment = this.pendingAttachments.shift();
                         await attachment.upload;
-
+                        
                         console.log("sending attachment:", attachment);
-
                         const cpim = new CPIM(attachment.uploadedURL, attachment.file.type);
                         if (this.groupUUID) {
                             cpim.headers["Group-UUID"] = this.groupUUID;
@@ -130,17 +132,15 @@ export default {
 
                     if (this.enteredText.length > 0) {
                         let message = this.getMessageData();
+                        console.log(message);
                         if (this.groupUUID) {
                             const url = await uploadText(this.enteredText);
                             const cpim = new CPIM(url, 'text/plain');
                             cpim.bodyText = this.enteredText;
-
                             if (this.groupUUID) {
                                 cpim.headers["Group-UUID"] = this.groupUUID;
                             }
-
                             console.log('outgoing cpim', cpim);
-
                             message.contentType = "message/cpim";
                             message.cpim = cpim;
                             message.body = cpim.serialize();
@@ -172,7 +172,7 @@ export default {
         },
         async sendNewMessage() {
             const phoneString = this.remoteNumber;
-            if ((this.remoteNumber && phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6) || this.groupUUID) {
+            if ((this.remoteNumber && (phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6) || this.groupUUID) ){
                 //console.log(this.enteredText);
                 if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
                     this.$refs.textbox.focus();
@@ -202,6 +202,9 @@ export default {
                     } else {
                         message.contentType = "text/plain";
                         message.body = this.enteredText;
+                    }
+                    if(this.extensionUUID){
+                        message.extensionUUID = this.extensionUUID;
                     }
                     //console.log('emitting message', message);
                     emitter.emit('outbound-message', message);
@@ -282,7 +285,7 @@ export default {
                 return true;
             }
             else if (this.location === 'New-Message') {
-                //alert('Attachments not supported for new conversations at this time.');
+                return true
             }
             else {
                 alert('Invalid SendBox location.')

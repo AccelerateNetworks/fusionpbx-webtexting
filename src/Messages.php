@@ -199,6 +199,7 @@ final class Messages
         }
 
         // save the message to the db
+        //TODO: add status column
         $sql = "INSERT INTO webtexting_messages (message_uuid, extension_uuid, domain_uuid, start_stamp, from_number, to_number, group_uuid, message, content_type, direction) VALUES (:message_uuid, :extension_uuid, :domain_uuid, NOW(), :from, :to, :group_uuid, :body, :content_type, :direction)";
         $parameters['message_uuid'] = $messageUUID;
         $parameters['extension_uuid'] = $extensionUUID;

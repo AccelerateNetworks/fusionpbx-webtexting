@@ -32,7 +32,7 @@ export default {
                     <span class='menu-name' >{{
                         this.name }}</span>
 
-                    <span class='menu-last-message' >{{
+                    <span class='menu-last-item' >{{
                         this.description }}</span>
                 </div>
 
@@ -51,14 +51,7 @@ export default {
     color: black;
 }
 
-.timestamp {
-    grid-column-start: 3;
-    grid-column-end: 3;
-    grid-row: 1;
-    justify-self: end;
-}
-
-.menu-last-message {
+.menu-last-item {
     color: darkgray;
     grid-row-start: 2;
     grid-column: 1;
@@ -67,43 +60,14 @@ export default {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.new-messages{
-    grid-row:2;
-    grid-column: 3;
-    display: inline-block;
-    justify-content: right;
-    justify-self: right;
-}
-.new-message-alert-dot {    
-         border-radius: 50%;
-         -moz-border-radius: 50%;
-         -webkit-border-radius: 50%;
-         color: #ffffff;
-         display: inline-block;
-         font-weight: bold;
-         line-height: 22px;
-         margin-right: 1.5rem;
-         text-align: center;
-         width: 22px;
- 
- }
- .dot:hover{
-     color:#fff;
- }
-
-.timestamp.activeMenu {
-    color: white;
-}
 
 .menu-name.activeMenu {
     color: white;
 }
 
-.menu-last-message.activeMenu {
+.menu-last-item.activeMenu {
     color: white;
 }
-
-
 
 .activeMenu {
     color: white;

@@ -1,7 +1,7 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
 import ThreadList from '../ThreadList/ThreadList.vue';
-import { ThreadPreviewInterface } from '../ThreadPreview/ThreadPreview.vue';
+import { ThreadPreviewData } from '../ThreadPreview/ThreadPreview.vue';
 import moment from 'moment';
 import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
@@ -24,7 +24,7 @@ export default {
         username: String,
         threads: Array<Object>,
         extensionUUID: String,
-        threadPreviews: Map<String, ThreadPreviewInterface>,
+        threadPreviews: Map<String, ThreadPreviewData>,
         multipleWebTextingExtensions: Boolean,
     },
     computed: {

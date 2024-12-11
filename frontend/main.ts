@@ -1,5 +1,5 @@
 import {  createApp } from 'vue';
-import {ThreadPreviewInterface} from 'components/ThreadPreview/ThreadPreview.vue';
+import {ThreadPreviewData} from 'components/ThreadPreview/ThreadPreview.vue';
 import {createWebHistory, createRouter, RouteRecordRaw, RouterViewProps, RouterView} from 'vue-router';
 import {router} from './routes';
 import { RunSIPConnection } from './lib/SIP';

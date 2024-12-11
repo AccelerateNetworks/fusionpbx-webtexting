@@ -2,10 +2,10 @@ import { Moment } from 'moment';
 import { reactive } from 'vue'
 import { CPIM } from './CPIM';
 import mitt from 'mitt';
-import { ThreadPreviewInterface } from '../components/ThreadPreview/ThreadPreview.vue';
+import  ThreadPreviewData  from '../components/ThreadPreview/ThreadPreview.vue';
 
 type ConversationData = Record<string,Array<MessageData>>;
-type PreviewData = Map<String, ThreadPreviewInterface>;
+type PreviewData = Map<String, ThreadPreviewData>;
 type ThreadChangePayload = {
   key: String, 
 
@@ -26,6 +26,7 @@ type MessageData = {
     to: string;
     body?: string;
     cpim?: CPIM;
+    extensionUUID?: string;
 }
 //what do we do when we need to add a thread to threadlist
 type GlobalState = {
@@ -42,7 +43,7 @@ const state = reactive<GlobalState>({
     conversations:  {},
     connectivityStatus: 'loading',
     connected: false,
-    previews: null,
+    previews:         new Map<String,  ThreadPreviewData>(),
     page:0,
     oldestMessage: null
 });
@@ -91,17 +92,49 @@ function addThread(key:string, message?:MessageData){
         if(!message.id){
             message.id = message.message_uuid;
         }
+        console.log(message);
         const newConversation = Array<MessageData>(message);
         console.log(`new messages to add to new conversation ${newConversation}`);
         state.conversations[key] = newConversation;
         console.log(`adding conversation with message ${message}`)
+
+        //this is where we add a ThreadPreview for a new outgoing message
+        //TODO: refactor to allow MMS messages on new message
+        if(message.direction==='outgoing' && message.extensionUUID){
+            const newConversationLink: string=`thread.php?extension_uuid=${message.extensionUUID}&number=${message.to}`;
+            const newOutgoingPreview: ThreadPreviewData = {
+                displayName: message.to,
+                bodyPreview: message.body,
+                link: newConversationLink,
+                timestamp: message.timestamp.toISOString(true),
+                remoteNumber: message.to,
+                ownNumber: message.from,        
+
+            }
+            addPreview(newOutgoingPreview);
+        }
+        //new inbound messages have no message.to somehow
+        else if(message.direction==='incoming' && !message.to){
+            const newConversationLink: string=`thread.php?extension_uuid=${message.extensionUUID}&number=${message.from}`;
+            const newIncomingPreview: ThreadPreviewData = {
+                displayName: message.from,
+                bodyPreview: message.body,
+                link: newConversationLink,
+                timestamp: message.timestamp.toISOString(true),
+                remoteNumber: message.from,
+                ownNumber: message.to,        
+
+            }
+            addPreview(newIncomingPreview);
+        }
+        
     }
     else{
         state.conversations[key] = new Array<MessageData>();
         console.log(`adding conversation without message`)
     }
 }
-function addPreview(preview : ThreadPreviewInterface){
+function addPreview(preview : ThreadPreviewData){
     //console.log(preview)
     const conversationKey:string = preview.groupUUID ? preview.groupUUID : preview.remoteNumber;
     if(state.previews){
@@ -115,7 +148,7 @@ function addPreview(preview : ThreadPreviewInterface){
         }
     }
     else{   //first add also creates the map
-        state.previews = new Map<String,  ThreadPreviewInterface>();
+        state.previews = new Map<String,  ThreadPreviewData>();
         state.previews.set(conversationKey, preview);
     }
 }

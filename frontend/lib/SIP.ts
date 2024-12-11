@@ -99,7 +99,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 //I believe this is where we need to target to add auto updatign threadlist
                 let direction = 'incoming';
                 let originalTo = message.request.getHeader("X-Original-To");
-                //console.log(`Message requsetfrom ${message.request.from.uri.user}`)
+                console.log(`Message requsetfrom ${message.request.from.uri.user}`)
                 if (message.request.from.uri.user == ownNumber) {
                     //console.log("our own message mirrored back to us: ", message.request);
                     direction = 'outgoing'; 
@@ -248,7 +248,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         const response = await messager.message();
         addMessage(message.to,m);
         
-        //console.log(response);
+        console.log(response);
         //updateLastMessage goes here?
         //emitter.emit('scroll-to-bottom');
     });

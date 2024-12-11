@@ -55,51 +55,60 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         
        // console.log(params)
         const response: BackfillResponse = await fetch('/app/webtexting/messages.php?' + new URLSearchParams(params).toString()).then(r => r.json());
-        
-        console.log("received", response.messages.length, "message from backlog");
-        for (let i = 0; i < response.messages.length; i++) {
-            let m = response.messages[i];
-            //console.log(m)
-            switch (m.content_type) {
-                case "text/plain":
-                    insertMessageInHistory(remoteNumber,{
-                        direction: m.direction,
-                        contentType: m.content_type,
-                        timestamp: moment.utc(m.start_stamp),
-                        id: m.message_uuid,
-                        from: m.from_number,
-                        to: m.to_number,
-                        body: m.message,
-                    });
-                    break;
-                case "message/cpim":
-                    if(group){
-                        key = group;
-                    }                    
-                    else{
-                        key = remoteNumber;
-                    }
-                    //console.log(`cpim ${m.message}`);
-                    insertMessageInHistory(key,{
-                        direction: m.direction,
-                        contentType: m.content_type,
-                        timestamp: moment.utc(m.start_stamp),
-                        id: m.message_uuid,
-                        from: m.from_number,
-                        to: m.to_number,
-                        cpim: CPIM.fromString(m.message),
-                    });
-                    break;
+        console.log("received", response.messages, "as backlog");
+        if(response.messages){
+            console.log("received", response.messages.length, "message from backlog");
+            for (let i = 0; i < response.messages.length; i++) {
+                let m = response.messages[i];
+                //console.log(m)
+                switch (m.content_type) {
+                    case "text/plain":
+                        insertMessageInHistory(remoteNumber,{
+                            direction: m.direction,
+                            contentType: m.content_type,
+                            timestamp: moment.utc(m.start_stamp),
+                            id: m.message_uuid,
+                            from: m.from_number,
+                            to: m.to_number,
+                            body: m.message,
+                        });
+                        break;
+                    case "message/cpim":
+                        if(group){
+                            key = group;
+                        }                    
+                        else{
+                            key = remoteNumber;
+                        }
+                        //console.log(`cpim ${m.message}`);
+                        insertMessageInHistory(key,{
+                            direction: m.direction,
+                            contentType: m.content_type,
+                            timestamp: moment.utc(m.start_stamp),
+                            id: m.message_uuid,
+                            from: m.from_number,
+                            to: m.to_number,
+                            cpim: CPIM.fromString(m.message),
+                        });
+                        break;
+                }
             }
+        
+
+            fetching = false;
+            //console.log('backfill request complete');
+
+            if (response.messages.length == 0) {
+                emitter.emit('conversation-fully-backfilled');
+            }
+            
         }
-
-        fetching = false;
-        //console.log('backfill request complete');
-
-        if (response.messages.length == 0) {
+        else{
+            console.log("no messages found for ", params);
             emitter.emit('conversation-fully-backfilled');
         }
         emitter.emit('backfill-complete');
+
     } catch (e) {
         fetching = false;
         console.log('backfill error:', e);

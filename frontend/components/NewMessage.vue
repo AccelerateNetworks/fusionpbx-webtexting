@@ -9,6 +9,7 @@ export default {
     data() {
         return {
             number: '',
+            extensionUUID: this.$route.query.extension_uuid
         }
     },
     methods:{
@@ -70,7 +71,7 @@ export default {
                 <br>
                 <br>
                 <label for="new-thread-number">Outbound Number must include Country Code and Area Code:</label>
-                <SendBox :remoteNumber="number" :ownNumber="ownNumber" location="New-Message"/>    
+                <SendBox :remoteNumber="number" :ownNumber="ownNumber" location="New-Message" :extensionUUID="this.extensionUUID"/>    
             </div>
         </div>
    
