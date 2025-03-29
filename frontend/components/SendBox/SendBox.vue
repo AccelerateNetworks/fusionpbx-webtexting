@@ -393,7 +393,7 @@ export default {
             </div>
         </div>
         <div class="sendbox ">
-            <textarea maxlength="160" rows="3" class="textentry" autofocus="true" @keypress="keypress"
+            <textarea maxlength="1600" rows="5" class="textentry text-break" autofocus="true" @keypress="keypress"
                 v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste" name="text-message-entry-box"></textarea>
 
             <div class="btn-group align-middle dropup">
@@ -418,7 +418,7 @@ export default {
 
         </div>
         <div class="char-counter-box">
-            <div class="char-counter-display">{{ enteredText.length }} / 160</div>
+            <div class="char-counter-display">{{ enteredText.length }} / 1600</div>
         </div>
     </div>
 </template>

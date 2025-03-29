@@ -1,4 +1,4 @@
-import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions } from 'sip.js';
+import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions, MessagerMessageOptions,OutgoingRequestDelegate, IncomingResponse } from 'sip.js';
 import { CPIM } from './CPIM';
 import { state, emitter, MessageData, addMessage } from './global';
 import moment from 'moment';
@@ -236,19 +236,41 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         //console.log(remoteURI)
         let options: MessagerOptions = {extraHeaders: []};
         if(message.id) {
-            //console.log(message.id)
+        //    console.log(message.id)
             options.extraHeaders.push("X-Message-ID: " + message.id);
         }
         const messager = new Messager(userAgent, remoteURI, message.body, message.contentType, options);
         //console.log(`Messager: `);
         //console.log(messager);
         //console.log(userAgent)
-       
 
-        const response = await messager.message();
+        //these only matter if there are SIP side issues
+        //this is not for sms.callpipe issues!
+        const delFuncs:OutgoingRequestDelegate={
+            onAccept: (response:IncomingResponse):void =>{
+                console.log("200 Accept")
+                console.log(response);
+                emitter.emit("SIP SENT",response)
+                //console.log("sip message sent");
+            },
+            onReject:(response: IncomingResponse):void =>{
+                console.log("400 reject")
+                console.log(response);
+                //console.log("sip message not sent");
+                emitter.emit("SIP REJECT",response)
+
+            },
+        }
+       const messageOptions:MessagerMessageOptions={
+            requestDelegate: delFuncs,
+        }
+       
+        //send message
+        const response = await messager.message(messageOptions);
+        //add message to state
         addMessage(message.to,m);
         
-        console.log(response);
+        //console.log(response);
         //updateLastMessage goes here?
         //emitter.emit('scroll-to-bottom');
     });

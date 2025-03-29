@@ -74,7 +74,7 @@ final class Messages
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
         // store message in the database
-        $dedupeID = Messages::AddMessage('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
+        $dedupeID = Messages::Save('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
         if ($body instanceof CPIM) {
@@ -124,7 +124,7 @@ final class Messages
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
-        Messages::AddMessage('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
+        Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
         if ($body instanceof CPIM) {
@@ -185,7 +185,7 @@ final class Messages
         return implode(",", $membersArray);
     }
 
-    public static function AddMessage(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $groupUUID=null): string
+    public static function Save(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $groupUUID=null): string
     {
         $db = new database;
 

@@ -209,8 +209,8 @@ export default {
 
 <style>
 .thread-name {
-    grid-column-start: 2;
-    grid-column-end: 2;
+    grid-column-start: 1;
+    grid-column-end: 4;
     grid-row: 1;
     justify-self: start;
     color: black;

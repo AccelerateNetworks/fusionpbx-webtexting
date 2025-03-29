@@ -37,7 +37,7 @@ if (!$ownNumber) {
 }
 //this is for Limiting the list of threads on initial load
 
-$QUERY_LIMIT = 20;
+$QUERY_LIMIT = 25;
 
 
 $sql = 'SELECT * FROM webtexting_threads WHERE domain_uuid = :domain_uuid AND local_number = :local_number ';

@@ -11,6 +11,7 @@ export default {
             timestampText: "-",
             interval: null,
             loaded: false,
+            status: "-1",
         }
     },
     props: {
@@ -29,7 +30,7 @@ export default {
         mode:{
             type: String,
             required: true
-        }
+        },
     },
     methods: {
         bumpTimestamp() {
@@ -96,7 +97,7 @@ export default {
         <div class="author" :class="this.message.direction">{{ this.lastSender == this.message.from ? "" :
             this.message.from }}</div>
         <div class="message" :class="this.message.direction">
-            <p class="message-body" v-if="this.text">{{ this.text }}</p>
+            <p class="message-body text-break" v-if="this.text">{{ this.text }}</p>
             <p class="message-body" v-if="this.embedImage" ref="embed">
                 <a :href="embedImage" target="_blank">
                     <img class="message-body-inline-media" :src="embedImage" v-on:load="emitLoaded" />

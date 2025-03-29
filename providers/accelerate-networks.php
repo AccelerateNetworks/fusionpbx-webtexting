@@ -1,9 +1,21 @@
 <?php
-
+session_start();
 require_once "root.php";
 require_once "resources/require.php";
 require_once __DIR__."/../vendor/autoload.php";
-
+//put db call to grab all the c redentials we need for DO, S3, and callpipe.
+$sql= "SELECT default_setting_subcategory, default_setting_value FROM v_default_settings  WHERE default_setting_subcategory='auth_secret' OR default_setting_subcategory='auth_email' OR default_setting_subcategory='mms_bucket' OR default_setting_subcategory='mms_bucket_endpoint' OR default_setting_subcategory='aws_access_key_id' OR default_setting_subcategory='aws_secret_key' OR default_setting_subcategory='acceleratenetworks_inbound_token'
+ORDER BY default_setting_subcategory DESC";
+$db = new database;
+$creds = $db->select($sql, 'all');
+if($creds){
+    $z=0;
+    foreach($creds as $cred){
+        $creds[$z] = $cred['default_setting_value'];
+        $_SESSION['webtexting'][$cred['default_setting_subcategory']]['text'] = $creds[$z];
+        $z++;
+    }
+}
 function incoming()
 {
     header("Content-Type: application/json");

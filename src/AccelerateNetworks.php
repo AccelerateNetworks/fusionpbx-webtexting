@@ -1,6 +1,25 @@
 <?php
-//session_start();
 final class AccelerateNetworks {
+    private static function getCreds(){
+        if(isset($_SESSION['webtexting']['auth_email']) || isset($_SESSION['webtexting']['auth_secret'] )){
+            return 0;
+        }
+        else{
+            $sql = "SELECT default_setting_subcategory, default_setting_value FROM v_default_settings  WHERE default_setting_subcategory='auth_secret' OR default_setting_subcategory='auth_email' ORDER BY default_setting_subcategory DESC";
+            $db = new database;
+            $creds = $db->select($sql, 'all');
+            if ($creds) {
+                $z = 0;
+                foreach ($creds as $cred) {
+                    $creds[$z] = $cred['default_setting_value'];
+                    $z++;
+                }
+            }
+            $_SESSION['webtexting']['auth_email']['text'] = $creds[1];
+            $_SESSION['webtexting']['auth_secret']['text'] = $creds[0];
+        }        
+        return 1;
+    }
     static function GetInboundSMSRouting(string $number) {
         $client = new GuzzleHttp\Client();
         AccelerateNetworks::ValidateAccessToken();
@@ -37,6 +56,7 @@ final class AccelerateNetworks {
 
     //This function hits toms ops.callpipe.com for verifying auth
     static function ValidateAccessToken(){
+        AccelerateNetworks::getCreds();
         //Pre-Conditions
         //unset($_SESSION['webtexting']['acceleratenetworks_api_key']['text']);
         //$_SESSION['webtexting']['accessTokenExpiration'] =time() -140;

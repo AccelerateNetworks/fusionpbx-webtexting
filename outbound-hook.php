@@ -1,23 +1,29 @@
 <?php
+require_once __DIR__."/vendor/autoload.php";
+require_once "root.php";
+require_once "resources/require.php";
+//require_once "resources/check_auth.php";
+require_once "src/AccelerateNetworks.php";
+
+$session_id = session_id();
+$status_of_session = session_status();
 if ($_SERVER['REMOTE_ADDR'] != "127.0.0.1") {
     error_log("attempt to forge outbound message from ".$_SERVER['REMOTE_ADDR']);
     http_response_code(401);
     die();
 }
 
-require_once "root.php";
-require_once "resources/require.php";
-require_once __DIR__."/vendor/autoload.php";
+
 
 $event = json_decode(file_get_contents('php://input'));
-if (!$event) {
-    error_log("failed to parse request body: ".$postbody);
-    http_response_code(400);
-    die();
-}
+// if (!$event) {
+//     error_log("failed to parse request body: ".$postbody);
+//     http_response_code(400);
+//     die();
+// }
 
 $domain_name = $event->{'from_host'};
-$extension = $event->{'from_user'};
+$extension = $event->{'from_user'}; 
 $to = $event->{'to_user'};
 $contentType = $event->type;
 $body = urldecode($event->_body);
@@ -36,7 +42,17 @@ unset($parameters);
 $from = $destination['phone_number'];
 $domainUUID = $destination['domain_uuid'];
 $extensionUUID = $destination['extension_uuid'];
-
+$sql= "SELECT default_setting_subcategory, default_setting_value FROM v_default_settings  WHERE default_setting_subcategory='auth_secret' OR default_setting_subcategory='auth_email' OR default_setting_subcategory='mms_bucket' OR default_setting_subcategory='mms_bucket_endpoint' OR default_setting_subcategory='aws_access_key_id' OR default_setting_subcategory='aws_secret_key' OR default_setting_subcategory='acceleratenetworks_inbound_token' 
+ORDER BY default_setting_subcategory DESC";
+$db = new database;
+$creds = $db->select($sql, 'all');
+if($creds){
+    $z=0;
+    foreach($creds as $cred){
+        $creds[$z] = $cred['default_setting_value'];
+        $z++;
+    }
+}
 // error_log("sending outbound message from $from ($extension@$domain_name) to $to: $body");
 
 $provider = "accelerate-networks"; // TODO: make this customizable

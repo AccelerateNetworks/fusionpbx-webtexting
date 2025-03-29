@@ -29,6 +29,7 @@ if (!$extension) {
       } else {
           message::add("error saving changes to template.", 'negative');
       }
+      unset($parameters);
       echo(json_encode($templates));
       return json_encode($templates);
 //       unset($parameters);

@@ -1,5 +1,8 @@
 <?php
+if (!isset($_SESSION)) { session_start(); }
+
 use GuzzleHttp\Client;
+
 require_once "root.php";
 require_once "resources/require.php";
 require_once "resources/check_auth.php";

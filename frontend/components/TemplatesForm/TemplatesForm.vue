@@ -47,7 +47,7 @@ export default {
             event.preventDefault();
             console.log(this.formInputs)
             if(this.formInputs.templateName  || this.formInputs.body ){
-                if(this.formInputs.body.length>160){
+                if(this.formInputs.body.length>1600){
                     console.error('Error Submitting Form. Quick Response templates must contain less than 160 characters')
                 }
                 else if( this.formInputs.templateName.length > 0 && this.formInputs.body.length > 0){
@@ -166,7 +166,7 @@ export default {
                     <label for="ENABLED_CHECKBOX"></label> 
 
                 </div>
-                <div class="mt-form-row">
+                <div class="mt-form-row mb-3">
                     <div class="category-desc">Description</div>
                     <div class="area-for-text"> <textarea class='form-control' v-model="formInputs.description"></textarea></div>
                 </div>

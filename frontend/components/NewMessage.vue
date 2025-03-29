@@ -60,17 +60,17 @@ export default {
                             <router-link class="back-link fa fa-arrow-left btn btn-large " :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!"></router-link>
                         </div>
                         <div>
-                            <div class="new-message-headline"><h6>New Conversation</h6></div>
+                            <div class="new-message-headline"><h6 class="mb-0">New Conversation</h6></div>
 
                         </div>
                     </div>
                 </div>
-                <span class='new-thread-message'>Enter Number:
-                    <input type="tel" size="11" min="10000000000" max="19999999999" @paste="this.numberPaste" v-model="number" id="new-thread-number" name="new-thread-number" placeholder="12065551212" />
-                </span>
-                <br>
-                <br>
-                <label for="new-thread-number">Outbound Number must include Country Code and Area Code:</label>
+                <div class="form-group pt-1">
+                    <label for="new-thread-number" class='new-thread-message'>Enter Number:</label>
+                        <input class='form-control form-control-lg' type="tel" size="11" min="10000000000" max="19999999999" @paste="this.numberPaste" v-model="number" id="new-thread-number" name="new-thread-number" placeholder="12065551212" />
+                        <label for="new-thread-number">Outbound Number must include Country Code and Area Code.</label>
+
+                    </div>
                 <SendBox :remoteNumber="number" :ownNumber="ownNumber" location="New-Message" :extensionUUID="this.extensionUUID"/>    
             </div>
         </div>
