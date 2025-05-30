@@ -58,5 +58,9 @@ export default {
     </div>
 </template>
 <style scoped>
-
+.alert-box{
+    position:fixed !important;
+    width:100%;
+    justify-content: flex-end;
+}
 </style>
