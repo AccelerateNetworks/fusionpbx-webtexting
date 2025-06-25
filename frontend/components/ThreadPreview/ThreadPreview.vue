@@ -2,7 +2,7 @@
 import Conversation from '../conversation/Conversation.vue';
 import { MessageData, emitter, ThreadChangePayload } from '../../lib/global'
 
-export type ThreadPreviewData = {
+type ThreadPreviewData = {
     displayName: {
         type: String,
     },

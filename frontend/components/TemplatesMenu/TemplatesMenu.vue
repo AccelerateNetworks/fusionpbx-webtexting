@@ -42,7 +42,7 @@ export default {
                 console.log(this.templatePreviews[value].template_uuid);
                 if(this.templatePreviews[value].template_uuid===targetUUID){
                     this.templatePreviews.splice(index,1);
-                    console.log("match found removing template from list")
+                    //console.log("match found removing template from list")
                 }
                 index++;
             }
@@ -57,21 +57,21 @@ export default {
     mounted() {
         emitter.emit("load-templates",{});
         emitter.on("backfill-template-complete",(results:Array<loadTemplateResponse>) =>{
-            console.log("backfilled templates");
-            console.log(results);
+            //console.log("backfilled templates");
+            //console.log(results);
             let typedTemplatesArray= new Array<TemplatePreviewInterface>;
             for( let x = 0 ; x < results.length ; x++){
-                console.log(results[x]);
+                //console.log(results[x]);
                 let entry: TemplatePreviewInterface = this.buildTemplatePreview(results[x]);
                 
-                console.log(entry);
+                //console.log(entry);
                 typedTemplatesArray.push(entry);
             }
             this.templatesLoaded = true;
             this.templatePreviews = typedTemplatesArray;
         });
         emitter.on('delete-template-complete',(temp:string) => {
-            console.log( temp);
+            //console.log( temp);
             this.removeTemplate(temp);
         });        
     },

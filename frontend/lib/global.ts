@@ -51,8 +51,8 @@ const state = reactive<GlobalState>({
 const emitter = mitt();
 
 function addMessage(key:string, message: MessageData) {
-    console.log("trying to add message with key: " + key);
-    console.log(message)
+    //console.log("trying to add message with key: " + key);
+    //console.log(message)
     emitter.emit("update-last-message",message)
 
     if(state.conversations[key]){
@@ -63,15 +63,15 @@ function addMessage(key:string, message: MessageData) {
             if(messages){
                 for(let m of messages) {
                     if (m.id == message.id) {
-                        console.log("not re-inserting message", message.id);
+                        //console.log("not re-inserting message", message.id);
                         return;
                     }
                 }
-                console.log("inserting new message", message.id);
+                //console.log("inserting new message", message.id);
             }
             
         } else {
-            console.log("adding message with no ID!", message);       
+            //console.log("adding message with no ID!", message);       
         }
         emitter.emit('scroll-to-bottom'); 
         emitter.emit('new-message-ingested',message);
@@ -131,7 +131,7 @@ function addThread(key:string, message?:MessageData){
     }
     else{
         state.conversations[key] = new Array<MessageData>();
-        console.log(`adding conversation without message`)
+        //console.log(`adding conversation without message`)
     }
 }
 function addPreview(preview : ThreadPreviewData){
@@ -142,7 +142,7 @@ function addPreview(preview : ThreadPreviewData){
             //don't add duplicates
         }
         else{
-            console.log(Date.parse(preview.timestamp))
+            //console.log(Date.parse(preview.timestamp))
             updateOldestMessage(Date.parse(preview.timestamp));
             state.previews.set(conversationKey,preview);
         }

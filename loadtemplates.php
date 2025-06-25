@@ -16,7 +16,7 @@ foreach ($_SESSION['user']['extension'] as $ext) {
 
 if (!$extension) {
     http_response_code(400);
-    echo json_encode(array("error" => "invalid or unauthorized extension"));
+    echo json_encode(array("error" => "invalid or unauthorized extension","status"=>http_response_code(400)));
     die();
 }
     $database = new database;
@@ -25,9 +25,11 @@ if (!$extension) {
          $parameters['domain_uuid'] = $domain_uuid;
          $templates = $database->select($sql, $parameters, 'all');
       if($templates){
-          message::add("templates loaded.");
+          //message::add("templates loaded.");
       } else {
-          message::add("error saving changes to template.", 'negative');
+          //message::add("error saving changes to template.", 'negative');
+          http_response_code(400);
+          return $templates;
       }
       unset($parameters);
       echo(json_encode($templates));

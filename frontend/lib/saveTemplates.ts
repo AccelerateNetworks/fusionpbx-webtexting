@@ -23,12 +23,22 @@ export async function saveTemplate(query: saveTemplateQuery){
         //await fetch 
     }
     catch(e){
-        console.log(e);
-        alert("Failed to add template. Please contact Accelerate Networks Support.");
+        console.log(e,'Failed to add template. Please contact Accelerate Networks Support.');
+        //alert("Failed to add template. Please contact Accelerate Networks Support.");
+        temp.message="Failed to add template. Please contact Accelerate Networks Support.";
+        emitter.emit("template-save-failed",temp);
     }
     finally{
-        emitter.emit("template-save-complete",temp)
-        console.log("finally done")
+        if(temp.status==200){
+            temp.action = 'Template Saved!'
+            emitter.emit("template-save-complete",temp)
+            console.log("finally done")
+        }
+        else{
+            temp.message="Failed to save template. Please contact Accelerate Networks support.";            
+            emitter.emit("template-save-failed",temp);
+        }
+        
     }
     
 }

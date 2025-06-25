@@ -38,11 +38,13 @@ if($_GET['template_uuid']){
         $parameters['template_enabled'] = $_GET['enabled'];
         $parameters['template_desc'] = $_GET['description'];
         $parameters['template_name'] = $_GET['templateName'];
-
-        if($database->execute($sql, $parameters)) {
-            message::add("Template Added.");
+        $response = $database->execute($sql, $parameters);
+        if($response) {
+            //message::add("Template Added.");
         } else {
-            message::add("Error Creating Template.", 'negative');
+            //message::add("Error Creating Template.", 'negative');
+            http_response_code(400);
+            return $response;
         }
         unset($parameters);
     }
@@ -63,11 +65,18 @@ if($_GET['template_uuid']){
             $parameters['template_desc'] = $_GET['description'];
             $parameters['template_name'] = $_GET['templateName'];
         if($database->execute($sql, $parameters)) {
-            message::add("template edited.");
+            //message::add("template edited.");        
+            unset($parameters);
+
+            return "Template edited.";
         } else {
-            message::add("error saving changes to template.", 'negative');
+            //message::add("error saving changes to template.", 'negative');     
+            http_response_code(400);   
+            unset($parameters);
+
+            return "Changes to template not saved due to server error.";
+
         }
-        unset($parameters);
     }
 }
 else if(!$_GET['template_uuid']){

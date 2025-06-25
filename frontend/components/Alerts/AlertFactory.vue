@@ -15,7 +15,7 @@ export default {
     },
     mounted() {
         emitter.on('delete-template-failed', (payload:AlertData)=>{
-            console.log("failed to delete template make an alert about it.");
+            //console.log("failed to delete template make an alert about it.");
             payload.message = "failed to delete template make an alert about it.";
             payload.type='Error';
                         this.AddAlert(payload);
@@ -34,9 +34,11 @@ export default {
         emitter.on('group-rename-success', (payload)=>{
             console.log("Succesfully renamed group.");
                         this.AddAlert(payload);
-
         })
         emitter.on('template-save-complete', (payload)=>{
+            this.AddAlert(payload);
+        })
+        emitter.on('template-save-failed', (payload)=>{
             this.AddAlert(payload);
         })
     },

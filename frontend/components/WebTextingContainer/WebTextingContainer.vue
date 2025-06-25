@@ -13,6 +13,7 @@ import {loadTemplates, loadTemplateQuery} from '../../lib/loadTemplates';
 import { deleteTemplateQuery,deleteTemplate} from '../../lib/deleteTemplate';
 import {registerForwardAddress, registerForwardingRequest } from '../../lib/messageForwarding';
 import {computePosition} from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.11/+esm';
+import AlertFactory from '../Alerts/AlertFactory.vue';
 
 
 
@@ -43,7 +44,7 @@ export default {
             return newThreadSelected;
         },
     },
-    components: { Conversation, ThreadList },
+    components: { Conversation, ThreadList, AlertFactory },
     data() {
         let contactEditLink = null;
         let title = '';
@@ -271,7 +272,7 @@ The blank space should notify the user that they can select a thread to display 
 <template>
     <RouterView>
 
-
+        <AlertFactory />
         <div id="WEB_TEXT_ROOT">
         <div v-if="smallScreen" class="pull-to-refresh"><div class="spinner-border"></div></div>
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"

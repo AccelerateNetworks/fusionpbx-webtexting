@@ -16,7 +16,7 @@ foreach ($_SESSION['user']['extension'] as $ext) {
 
 if (!$extension) {
     http_response_code(400);
-    echo json_encode(array("error" => "invalid or unauthorized extension"));
+    echo json_encode(array("error" => "invalid or unauthorized extension", "status"=>http_response_code(400)));
     die();
 }
     $database = new database;
@@ -28,6 +28,7 @@ if (!$extension) {
       if($deleted){
           //message::add("template deleted.");
       } else {
+          http_response_code(400);
           message::add("error deleting template.", 'negative');
       }
       echo(json_encode($deleted));

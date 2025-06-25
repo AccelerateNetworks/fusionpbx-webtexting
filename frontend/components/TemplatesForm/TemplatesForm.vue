@@ -89,7 +89,7 @@ export default {
                 enabled:this.$route.query.template_enabled,
                 description:this.$route.query.template_description,
             }
-            alert("Template Saved.")
+            //alert("Template Saved.")
         })
     },
     
