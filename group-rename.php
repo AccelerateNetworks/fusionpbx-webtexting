@@ -28,14 +28,13 @@ if($_POST['action']) {
       unset($parameters);
       if($response) {
           //message::add("group renamed");
-          return $response;
+          //return $response;
       } else {
           //message::add("error renaming group", 'negative');
           http_response_code(400);
-          return $response;
+          //return $response;
       }
       
-  die();
   // redirect to the same page so the user's request to the page is a GET and refreshing doesn't re-run the action
   header("Location: /app/webtexting/threadlist.php?extension_uuid=".$_POST['extension_uuid']);
   die();
