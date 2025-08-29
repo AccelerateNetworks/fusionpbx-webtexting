@@ -38,26 +38,28 @@ export default{
                             <router-link class="fa fa-arrow-left btn btn-large align-middle" :to="`/menu.php`"
                                 @click="backArrowClickHandler" aria="Go Back to Settings Menu"></router-link>
     
-                            <div class="">
+                            <div>
                                 <h6 class="mb-0">Email Forwarding</h6>
                             </div>
-    
                         </div>
                     </div>
                 </div>
                     <div class="template-form align-content-center">
-                        <div class="mt-form-row">
+                        <div class="mt-form-row pt-1">
                             <label for="formSelect1">Select the number to register for Email forwarding.</label>
-                            <select id="formSelect1">
+                            <select class="custom-select" id="formSelect1">
                                 <option>{{this.$props.ownNumber}}</option>
                             </select>
                         </div>
                         <div class="mt-form-row">
-                            <div class="category-desc">Email Address to forward messages to.</div>
-                            <div class="area-for-text"> <textarea v-model="emailForwardFormInputs.emailAddress"></textarea></div>
-
+                            <label class="category-desc" for="emailInput">Email Address to forward messages to.</label>
+                            <div class="area-for-text input-group"> 
+                                <input type="email" class="form-control" id="emailInput" v-model="emailForwardFormInputs.emailAddress"></input>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" @click="submitEmailForwardingRegisterRequest">Submit</button>
+                                </div>
+                            </div>
                         </div>
-                        <button class="submit" @click="submitEmailForwardingRegisterRequest">Submit</button>
                     </div>
                     <p v-if="!selectedConvo" class="">  Forward new text messages to your Email</p>
                 </div>
