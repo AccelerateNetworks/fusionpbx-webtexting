@@ -396,7 +396,7 @@ export default {
             <textarea maxlength="1600" rows="5" class="textentry text-break" autofocus="true" @keypress="keypress"
                 v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste" name="text-message-entry-box"></textarea>
 
-            <div class="btn-group align-middle dropup">
+            <div class="btn-group align-middle dropup p-2">
                 <label v-if="location === 'Conversation'" for="attachment-upload" class="btn btn-attach">
                     <span v-if="location === 'Conversation'" class="fas fa-paperclip fa-fw"></span>
                 </label>
@@ -453,6 +453,8 @@ export default {
     resize: none;
     /* prevent the user from resizing the text box */
     flex-grow: 1;
+    font-size: 1rem;
+    padding: 0.5rem;
 }
 
 .btn-attach {
