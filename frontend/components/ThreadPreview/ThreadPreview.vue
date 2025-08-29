@@ -214,6 +214,7 @@ export default {
     grid-row: 1;
     justify-self: start;
     color: black;
+    font-size: 1rem;
 }
 
 .timestamp {
@@ -223,6 +224,7 @@ export default {
     grid-row: 1;
     justify-self: end;
     text-align: center;
+    font-size: 0.7rem;
 }
 
 .thread-last-message {

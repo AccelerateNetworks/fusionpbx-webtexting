@@ -335,7 +335,7 @@ export default {
                     aria="Go Back to threadlist!"></router-link>
             </div>
             <div class="m-auto">
-                <h6 class="m-auto">{{ title }}</h6>
+                <h5 class="m-auto">{{ title }}</h5>
             </div>
             <div class="justify-content-end">
                 <a v-if="contactEditLink" :href="contactEditLink" class="white btn btn-large" target="_blank">

@@ -152,11 +152,12 @@ export default {
 }
 
 .ts {
-    font-size: 7pt;
+    font-size: 0.7rem;
 }
 
 .message-body {
     margin: 0;
+    font-size: 1rem;
 }
 
 .message-body-inline-media {
