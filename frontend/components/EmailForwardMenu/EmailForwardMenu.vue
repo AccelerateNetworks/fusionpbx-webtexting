@@ -54,7 +54,7 @@ export default{
                         <div class="mt-form-row">
                             <label class="category-desc" for="emailInput">Email Address to forward messages to.</label>
                             <div class="area-for-text input-group"> 
-                                <input type="email" class="form-control" id="emailInput" v-model="emailForwardFormInputs.emailAddress"></input>
+                                <input type="email" class="form-control" id="emailInput" v-model="emailForwardFormInputs.emailAddress" />
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" @click="submitEmailForwardingRegisterRequest">Submit</button>
                                 </div>
