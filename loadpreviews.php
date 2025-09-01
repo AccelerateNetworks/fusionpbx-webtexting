@@ -144,6 +144,7 @@ if($conversations){
                         $threadPreviews[$i]['ownNumber'] = $ownNumber;
                         $threadPreviews[$i]['timestamp'] = $group['last_message'];
                         $threadPreviews[$i]['displayName'] = $display_name;
+                        $threadPreviews[$i]['remoteNumber'] = null;
                 }
                 $group= null;
         }
@@ -201,7 +202,9 @@ if($conversations){
                         if (sizeof($name_parts) > 0) {
                             $threadPreviews[$i]['displayName'] = implode(" ", $name_parts);
                             $contacts[$solo['phone_number']] = $threadPreviews[$i]['displayName'] ;
-                        }    
+                        }
+                        $threadPreviews[$i]['groupUUID'] = null;
+                        $threadPreviews[$i]['groupMembers'] = null;    
                         $solo= null;            
                 }
                 
@@ -229,6 +232,8 @@ if($conversations){
                                 $threadPreviews[$i]['link'] = "thread.php?extension_uuid=".$extension['extension_uuid']."&number=".$result[0]['remote_number'];
                                 $threadPreviews[$i]['ownNumber'] = $ownNumber;
                                 $threadPreviews[$i]['timestamp'] = $result[0]['last_message'];
+                                $threadPreviews[$i]['groupUUID'] = null;
+                                $threadPreviews[$i]['groupMembers'] = null; 
                             }
                         }
                     }
@@ -263,7 +268,7 @@ if($conversations){
     
         }
         $last_message = false;
-        if($preview['threadUUID'] ){
+        if($preview['threadUUID']){
         
             $sql = "SELECT timestamp from webtexting_threads_last_seen WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND thread_uuid = :thread_uuid;";
             $parameters['extension_uuid'] = $extension['extension_uuid'];
@@ -294,6 +299,8 @@ if($conversations){
                     $threadPreviews[$i]['newMessages'] = $count_since_last_seen['count'];
                 }
                 $count_since_last_seen = 0;
+            } else {
+                $threadPreviews[$i]['newMessages'] = 0;
             }
             $last_seen_stamp = false;
             
