@@ -52,7 +52,7 @@ const getMessages = async (queryParams: MessageQuery) => {
             let m = response.messages[i];
             m.timestamp = moment.utc(m.start_stamp);
             //console.log(m);
-            switch (m.content_type) {
+          switch (m.content_type) {
                 case "message/cpim":
                     m.cpim = CPIM.fromString(m.message)
             }

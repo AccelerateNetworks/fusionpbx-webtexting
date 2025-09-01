@@ -78,7 +78,7 @@ export default {
     padding: 0.5625em;
     display: grid;
     grid-template-rows: auto;
-    grid-template-columns: 0 auto auto;
+    grid-template-columns: auto auto;
 }
 .tr_replace{
     max-height: 6rem;

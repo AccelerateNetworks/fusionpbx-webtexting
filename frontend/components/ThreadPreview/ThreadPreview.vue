@@ -210,7 +210,7 @@ export default {
 <style>
 .thread-name {
     grid-column-start: 1;
-    grid-column-end: 4;
+    grid-column-end: 1;
     grid-row: 1;
     justify-self: start;
     color: black;
@@ -219,9 +219,9 @@ export default {
 
 .timestamp {
     display:inline-grid;
-    grid-column-start: 3;
-    grid-column-end: 5;
-    grid-row: 1;
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row: 2;
     justify-self: end;
     text-align: center;
     font-size: 0.7rem;
@@ -231,16 +231,16 @@ export default {
     color: darkgray;
     grid-row-start: 2;
     grid-column-start: 1;
-    grid-column-end: 3;
+    grid-column-end: 1;
     justify-self: start;
     overflow:hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    max-width:235px;
+    max-width:200px;
 }
 .new-messages{
-    grid-row:2;
-    grid-column: 4;
+    grid-row:1;
+    grid-column: 2;
     display: inline-block;
     justify-content: right;
     justify-self: right;
@@ -284,8 +284,8 @@ export default {
     border-radius: 1em;
     padding: 0.5625em;
     display: grid;
-    grid-template-rows: auto;
-    grid-template-columns: 0 minmax(0,75vw) 5vw 10vw;
+    grid-template-rows: auto auto auto;
+    grid-template-columns: 65% 35%;
 }
 .tr_replace{
     max-height: 6rem;
@@ -326,7 +326,12 @@ export default {
 }
 @media screen and (width <=700px) {
     .thread-last-message{
-        max-width: 70vw;
+        max-width: 65vw;
+    }    
+}
+@media screen and (width <=400px) {
+    .thread-last-message{
+        max-width: 60vw;
     }    
 }
 </style>
