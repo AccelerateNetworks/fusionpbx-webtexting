@@ -28,7 +28,7 @@ let fetching = false;
 
 export async function backfillMessages(extensionUUID: string, remoteNumber?: string, group?: string) {
     if (fetching) {
-        console.log("skipping duplicate backfill request");
+        console.log("[backfill.backfillMessages] skipping duplicate backfill request");
         return;
     }
     fetching = true;
@@ -44,26 +44,26 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         }
         //if state.conversations[key] exists we have already backfilled at least once
         const stateMessages = state.conversations[key];
-        if(stateMessages){
+        if (stateMessages) {
             if (stateMessages.length > 0 && stateMessages[0].id) {
                 params.older_than = stateMessages[0].id;
             }
         }
-        else{
+        else {
 
         }
-        
-       // console.log(params)
+
+        // console.log(params)
         const response: BackfillResponse = await fetch('/app/webtexting/messages.php?' + new URLSearchParams(params).toString()).then(r => r.json());
-        console.log("received", response.messages, "as backlog");
-        if(response.messages){
-            console.log("received", response.messages.length, "message from backlog");
+        console.log("[backfill.backfillMessages] received", response.messages, "as backlog");
+        if (response.messages) {
+            console.log("[backfill.backfillMessages] received", response.messages.length, "message from backlog");
             for (let i = 0; i < response.messages.length; i++) {
                 let m = response.messages[i];
                 //console.log(m)
                 switch (m.content_type) {
                     case "text/plain":
-                        insertMessageInHistory(remoteNumber,{
+                        insertMessageInHistory(remoteNumber, {
                             direction: m.direction,
                             contentType: m.content_type,
                             timestamp: moment.utc(m.start_stamp),
@@ -74,14 +74,14 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                         });
                         break;
                     case "message/cpim":
-                        if(group){
+                        if (group) {
                             key = group;
-                        }                    
-                        else{
+                        }
+                        else {
                             key = remoteNumber;
                         }
                         //console.log(`cpim ${m.message}`);
-                        insertMessageInHistory(key,{
+                        insertMessageInHistory(key, {
                             direction: m.direction,
                             contentType: m.content_type,
                             timestamp: moment.utc(m.start_stamp),
@@ -93,7 +93,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                         break;
                 }
             }
-        
+
 
             fetching = false;
             //console.log('backfill request complete');
@@ -101,9 +101,9 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
             if (response.messages.length == 0) {
                 emitter.emit('conversation-fully-backfilled');
             }
-            
+
         }
-        else{
+        else {
             console.log("no messages found for ", params);
             emitter.emit('conversation-fully-backfilled');
         }
@@ -111,19 +111,19 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
 
     } catch (e) {
         fetching = false;
-        console.log('backfill error:', e);
+        console.log('[backfill.backfillMessages] backfill error:', e);
     }
 }
 
-export function insertMessageInHistory(key:string, message: MessageData) {
+export function insertMessageInHistory(key: string, message: MessageData) {
     //check for message in history
-    if(state.conversations[key]){
+    if (state.conversations[key]) {
         for (let i = 0; i < state.conversations[key].length; i++) {
             if (state.conversations[key][i].id == message.id) {
                 state.conversations[key][i] = message;
                 return;
             }
-    
+
             if (state.conversations[key][i].timestamp.isAfter(message.timestamp)) {
                 state.conversations[key].splice(i, 0, message);
                 return;
@@ -131,7 +131,7 @@ export function insertMessageInHistory(key:string, message: MessageData) {
         }
     }
     //add a new history if no history is found
-    else{
+    else {
         state.conversations[key] = new Array<MessageData>();
     }
     // no existing message matched, append to end    

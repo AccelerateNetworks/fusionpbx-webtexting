@@ -1,5 +1,5 @@
 export class CPIM {
-    headers: { [id: string]: string};
+    headers: { [id: string]: string };
     filename: string;
     fileSize: number;
     fileContentType: string;
@@ -9,11 +9,11 @@ export class CPIM {
 
     constructor(url?: string, contentType?: string) {
         this.headers = {};
-        if(url) {
+        if (url) {
             this.fileURL = url;
         }
 
-        if(contentType) {
+        if (contentType) {
             this.fileContentType = contentType;
         }
     }
@@ -29,22 +29,22 @@ export class CPIM {
         const doc = parser.parseFromString(parts[2], "application/xml");
 
         let fileSize = doc.querySelector('file-size');
-        if(fileSize) {
+        if (fileSize) {
             cpim.fileSize = Number(fileSize.textContent);
         }
 
         let filename = doc.querySelector('file-name');
-        if(filename) {
+        if (filename) {
             cpim.filename = filename.textContent;
         }
 
         let contentType = doc.querySelector('content-type');
-        if(contentType) {
+        if (contentType) {
             cpim.fileContentType = contentType.textContent;
         }
 
         let data = doc.querySelector('data');
-        if(data && data.getAttribute("url")) {
+        if (data && data.getAttribute("url")) {
             cpim.fileURL = data.getAttribute("url");
         }
 
@@ -62,13 +62,13 @@ export class CPIM {
         fileInfoElement.setAttribute('type', 'file');
         fileElement.appendChild(fileInfoElement);
 
-        if(this.fileURL) {
+        if (this.fileURL) {
             const dataElement = doc.createElement('data');
             dataElement.setAttribute('url', this.fileURL);
             fileElement.appendChild(dataElement);
         }
 
-        if(this.fileContentType) {
+        if (this.fileContentType) {
             const contentTypeElement = doc.createElement('content-type');
             contentTypeElement.textContent = this.fileContentType;
             fileElement.appendChild(contentTypeElement);
@@ -85,10 +85,10 @@ export class CPIM {
         serialized += "\n";
 
         serialized += 'Content-Type: application/vnd.gsma.rcs-ft-http+xml\n';
-        serialized += 'Content-Length: '+body.length+'\n\n';
+        serialized += 'Content-Length: ' + body.length + '\n\n';
         serialized += body;
 
-        console.log("serialized CPIM", this, "->", serialized);
+        console.log("[CPIM] Serialized CPIM", this, "->", serialized);
 
         return serialized;
     }
@@ -96,7 +96,7 @@ export class CPIM {
     private addHeaders(headers: string) {
         for (const line of headers.split("\n")) {
             let parts = line.split(":", 2);
-            if(parts.length < 2) {
+            if (parts.length < 2) {
                 continue;
             }
 
@@ -104,15 +104,15 @@ export class CPIM {
         }
     }
 
-    public async getTextBody(): Promise<string|null> {
-        if(this.fileContentType != "text/plain") {
+    public async getTextBody(): Promise<string | null> {
+        if (this.fileContentType != "text/plain") {
             return null;
         }
         let response = await fetch(this.fileURL)
         return await response.text()
     }
 
-    public getHeader(header: string): string|null {
+    public getHeader(header: string): string | null {
         const key = header.toLowerCase();
         return this.headers[key];
     }

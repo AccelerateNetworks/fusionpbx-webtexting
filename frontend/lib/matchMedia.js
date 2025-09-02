@@ -1,6 +1,6 @@
-import {ref} from 'vue';
+import { ref } from 'vue';
 
-export function useMatchMedia(query){
+export function useMatchMedia(query) {
 
     const match = window.matchMedia(query);
 

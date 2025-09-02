@@ -2,17 +2,17 @@ import { emitter, addPreview, QUERY_LIMIT } from './global';
 
 let fetching = false;
 
-type ThreadPreviewResponse={
-    remoteNumber?:String,
-    displayName:String,
-    contactEditLink:String,
-    threadUUID?:String,
-    groupUUID?:String,
-    groupMembers?:String[],
-    link:String,
-    ownNumber:String,
-    timestamp:String,
-    bodyPreview:String,
+type ThreadPreviewResponse = {
+    remoteNumber?: String,
+    displayName: String,
+    contactEditLink: String,
+    threadUUID?: String,
+    groupUUID?: String,
+    groupMembers?: String[],
+    link: String,
+    ownNumber: String,
+    timestamp: String,
+    bodyPreview: String,
     newMessages: Number
 }
 
@@ -28,13 +28,13 @@ export async function searchPreviews(queryString: String, extensionUUID: String)
         return;
     }
     fetching = true;
-    let temp:ThreadPreviewResponse[];
+    let temp: ThreadPreviewResponse[];
     try {
         // https://nodejs.org/api/url.html#class-urlsearchparams
         const params = `query_string=${queryString}&extension_uuid=${extensionUUID}`
         queryString = queryString.trim();
         // console.log(params)
-        const response:ThreadPreviewResponse[] = await fetch('/app/webtexting/searchpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
+        const response: ThreadPreviewResponse[] = await fetch('/app/webtexting/searchpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
 
         temp = response;
         // if (response.length == 0) {
@@ -64,11 +64,11 @@ export async function loadPreviews(extensionUUID: string, older_than: string) {
     }
     fetching = true;
     emitter.emit("previews-loading");
-    let temp:ThreadPreviewResponse[];
+    let temp: ThreadPreviewResponse[];
     try {
         // https://nodejs.org/api/url.html#class-urlsearchparams
         const params = older_than ? `extension_uuid=${extensionUUID}&older_than=${older_than}` : `extension_uuid=${extensionUUID}`;
-        const initialResponse:ThreadPreviewResponse[] = await fetch('/app/webtexting/loadpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
+        const initialResponse: ThreadPreviewResponse[] = await fetch('/app/webtexting/loadpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         temp = initialResponse;
 
 
@@ -97,7 +97,7 @@ export async function loadPreviews(extensionUUID: string, older_than: string) {
 // Calls addPreview for each object in a supplied rpeviews array
 // INPUTS: previews = untyped array of objects that contain the data needed to construct a valid ThreadPreview component
 // OUTPUTS: None (the threadPreviews state object is constructed/updated in addPreview ) 
-export const buildPreviews = function buildPreviews(previews:ThreadPreviewResponse[]) {
+export const buildPreviews = function buildPreviews(previews: ThreadPreviewResponse[]) {
     //console.log( previews)
     if (previews && previews.length) {
         for (let x = 0; x < previews.length; x++) {
