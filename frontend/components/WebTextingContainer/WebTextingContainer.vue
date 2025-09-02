@@ -276,7 +276,14 @@ export default {
         })
         emitter.on("completed-email-forwarding-registration",(args:ForwardingCheckResponseObject ) =>{
             this.$data.email = args.email;
-            this.$data.emailVerified = true;
+            if(args.email.length>0){
+                this.$data.emailVerified = true;
+                args.emailVerified=true;
+            }
+            else{
+                this.$data.emailVerified = false;
+                args.emailVerified = false;
+            }
             emitter.emit("email-forwarding-register-success", args);
         })
 
@@ -303,7 +310,7 @@ The blank space should notify the user that they can select a thread to display 
                     :remoteNumber="this.$route.query.number" :groupUUID="this.$route.query.group"
                     :ownNumber="this.$props.ownNumber" :displayName="this.title" :selectedConvo="this.conversationSelected"
                     :contactEditLink="contactEditLink" :title="this.title" :threadUUID="this.threadUUID"
-                    :email="this.email" :emailVerified="this.emailVerified"/>
+                    />
             </suspense>
             <link type="text/css" href="../../../js/style.css">
         </div>

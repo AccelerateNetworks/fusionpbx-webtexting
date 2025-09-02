@@ -29,7 +29,15 @@ export default{
         },
         backArrowClickHandler() {
             emitter.emit('menu-change');
-        },
+        },submitEmailForwardingDeregisterRequest(){
+            event.preventDefault();
+            const params ={
+                email:'',
+                dialedNumber:this.$props.ownNumber
+            }
+            emitter.emit("register-email-forwarding",params);
+            this.$data.emailVerified=false;
+        }
     },
     mounted() {
         const checkParams={
@@ -42,7 +50,7 @@ export default{
         });
         emitter.on('email-forwarding-register-success', (args:ForwardingCheckResponseObject) =>{
             this.$data.emailAddress =  args.email
-            this.$data.emailVerified = true
+            this.$data.emailVerified = args.emailVerified
         })
     },
 }
@@ -74,13 +82,15 @@ export default{
                             <div class="area-for-text input-group"> 
                                 <input type="email" class="form-control" id="emailInput" v-model="emailAddress" />
                                 <div class="input-group-append">
-                                    <button class="btn btn-primary" @click="submitEmailForwardingRegisterRequest">Submit</button>
+                                    <button class="btn btn-primary" @click="submitEmailForwardingRegisterRequest">Register</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <p v-if="!selectedConvo" class="">  Forward new text messages to your Email</p>
-                    <p v-if="emailVerified">✓ Email Forwarding set up.</p>
+                    <div>                     <label v-if="!selectedConvo" class="">  Forward new text messages to your Email</label>
+</div>
+                    <div><button class="btn btn-danger mb-1" @click="submitEmailForwardingDeregisterRequest">Unregister</button></div>
+                    <div><label v-if="emailVerified" >✓ Email Forwarding set up.</label></div>
                 </div>
             </div>
         
