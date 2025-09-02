@@ -15,7 +15,7 @@ import {registerForwardAddress, registerForwardingRequest } from '../../lib/mess
 import {computePosition} from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.11/+esm';
 import AlertFactory from '../Alerts/AlertFactory.vue';
 import {checkIfForwardedAddress,checkForwardingRequest} from '../../lib/checkIfForwarded';
-
+import {ForwardingCheckResponseObject} from '../EmailForwardMenu/EmailForwardMenu.vue';
 
 //this component kind of functions as a partial state controller for the app
 export default {
@@ -52,7 +52,9 @@ export default {
         let smallScreen = useMatchMedia('(width<=700px)');
         let loadedPreviews = false;
         let remoteNumber = '';
-        return { contactEditLink, title, smallScreen, state:state, previews: state.previews, loadedPreviews,threadUUID };
+        let email='';
+        let emailVerified=''
+        return { contactEditLink, title, smallScreen, state:state, previews: state.previews, loadedPreviews,threadUUID,email ,emailVerified};
     },
     methods: {
         calculateDisplayName() {
@@ -267,10 +269,14 @@ export default {
             args.extension_uuid = this.extensionUUID;
             await checkIfForwardedAddress(args);
         })
-        emitter.on("forwarding-check-response",args =>{
+        emitter.on("forwarding-check-response",(args:ForwardingCheckResponseObject )=>{
+            this.$data.email = args.email;
+            this.$data.emailVerified = args.emailVerified
             emitter.emit('returned-forwarding-check',args);
         })
-        emitter.on("completed-email-forwarding-registration",args =>{
+        emitter.on("completed-email-forwarding-registration",(args:ForwardingCheckResponseObject ) =>{
+            this.$data.email = args.email;
+            this.$data.emailVerified = true;
             emitter.emit("email-forwarding-register-success", args);
         })
 
@@ -296,7 +302,8 @@ The blank space should notify the user that they can select a thread to display 
                 <RouterView name="rightSide" :extension_uuid="this.$route.query.extension_uuid"
                     :remoteNumber="this.$route.query.number" :groupUUID="this.$route.query.group"
                     :ownNumber="this.$props.ownNumber" :displayName="this.title" :selectedConvo="this.conversationSelected"
-                    :contactEditLink="contactEditLink" :title="this.title" :threadUUID="this.threadUUID"/>
+                    :contactEditLink="contactEditLink" :title="this.title" :threadUUID="this.threadUUID"
+                    :email="this.email" :emailVerified="this.emailVerified"/>
             </suspense>
             <link type="text/css" href="../../../js/style.css">
         </div>
