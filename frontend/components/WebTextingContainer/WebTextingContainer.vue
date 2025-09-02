@@ -14,7 +14,7 @@ import { deleteTemplateQuery,deleteTemplate} from '../../lib/deleteTemplate';
 import {registerForwardAddress, registerForwardingRequest } from '../../lib/messageForwarding';
 import {computePosition} from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.11/+esm';
 import AlertFactory from '../Alerts/AlertFactory.vue';
-
+import {checkIfForwardedAddress,checkForwardingRequest} from '../../lib/checkIfForwarded';
 
 
 //this component kind of functions as a partial state controller for the app
@@ -262,6 +262,18 @@ export default {
             args.extension_uuid = this.extensionUUID;
             await registerForwardAddress(args)
         });
+        emitter.on("forwarded-email-check",async (args: checkForwardingRequest) =>{
+            console.log("check if email already registered")
+            args.extension_uuid = this.extensionUUID;
+            await checkIfForwardedAddress(args);
+        })
+        emitter.on("forwarding-check-response",args =>{
+            emitter.emit('returned-forwarding-check',args);
+        })
+        emitter.on("completed-email-forwarding-registration",args =>{
+            emitter.emit("email-forwarding-register-success", args);
+        })
+
     },
 
 }

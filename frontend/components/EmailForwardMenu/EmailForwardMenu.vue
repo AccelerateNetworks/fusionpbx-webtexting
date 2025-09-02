@@ -1,5 +1,9 @@
 <script lang="ts">
 import {emitter} from '../../lib/global';
+export type ForwardingCheckResponseObject={
+    email: String,
+    emailVerified: Boolean
+}
 export default{
     name:"ForwardingPlaceholder",
     props:{
@@ -8,17 +12,17 @@ export default{
     },
     data(){
         return{
-            emailForwardFormInputs:{
-                phoneNumber:this.$props.ownNumber,
-                emailAddress:''
-            }
+            phoneNumber:this.$props.ownNumber,
+            emailAddress:'',
+            emailVerified:false
         }
     },
+    //onLoad emitter.emit("forwarded-email-check,this.$props.ownNumber")
     methods: {
         submitEmailForwardingRegisterRequest(){
             event.preventDefault();
             const params = {
-                email: this.$data.emailForwardFormInputs.emailAddress.trim(),
+                email: this.$data.emailAddress.trim(),
                 dialedNumber: this.$props.ownNumber
             }
             emitter.emit("register-email-forwarding",params);
@@ -26,6 +30,20 @@ export default{
         backArrowClickHandler() {
             emitter.emit('menu-change');
         },
+    },
+    mounted() {
+        const checkParams={
+            dialedNumber:this.$props.ownNumber
+        }
+        emitter.emit("forwarded-email-check",checkParams);
+        emitter.on('returned-forwarding-check',(args:ForwardingCheckResponseObject) =>{
+            this.$data.emailAddress =  args.email
+            this.$data.emailVerified = args.emailVerified
+        });
+        emitter.on('email-forwarding-register-success', (args:ForwardingCheckResponseObject) =>{
+            this.$data.emailAddress =  args.email
+            this.$data.emailVerified = true
+        })
     },
 }
 </script>
@@ -54,7 +72,7 @@ export default{
                         <div class="mt-form-row">
                             <label class="category-desc" for="emailInput">Email Address to forward messages to.</label>
                             <div class="area-for-text input-group"> 
-                                <input type="email" class="form-control" id="emailInput" v-model="emailForwardFormInputs.emailAddress" />
+                                <input type="email" class="form-control" id="emailInput" v-model="emailAddress" />
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" @click="submitEmailForwardingRegisterRequest">Submit</button>
                                 </div>
@@ -62,6 +80,7 @@ export default{
                         </div>
                     </div>
                     <p v-if="!selectedConvo" class="">  Forward new text messages to your Email</p>
+                    <p v-if="emailVerified">✓ Email Forwarding set up.</p>
                 </div>
             </div>
         

@@ -31,45 +31,22 @@ unset($parameters);
 //if number found continue registration hitting the sms.callpipe api
 // else return a legible fail message
 if($ownNumber[0]){
+
     $desiredWebhookURL = "https://".$_SESSION['domain_name']."/app/webtexting/inbound-hook.php?provider=accelerate-networks";
-    $validNumber = json_decode(_checkValidDestination($ownNumber[0]),true);
-    //the above is stackoverflow nonsense 
+    $validNumber = _checkValidDestination($ownNumber[0]);
+    //the json_deecode(json_encode()) abomination  is stackoverflow hax 
     //echo($validNumber);
     if($validNumber){
-      $registered = _registerForwarding(["dialedNumber" => $ownNumber[0]['phone_number'], "email" => $_GET['email'], "callbackUrl" => $validNumber['callbackUrl'], "clientSecret" => $validNumber['clientSecret']]);
-        //return json_encode($registered );
-        echo($registered);
-        return ($registered);
+        $registered = json_encode($validNumber);
+        echo(json_encode($validNumber));
+      return json_encode($validNumber);
     }
 }
 else{
     echo("Invalid phone number. Contact Accelerate Networks support staff.");
 }
 
-function _registerForwarding(array $body)
-{
-    AccelerateNetworks::ValidateAccessToken();
-    $client = new GuzzleHttp\Client();
-    $res = $client->request(
-        'POST', "https://sms.callpipe.com/client/register", [
-            'headers' => [
-                'Authorization' => "Bearer ".$_SESSION['webtexting']['acceleratenetworks_api_key']['text'],
-            ],
-            'http_errors' => false,
-            'json' => $body,
-        ],
-    );
-    if($res->getStatusCode() == 200){
-        //everything's fine do nothing.
-        $check = ($res->getBody()->getContents());
-        return $check;
-    }
-    else{
-        error_log("got ".$res->getStatusCode()." ".$res->getReasonPhrase()."\n");
-        $responseBody = json_decode($res->getBody()->getContents());
-        error_log("response body: ".print_r($responseBody, true)."\n");
-    }
-}
+
 
 function _checkValidDestination(array $ownPhone)
 {
@@ -89,7 +66,8 @@ function _checkValidDestination(array $ownPhone)
         //everything's fine do nothing.
         $responseBody = ($res->getBody()->getContents());
         //echo($responseBody);
-        return ($responseBody);
+        $testcheck = json_decode($responseBody);
+        return $responseBody;
     }
     else{
         error_log("got ".$res->getStatusCode()." ".$res->getReasonPhrase()."\n");

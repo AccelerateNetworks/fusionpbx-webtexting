@@ -1,5 +1,5 @@
 import { log } from "console";
-
+import { emitter } from "./global";
 export type registerForwardingRequest={
     dialed_number:string,
     email: string,
@@ -13,23 +13,17 @@ export async function registerForwardAddress(query:registerForwardingRequest){
         fetching = true;
         test= await fetch('/app/webtexting/register-forwarding.php?' + new URLSearchParams(query).toString(),{
             method:"POST"
-        });
-        if(test.ok){
-            return await test;
-        }
-        else{
-            throw new Error(`Response status: ${test.status}`)
-        }
+        }).then(res => res.json())
     }
     catch(e){
         console.log(e);
         throw(e);
     }
     finally{
-        console.log("finally done registering")
-        //console.log(await test.json());
+        console.log("finally done registering for forwarding")
+        emitter.emit("completed-email-forwarding-registration",test)
         fetching= false;
-        return await test;
+        return  test;
     }
     
 }
