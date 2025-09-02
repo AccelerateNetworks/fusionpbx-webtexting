@@ -274,7 +274,7 @@ require_once "footer.php";
       <div id='modal-rename-group' class='modal-window'>
         <div>
             <span title="" class='modal-close' onclick="modal_close(); ">&times</span>
-            <span class='modal-message'>New name: <input type="text" name="name" class="form-control" placeholder="My besties" value="<?php echo $display_name; ?>" /></span>
+            <span class='modal-message'>New name: <input type="text" name="name" class="form-control" placeholder="My besties" value="<?php echo $_GET['group']; ?>" /></span>
             <span class='modal-actions'>
                 <button type='button' alt='Cancel' title='Cancel' onclick='modal_close();' class='btn btn-default' ><span class='fas fa-times fa-fw'></span><span class='button-label never pad'>Cancel</span></button>
                 <button type='submit' value='Ok' id='btn_ok' alt='ok' title='ok' onclick='modal_close();' class='btn btn-default' style='float: right; margin-left: 15px' ><span class='fas fa-check fa-fw'></span><span class='button-label never pad'>Rename</span></button>
