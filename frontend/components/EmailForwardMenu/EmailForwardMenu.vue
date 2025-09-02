@@ -82,15 +82,26 @@ export default{
                             <div class="area-for-text input-group"> 
                                 <input type="email" class="form-control" id="emailInput" v-model="emailAddress" />
                                 <div class="input-group-append">
-                                    <button class="btn btn-primary" @click="submitEmailForwardingRegisterRequest">Register</button>
+                                    <button class="btn btn-default" @click="submitEmailForwardingRegisterRequest">
+                                        <span class="fas fa-check fa-fw"></span>
+                                        <span class="pl-1">Register</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div>                     <label v-if="!selectedConvo" class="">  Forward new text messages to your Email</label>
-</div>
-                    <div><button class="btn btn-danger mb-1" @click="submitEmailForwardingDeregisterRequest">Unregister</button></div>
-                    <div><label v-if="emailVerified" >✓ Email Forwarding set up.</label></div>
+                    <div>
+                        <label v-if="!selectedConvo" class="">  Forward new text messages to your Email</label>
+                    </div>
+                    <div>
+                        <button class="btn btn-danger mb-1" @click="submitEmailForwardingDeregisterRequest">
+                            <span class="fas fa-times fa-fw"></span>
+                            <span class="pl-1">Unregister</span>
+                        </button>
+                    </div>
+                    <div>
+                        <label v-if="emailVerified" >✓ Email Forwarding set up.</label>
+                    </div>
                 </div>
             </div>
         
