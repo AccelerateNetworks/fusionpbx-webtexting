@@ -100,7 +100,10 @@ export default {
             <!-- for now we need to make sure the app -> db connection works so we'll hard code -->
 
             <div class="templates-list overflow-scroll">
-                <router-link to="/manage_templates.php">Add New Template</router-link>
+                <router-link to="/manage_templates.php" class="btn btn-primary mb-1">
+                    <span class="fas fa-plus fa-fw"></span>
+                    <span>Add New Template</span>
+                </router-link>
                 <div class="conditional_container table-responsive overflow-scroll" v-if="this.templatesLoaded" ref="conditional_container" >
                     <table class="table table-striped">
                         <thead>
