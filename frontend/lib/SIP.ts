@@ -84,7 +84,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             onDisconnect: (err?: Error) => {
                 state.connectivityStatus = "disconnected";
                 if(err) {
-                    console.log("connectivity error:", err)
+                    console.log("[SIP.RunSIPConnection] connectivity error:", err)
                 }
             },
             // onInvite: (invitation: Invitation) => {
@@ -99,7 +99,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 //I believe this is where we need to target to add auto updatign threadlist
                 let direction = 'incoming';
                 let originalTo = message.request.getHeader("X-Original-To");
-                console.log(`Message requsetfrom ${message.request.from.uri.user}`)
+                console.log(`[SIP.RunSIPConnection] Message requsetfrom ${message.request.from.uri.user}`)
                 if (message.request.from.uri.user == ownNumber) {
                     //console.log("our own message mirrored back to us: ", message.request);
                     direction = 'outgoing'; 
@@ -123,13 +123,13 @@ function RunSIPConnection(username: string, password: string, server: string, ow
 
                     case "message/cpim":
                         let cpim = CPIM.fromString(message.request.body);
-                        console.log("Received CPIM ", cpim);
+                        console.log("[SIP.RunSIPConnection] Received CPIM ", cpim);
 
 
                         //console.log("adding new message to the thread from CPIM");
                         
                         const cpimThreadID = calculateCPIMThreadID(cpim, direction, originalTo, messageFromUser);
-                        console.log(`cpim thread id: ${cpimThreadID}`)
+                        console.log(`[SIP.RunSIPConnection] cpim thread id: ${cpimThreadID}`)
                         addMessage(cpimThreadID ,{
                             direction: direction,
                             contentType: message.request.getHeader("Content-Type"),
@@ -142,7 +142,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                         break;
 
                     default:
-                        //console.log("dropping message with unknown content type ", message.request.getHeader("Content-Type"))
+                        console.log("[SIP.RunSIPConnection] dropping message with unknown content type ", message.request.getHeader("Content-Type"))
                 }
             }
         }
@@ -228,7 +228,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         //if it's cpim 
         if(message.cpim) {
             message.body = message.cpim.serialize();
-            console.log(`serialized cpim message ${message.body}`)
+            console.log(`[SIP] serialized cpim message ${message.body}`)
             message.contentType = 'message/cpim';
         }
 

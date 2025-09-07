@@ -25,5 +25,4 @@ export async function registerForwardAddress(query: registerForwardingRequest) {
         fetching = false;
         return test;
     }
-
 }
