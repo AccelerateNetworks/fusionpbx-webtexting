@@ -55,8 +55,8 @@ foreach($_SESSION['user']['extension'] as $extension) {
 	}
 	echo "<tr>";
 	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$extension['user']."</a></td>";
-	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$extension['outbound_caller_id_name']."</a></td>";
 	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$smsenabled_extensions[$extension['extension_uuid']]['phone_number']."</a></td>";
+	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$extension['outbound_caller_id_name']."</a></td>";
 	echo "<td><a href='threadlist.php?extension_uuid=".$extension['extension_uuid']."'>".$extension['description']."</a></td>";
 	echo "</tr>";
 	$matched_smsenabled_extensions++;
@@ -65,7 +65,7 @@ foreach($_SESSION['user']['extension'] as $extension) {
 echo "</table>";
 
 if (if_group("superadmin")) {
-    echo "<br /><a href='githook.php'>Check for app updates</a> | <a href='admin.php'>Number Administration</a><br />\n";
+    echo "<br /><a class='btn btn-danger' href='admin.php'>WebTexting Administration</a><br />\n";
 }
 if($matched_smsenabled_extensions>1){
 	$_SESSION['user']['multiple_wt_extensions'] = true;
