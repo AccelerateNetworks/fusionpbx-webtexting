@@ -39,6 +39,7 @@ export default {
         </div>
         <MenuPreview name="Templates" link='templates.php' descriptions="Manage Message Templates" ></MenuPreview>
         <MenuPreview name="Email Forwarding" link='email_forwarding.php' descriptions="Manage Email Forwarding"></MenuPreview>
+        <MenuPreview name="Help" link='https://acceleratenetworks.com/Phones/WebTexting' descriptions="How to use WebTexting"></MenuPreview>
         <div class="threadlist-table">
             <div class="preview_list_container">
                 

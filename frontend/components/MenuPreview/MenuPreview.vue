@@ -26,7 +26,7 @@ export default {
 </script>
 <template>
     <div class='tr_replace' :data-displayName="this.name"  >
-        <div class='td_preview' >
+        <div class='td_preview nav-link' >
             <router-link :to="this.link" class="menu-link" @click="menuLinkClickHandler">
                 <div class="menu-preview-container" >
                     <span class='menu-name' >{{
@@ -35,8 +35,6 @@ export default {
                     <span class='menu-last-item' >{{
                         this.description }}</span>
                 </div>
-
-
             </router-link>
         </div>
     </div>
