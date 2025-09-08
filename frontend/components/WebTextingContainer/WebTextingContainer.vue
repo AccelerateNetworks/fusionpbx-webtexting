@@ -5,17 +5,17 @@ import { ThreadPreviewData } from '../ThreadPreview/ThreadPreview.vue';
 import moment from 'moment';
 import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
-import {saveTemplate, saveTemplateQuery} from '../../lib/saveTemplates';
-import {useMatchMedia} from '../../lib/matchMedia';
-import { emitter, MessageData, ThreadChangePayload,state} from '../../lib/global';
-import {searchPreviews,loadPreviews} from '../../lib/backfillPreviews';
-import {loadTemplates, loadTemplateQuery} from '../../lib/loadTemplates';
-import { deleteTemplateQuery,deleteTemplate} from '../../lib/deleteTemplate';
-import {registerForwardAddress, registerForwardingRequest } from '../../lib/messageForwarding';
-import {computePosition} from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.11/+esm';
+import { saveTemplate, saveTemplateQuery } from '../../lib/saveTemplates';
+import { useMatchMedia } from '../../lib/matchMedia';
+import { emitter, MessageData, ThreadChangePayload, state } from '../../lib/global';
+import { searchPreviews, loadPreviews } from '../../lib/backfillPreviews';
+import { loadTemplates, loadTemplateQuery } from '../../lib/loadTemplates';
+import { deleteTemplateQuery, deleteTemplate } from '../../lib/deleteTemplate';
+import { registerForwardAddress, registerForwardingRequest } from '../../lib/messageForwarding';
+import { computePosition } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.11/+esm';
 import AlertFactory from '../Alerts/AlertFactory.vue';
-import {checkIfForwardedAddress,checkForwardingRequest} from '../../lib/checkIfForwarded';
-import {ForwardingCheckResponseObject} from '../EmailForwardMenu/EmailForwardMenu.vue';
+import { checkIfForwardedAddress, checkForwardingRequest } from '../../lib/checkIfForwarded';
+import { ForwardingCheckResponseObject } from '../EmailForwardMenu/EmailForwardMenu.vue';
 
 //this component kind of functions as a partial state controller for the app
 export default {
@@ -48,13 +48,13 @@ export default {
     data() {
         let contactEditLink = null;
         let title = '';
-        let threadUUID='';
+        let threadUUID = '';
         let smallScreen = useMatchMedia('(width<=700px)');
         let loadedPreviews = false;
         let remoteNumber = '';
-        let email='';
-        let emailVerified=''
-        return { contactEditLink, title, smallScreen, state:state, previews: state.previews, loadedPreviews,threadUUID,email ,emailVerified};
+        let email = '';
+        let emailVerified = ''
+        return { contactEditLink, title, smallScreen, state: state, previews: state.previews, loadedPreviews, threadUUID, email, emailVerified };
     },
     methods: {
         calculateDisplayName() {
@@ -146,7 +146,7 @@ export default {
             else {
                 //console.log("not message.cpim")
                 if (message.from == this.ownNumber) {
-                  //console.log(this.state.previews.get(message.to))
+                    //console.log(this.state.previews.get(message.to))
                     //set this.state.previews.get(message.to)bodyPreview to message.body
                     if (this.state.previews.get(message.to)) {
                         let temp = this.state.previews.get(message.to);
@@ -181,14 +181,14 @@ export default {
             },
             deep: true,
         },
-        smallScreen:{
-            handler(oldScreen, newScreen){
+        smallScreen: {
+            handler(oldScreen, newScreen) {
                 let smallScreen = useMatchMedia('(max-width<=700px)');
                 console.log("smallscreen handler")
-                if(smallScreen){
+                if (smallScreen) {
                     let pullToRefresh = document.querySelector('.pull-to-refresh');
                 }
-                else{
+                else {
                     let pullToRefresh = false;
                 }
             }
@@ -198,7 +198,7 @@ export default {
     async created() {
         //getPreviews();
         console.log(this.state);
-        loadPreviews(this.extensionUUID,state.oldestMessage);
+        loadPreviews(this.extensionUUID, state.oldestMessage);
     },
     mounted() {
         //console.log(this.$route.query.extension_uuid);
@@ -207,8 +207,8 @@ export default {
             this.threadUUID = payload.threadUUID;
             console.log(`wtc thread change ${payload.threadUUID}`)
             this.title = payload.key;
-            const updateUserLastSeenObject = {thread_uuid: payload.threadUUID, extension_uuid: this.$route.query.extension_uuid} 
-            emitter.emit("conversation-accessed",updateUserLastSeenObject)
+            const updateUserLastSeenObject = { thread_uuid: payload.threadUUID, extension_uuid: this.$route.query.extension_uuid }
+            emitter.emit("conversation-accessed", updateUserLastSeenObject)
             emitter.emit('thread-changed', payload.key);
         });
         emitter.on("new-message-ingested", (message: MessageData) => {
@@ -219,68 +219,68 @@ export default {
             this.updateLastMessage(message);
 
         });
-        emitter.on("thread-search-request", async (queryString: string) =>{
-            if(this.$route.query.extension_uuid){
+        emitter.on("thread-search-request", async (queryString: string) => {
+            if (this.$route.query.extension_uuid) {
                 this.loaded = false;
                 this.loadedPreviews = false;
                 console.log("we've got a route")
-                await searchPreviews(queryString,this.$route.query.extension_uuid);
+                await searchPreviews(queryString, this.$route.query.extension_uuid);
                 console.log(this.state.previews);
             }
-            else{
+            else {
                 alert("No Extension detected. Reload the page")
             }
         });
-        emitter.on("previews-built-and-loaded",() => {
-            this.loadedPreviews=true;
+        emitter.on("previews-built-and-loaded", () => {
+            this.loadedPreviews = true;
             this.load = true;
         });
-        emitter.on("backfill-previews-requested",() => {
-            loadPreviews(this.extensionUUID,state.oldestMessage);
+        emitter.on("backfill-previews-requested", () => {
+            loadPreviews(this.extensionUUID, state.oldestMessage);
         });
-        emitter.on("add-template", async (queryString: saveTemplateQuery) =>{
+        emitter.on("add-template", async (queryString: saveTemplateQuery) => {
             //console.log(queryString)
-            if(queryString.template_uuid){
+            if (queryString.template_uuid) {
                 queryString.template_uuid = null;
             }
             queryString.extension_uuid = this.extensionUUID;
             await saveTemplate(queryString);
         });
-        emitter.on("edit-template", async (queryString: saveTemplateQuery) =>{
+        emitter.on("edit-template", async (queryString: saveTemplateQuery) => {
             //console.log(queryString);
             queryString.extension_uuid = this.extensionUUID;
             await saveTemplate(queryString);
         });
-        emitter.on("load-templates", async (queryString:loadTemplateQuery) =>{
+        emitter.on("load-templates", async (queryString: loadTemplateQuery) => {
             queryString.extension_uuid = this.extensionUUID;
             return await loadTemplates(queryString);
         });
-        emitter.on("delete-template-request", async (args: deleteTemplateQuery) =>{
+        emitter.on("delete-template-request", async (args: deleteTemplateQuery) => {
             args.extension_uuid = this.extensionUUID;
             await deleteTemplate(args);
         });
-        
-        emitter.on("register-email-forwarding", async (args: registerForwardingRequest) =>{
+
+        emitter.on("register-email-forwarding", async (args: registerForwardingRequest) => {
             args.extension_uuid = this.extensionUUID;
             await registerForwardAddress(args)
         });
-        emitter.on("forwarded-email-check",async (args: checkForwardingRequest) =>{
+        emitter.on("forwarded-email-check", async (args: checkForwardingRequest) => {
             console.log("check if email already registered")
             args.extension_uuid = this.extensionUUID;
             await checkIfForwardedAddress(args);
         })
-        emitter.on("forwarding-check-response",(args:ForwardingCheckResponseObject )=>{
+        emitter.on("forwarding-check-response", (args: ForwardingCheckResponseObject) => {
             this.$data.email = args.email;
             this.$data.emailVerified = args.emailVerified
-            emitter.emit('returned-forwarding-check',args);
+            emitter.emit('returned-forwarding-check', args);
         })
-        emitter.on("completed-email-forwarding-registration",(args:ForwardingCheckResponseObject ) =>{
+        emitter.on("completed-email-forwarding-registration", (args: ForwardingCheckResponseObject) => {
             this.$data.email = args.email;
-            if(args.email.length>0){
+            if (args.email.length > 0) {
                 this.$data.emailVerified = true;
-                args.emailVerified=true;
+                args.emailVerified = true;
             }
-            else{
+            else {
                 this.$data.emailVerified = false;
                 args.emailVerified = false;
             }
@@ -299,18 +299,21 @@ The blank space should notify the user that they can select a thread to display 
 
         <AlertFactory />
         <div id="WEB_TEXT_ROOT">
-        <div v-if="smallScreen" class="pull-to-refresh"><div class="spinner-border"></div></div>
+            <div v-if="smallScreen" class="pull-to-refresh">
+                <div class="spinner-border"></div>
+            </div>
             <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
-                :threadPreviews="this.state.previews" :previewsLoaded="this.loadedPreviews" :selectedConvo="this.conversationSelected"
-                :newThreadView="this.newThreadSelected" :extensionUUID="this.extensionUUID" :multipleWebTextingExtensions="this.multipleWebTextingExtensions"/>
+                :threadPreviews="this.state.previews" :previewsLoaded="this.loadedPreviews"
+                :selectedConvo="this.conversationSelected" :newThreadView="this.newThreadSelected"
+                :extensionUUID="this.extensionUUID" :multipleWebTextingExtensions="this.multipleWebTextingExtensions" />
 
 
             <suspense>
                 <RouterView name="rightSide" :extension_uuid="this.$route.query.extension_uuid"
                     :remoteNumber="this.$route.query.number" :groupUUID="this.$route.query.group"
-                    :ownNumber="this.$props.ownNumber" :displayName="this.title" :selectedConvo="this.conversationSelected"
-                    :contactEditLink="contactEditLink" :title="this.title" :threadUUID="this.threadUUID"
-                    />
+                    :ownNumber="this.$props.ownNumber" :displayName="this.title"
+                    :selectedConvo="this.conversationSelected" :contactEditLink="contactEditLink" :title="this.title"
+                    :threadUUID="this.threadUUID" />
             </suspense>
             <link type="text/css" href="../../../js/style.css">
         </div>
@@ -337,13 +340,14 @@ The blank space should notify the user that they can select a thread to display 
     background: #BB6025;
 }
 
-.bgc-AN-blue{
-    background:  #3178B1;
+.bgc-AN-blue {
+    background: #3178B1;
 }
 
 .bgc-none {
     background: none;
 }
+
 #TEST_DIV_FOR_TESTING_WEBTEXTING {
     height: 85vh;
 }
@@ -359,8 +363,9 @@ The blank space should notify the user that they can select a thread to display 
     #TEST_DIV_FOR_TESTING_WEBTEXTING {
         height: 93vh;
     }
+
     .pull-to-refresh {
-        z-index:-1;
+        z-index: -1;
         position: fixed;
         top: 50px;
         width: 100%;
@@ -369,12 +374,11 @@ The blank space should notify the user that they can select a thread to display 
         justify-content: center;
         align-items: center;
         transition: top 0.7s ease-in-out;
-      }
-      .pull-to-refresh.visible {
+    }
+
+    .pull-to-refresh.visible {
         top: 0;
-        z-index:1;
-      }
+        z-index: 1;
+    }
 }
-
-
 </style>

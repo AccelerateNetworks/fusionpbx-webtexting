@@ -13,8 +13,6 @@ if ($_SERVER['REMOTE_ADDR'] != "127.0.0.1") {
     die();
 }
 
-
-
 $event = json_decode(file_get_contents('php://input'));
 // if (!$event) {
 //     error_log("failed to parse request body: ".$postbody);

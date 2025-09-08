@@ -80,7 +80,7 @@ function addMessage(key:string, message: MessageData) {
         state.conversations[key].push(message);
     }
     else{
-        console.log("conversation not found adding conversation")
+        console.log("[Global.addMessage] Conversation not found adding conversation")
         addThread(key,message);
     }
     
@@ -94,9 +94,9 @@ function addThread(key:string, message?:MessageData){
         }
         console.log(message);
         const newConversation = Array<MessageData>(message);
-        console.log(`new messages to add to new conversation ${newConversation}`);
+        console.log(`[Global.addThread] New messages to add to new conversation ${newConversation}`);
         state.conversations[key] = newConversation;
-        console.log(`adding conversation with message ${message}`)
+        console.log(`[Global.addThread] Adding conversation with message ${message}`)
 
         //this is where we add a ThreadPreview for a new outgoing message
         //TODO: refactor to allow MMS messages on new message

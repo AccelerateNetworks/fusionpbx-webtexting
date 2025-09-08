@@ -2,7 +2,7 @@
 import { uploadText } from '../../lib/upload';
 import { CPIM } from '../../lib/CPIM';
 import { MessageData, GlobalState, emitter, state } from '../../lib/global';
-import TemplateDropUpItem from '../TemplateDropUp/TemplateDropUpItem.vue'; 
+import TemplateDropUpItem from '../TemplateDropUp/TemplateDropUpItem.vue';
 import TemplateDropUpProps from '../TemplateDropUp/TemplateDropUpItem.vue';
 import moment from 'moment';
 
@@ -53,7 +53,7 @@ export default {
         }
     },
     name: "SendBox",
-    components:{TemplateDropUpItem },
+    components: { TemplateDropUpItem },
     props: {
         remoteNumber: {
             type: String,
@@ -69,14 +69,14 @@ export default {
             type: String,
             required: true
         },
-        extensionUUID:{
+        extensionUUID: {
             type: String,
         }
     },
     methods: {
         loadTemplates() {
             document.getElementById("myDropdown").classList.toggle("show");
-            if(this.templates.length === 0){
+            if (this.templates.length === 0) {
                 emitter.emit("load-templates", {});
 
             }
@@ -87,7 +87,7 @@ export default {
                 if (state.connected) {
                     this.send();
                 } else {
-                    console.log("not connected, can't send message");
+                    console.log("[Sendbox] Not connected, can't send message");
                 }
                 return false;
             }
@@ -102,6 +102,14 @@ export default {
                 to: this.remoteNumber || this.ownNumber, // remoteNumber is null for groups but we still need a To field, so set it to our own number and strip it out server side
             }
         },
+        /* 
+        Hit the send button on this Sendbox component 
+        => Sendboc.send (below) 
+        => SIP.ts outbound-message 
+        => SIP.ts RunSIPConnection 
+        => ?magic? 
+        => 
+        */
         async send() {
             //we need to fail  phone numbers that are not 11 digits long
             if (this.location === 'Conversation') {
@@ -116,8 +124,8 @@ export default {
                     while (this.pendingAttachments.length > 0) {
                         const attachment = this.pendingAttachments.shift();
                         await attachment.upload;
-                        
-                        console.log("sending attachment:", attachment);
+
+                        console.log("[Sendbox] sending attachment:", attachment);
                         const cpim = new CPIM(attachment.uploadedURL, attachment.file.type);
                         if (this.groupUUID) {
                             cpim.headers["Group-UUID"] = this.groupUUID;
@@ -172,7 +180,7 @@ export default {
         },
         async sendNewMessage() {
             const phoneString = this.remoteNumber;
-            if ((this.remoteNumber && (phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6) || this.groupUUID) ){
+            if ((this.remoteNumber && (phoneString.length === 11 || phoneString.length === 5 || phoneString.length === 6) || this.groupUUID)) {
                 //console.log(this.enteredText);
                 if (this.enteredText.length == 0 && this.pendingAttachments.length == 0) {
                     this.$refs.textbox.focus();
@@ -194,7 +202,7 @@ export default {
                             cpim.headers["Group-UUID"] = this.groupUUID;
                         }
 
-                        console.log('outgoing cpim', cpim);
+                        console.log('[Sendbox.sendnewMessage] Outgoing CPIM', cpim);
 
                         message.contentType = "message/cpim";
                         message.cpim = cpim;
@@ -203,13 +211,13 @@ export default {
                         message.contentType = "text/plain";
                         message.body = this.enteredText;
                     }
-                    if(this.extensionUUID){
+                    if (this.extensionUUID) {
                         message.extensionUUID = this.extensionUUID;
                     }
                     //console.log('emitting message', message);
                     emitter.emit('outbound-message', message);
                     setTimeout(() =>
-                        console.log("duplicate send prevention timeout"), 500
+                        console.log("[Sendbox.sendnewMessage] duplicate send prevention timeout"), 500
                     )
                     this.enteredText = "";
                 }
@@ -254,7 +262,7 @@ export default {
         },
         removeAttachment(attachment: PendingAttachment) {
             let position = this.pendingAttachments.indexOf(attachment);
-            console.log("removing attachment", position, attachment);
+            console.log("[Sendbox.removeAttachment] Removing attachment", position, attachment);
             this.pendingAttachments.splice(position, 1);
         },
         async uploadAttachment(attachment: PendingAttachment): Promise<void> {
@@ -266,7 +274,7 @@ export default {
 
                 attachment.uploadedURL = uploadTarget.download_url;
 
-                console.log("uploading ", uploadTarget);
+                console.log("[Sendbox.uploadAttachment] Uploading ", uploadTarget);
                 const resp = await fetch(uploadTarget.upload_url, {
                     method: "PUT",
                     body: await attachment.file.arrayBuffer(),
@@ -274,7 +282,7 @@ export default {
 
                 attachment.progress = 100;
 
-                console.log("uploaded: ", resp);
+                console.log("[Sendbox] uploaded: ", resp);
             } else {
                 //alert('Attachments not supported for new conversations at this time.')
             }
@@ -348,14 +356,14 @@ export default {
                     case "text/plain":
                         continue;
                     default:
-                        console.log("discarding clipboard data of unknown type:", item)
+                        console.log("[Sendbox.onPaste] Discarding clipboard data of unknown type:", item)
                 }
             }
         }
-    }, 
-    mounted(){
+    },
+    mounted() {
         // Close the dropdown if the user clicks outside of it
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (!event.target.matches('.dropbtn')) {
                 var dropdowns = document.getElementsByClassName("dropdown-content-menu");
                 var i;
@@ -367,18 +375,15 @@ export default {
                 }
             }
         }
-        emitter.on('dropup-selection-recieved',(payload:String) =>{
-            console.log('Selection Recieved. You selected: ' + payload);
-            this.enteredText= payload;
+        emitter.on('dropup-selection-recieved', (payload: String) => {
+            console.log('[Sendbox] Selection Recieved. You selected: ' + payload);
+            this.enteredText = payload;
         });
-        emitter.on('backfill-template-complete',(payload:Array<TemplateDropUpProps>) =>{
-            if(payload.length >0){
+        emitter.on('backfill-template-complete', (payload: Array<TemplateDropUpProps>) => {
+            if (payload.length > 0) {
                 this.templates = payload;
-
             }
         });
-
-        
     }
 }
 </script>
@@ -395,7 +400,6 @@ export default {
         <div class="sendbox ">
             <textarea maxlength="1600" rows="5" class="textentry text-break" autofocus="true" @keypress="keypress"
                 v-model.trim="enteredText" ref="textbox" v-on:paste="onPaste" name="text-message-entry-box"></textarea>
-
             <div class="btn-group align-middle dropup p-2">
                 <label v-if="location === 'Conversation'" for="attachment-upload" class="btn btn-attach">
                     <span v-if="location === 'Conversation'" class="fas fa-paperclip fa-fw"></span>
@@ -405,13 +409,15 @@ export default {
                 <button class="btn btn-send"
                     :disabled="(pendingAttachments.length == 0 && enteredText.length == 0) || !state.connected"
                     v-on:click="send"><span class="fas fa-paper-plane fa-fw"></span></button>
-                    <button class="btn dropdown-toggle dropbtn " data-toggle="dropmedown" aria-haspopup="true" aria-expanded="false" @click="loadTemplates">
-                        <span class=" dropbtn fas fa-comment-dots" aria-hidden="true"></span>
-                    </button>
+                <button class="btn dropdown-toggle dropbtn " data-toggle="dropmedown" aria-haspopup="true"
+                    aria-expanded="false" @click="loadTemplates">
+                    <span class=" dropbtn fas fa-comment-dots" aria-hidden="true"></span>
+                </button>
                 <div class="dropmedown dropup">
-                    
-                    <div id="myDropdown" class="dropdown-content-menu"> 
-                        <TemplateDropUpItem v-for="(message) in this.templates" :templateName="message.template_name" :templateText="message.template_body" :key="message.template_name" />
+
+                    <div id="myDropdown" class="dropdown-content-menu">
+                        <TemplateDropUpItem v-for="(message) in this.templates" :templateName="message.template_name"
+                            :templateText="message.template_body" :key="message.template_name" />
                     </div>
                 </div>
             </div>
@@ -520,6 +526,7 @@ export default {
     bottom: 1em;
     right: 1em;
 }
+
 /* DROPDOWN MENU */
 
 .dropbtn {
@@ -529,35 +536,38 @@ export default {
     */
     border: none;
     cursor: pointer;
-  }
+}
 
-  
-  .dropmedown {
+
+.dropmedown {
     /*position: relative; 
     display: inline-block;*/
-  }
-  
-  .dropdown-content-menu {
+}
+
+.dropdown-content-menu {
     display: none;
     position: absolute;
     background-color: #f1f1f1;
     min-width: 160px;
     overflow: auto;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
-    bottom:4rem;
-    left:-160px;
-  }
-  
-  .dropdown-content-menu a {
+    bottom: 4rem;
+    left: -160px;
+}
+
+.dropdown-content-menu a {
     color: black;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
-  }
-  
-  .dropmedown a:hover {background-color: #ddd;}
-  
-  .show {display: block;}
+}
 
+.dropmedown a:hover {
+    background-color: #ddd;
+}
+
+.show {
+    display: block;
+}
 </style>

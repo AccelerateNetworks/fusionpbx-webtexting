@@ -1,4 +1,4 @@
-import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions, MessagerMessageOptions,OutgoingRequestDelegate, IncomingResponse } from 'sip.js';
+import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions, MessagerMessageOptions, OutgoingRequestDelegate, IncomingResponse } from 'sip.js';
 import { CPIM } from './CPIM';
 import { state, emitter, MessageData, addMessage } from './global';
 import moment from 'moment';
@@ -12,35 +12,35 @@ const registrationIntervalSeconds = 270;
 
 let backoff = 0;
 
-function calculatePlainThreadID(message:Message, direction:string, originalTo: string, messageFromUser: string){
+function calculatePlainThreadID(message: Message, direction: string, originalTo: string, messageFromUser: string) {
     //console.log(`calculatePlainThreadID: ${message}`)
     console.log(message);
 
-    switch(direction){
-        case "incoming":{
+    switch (direction) {
+        case "incoming": {
             //console.log(`incoming message from ${messageFromUser} to ${originalTo}`)
             return messageFromUser;
         }
 
-        case"outgoing":{
+        case "outgoing": {
             //console.log(`outgoing message to ${originalTo} from ${messageFromUser}.`)
             return message.to;
         }
     }
 
     //console.log("do not add")
-    return'do not add';
+    return 'do not add';
 }
 
-function calculateCPIMThreadID(cpim:CPIM, direction:string, originalTo: string, messageFromUser: string){    
+function calculateCPIMThreadID(cpim: CPIM, direction: string, originalTo: string, messageFromUser: string) {
     //console.log(`calculateCPIMThreadID ${cpim}`);
-    if(cpim.getHeader("Group-UUID")) {
+    if (cpim.getHeader("Group-UUID")) {
         //console.log("message is for a group");
         return cpim.getHeader("Group-UUID")
     }
-    else if ((originalTo || messageFromUser) ) {
+    else if ((originalTo || messageFromUser)) {
         //console.log(`adding message to conversation between ${originalTo} and ${messageFromUser}.`)
-                             //so addMessage it to the correct thread
+        //so addMessage it to the correct thread
         return messageFromUser;
     }
     //console.log("do not add")
@@ -83,7 +83,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             },
             onDisconnect: (err?: Error) => {
                 state.connectivityStatus = "disconnected";
-                if(err) {
+                if (err) {
                     console.log("[SIP.RunSIPConnection] connectivity error:", err)
                 }
             },
@@ -102,7 +102,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 console.log(`[SIP.RunSIPConnection] Message requsetfrom ${message.request.from.uri.user}`)
                 if (message.request.from.uri.user == ownNumber) {
                     //console.log("our own message mirrored back to us: ", message.request);
-                    direction = 'outgoing'; 
+                    direction = 'outgoing';
                 }
                 const messageFromUser = message.request.from.uri.user;
                 console.log(message.request.getHeader("Content-Type"));
@@ -110,7 +110,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                     case "text/plain":
 
                         const plainThreadID = calculatePlainThreadID(message, direction, originalTo, messageFromUser);
-                        addMessage(plainThreadID , {
+                        addMessage(plainThreadID, {
                             direction: direction,
                             contentType: message.request.getHeader("Content-Type"),
                             timestamp: moment(),
@@ -127,10 +127,10 @@ function RunSIPConnection(username: string, password: string, server: string, ow
 
 
                         //console.log("adding new message to the thread from CPIM");
-                        
+
                         const cpimThreadID = calculateCPIMThreadID(cpim, direction, originalTo, messageFromUser);
                         console.log(`[SIP.RunSIPConnection] cpim thread id: ${cpimThreadID}`)
-                        addMessage(cpimThreadID ,{
+                        addMessage(cpimThreadID, {
                             direction: direction,
                             contentType: message.request.getHeader("Content-Type"),
                             timestamp: moment(),
@@ -152,7 +152,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     const userAgent = new UserAgent(uaOpts);
 
     userAgent.transport.onDisconnect = (err?: Error) => {
-        if(err) {
+        if (err) {
             //console.log("connectivity error:", err)
         }
     }
@@ -160,9 +160,9 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     let registerer: Registerer = null;
     userAgent.transport.stateChange.addListener(async (data: TransportState) => {
         //console.log("transport state changeed to", data, "registerer=", registerer);
-        switch(data) {
+        switch (data) {
             case TransportState.Connected:
-                if(registerer != null) {
+                if (registerer != null) {
                     await registerer.dispose();
                 }
                 registerer = new Registerer(userAgent, { expires: registrationIntervalSeconds });
@@ -170,7 +170,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                     state.connected = data == RegistererState.Registered;
                     state.connectivityStatus = data;
                     //console.log("registerer state changed to", data, " connected?", state.connected);
-                    switch(data) {
+                    switch (data) {
                         case RegistererState.Registered:
                             backoff = 0; // reset reconnect backoff timer
                             break;
@@ -191,7 +191,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 break;
             case TransportState.Disconnected:
                 if (backoff > 0) {
-                    let thisBackoff = backoff + Math.round(Math.random()*5); // add up to 5 seconds to the backoff
+                    let thisBackoff = backoff + Math.round(Math.random() * 5); // add up to 5 seconds to the backoff
                     state.connectivityStatus = "reconnecting in " + Math.ceil(thisBackoff) + " seconds";
                     let interval = setInterval(() => {
                         state.connectivityStatus = "reconnecting in " + Math.floor(thisBackoff--) + " seconds";
@@ -220,23 +220,23 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     userAgent.start();
 
     emitter.on('outbound-message', async (message: MessageData) => {
-        console.log("outbound message:", message);
+        console.log("[SIP.outbound-message] Outbound message:", message);
 
         message.timestamp = moment();
         const m = message;
-        //if plain/text use to number as key
-        //if it's cpim 
-        if(message.cpim) {
+        // if plain/text use to number as key
+        // if it's cpim 
+        if (message.cpim) {
             message.body = message.cpim.serialize();
-            console.log(`[SIP] serialized cpim message ${message.body}`)
+            console.log(`[SIP.outbound-message] serialized cpim message ${message.body}`)
             message.contentType = 'message/cpim';
         }
 
         const remoteURI = new URI('sip', message.to || message.from, server);
-        //console.log(remoteURI)
-        let options: MessagerOptions = {extraHeaders: []};
-        if(message.id) {
-        //    console.log(message.id)
+        console.log(`[SIP.outbound-message] ${remoteURI}`)
+        let options: MessagerOptions = { extraHeaders: [] };
+        if (message.id) {
+            //console.log(message.id)
             options.extraHeaders.push("X-Message-ID: " + message.id);
         }
         const messager = new Messager(userAgent, remoteURI, message.body, message.contentType, options);
@@ -246,30 +246,30 @@ function RunSIPConnection(username: string, password: string, server: string, ow
 
         //these only matter if there are SIP side issues
         //this is not for sms.callpipe issues!
-        const delFuncs:OutgoingRequestDelegate={
-            onAccept: (response:IncomingResponse):void =>{
-                console.log("200 Accept")
+        const delFuncs: OutgoingRequestDelegate = {
+            onAccept: (response: IncomingResponse): void => {
+                console.log("[SIP.outbound-message] 200 Accept")
                 console.log(response);
-                emitter.emit("SIP SENT",response)
+                emitter.emit("SIP SENT", response)
                 //console.log("sip message sent");
             },
-            onReject:(response: IncomingResponse):void =>{
-                console.log("400 reject")
+            onReject: (response: IncomingResponse): void => {
+                console.log("[SIP.outbound-message] 400 reject")
                 console.log(response);
                 //console.log("sip message not sent");
-                emitter.emit("SIP REJECT",response)
-
+                emitter.emit("SIP REJECT", response)
             },
         }
-       const messageOptions:MessagerMessageOptions={
+        const messageOptions: MessagerMessageOptions = {
             requestDelegate: delFuncs,
         }
-       
+
         //send message
         const response = await messager.message(messageOptions);
+        console.log(`[SIP.outbound-message] Response ${response}`)
         //add message to state
-        addMessage(message.to,m);
-        
+        addMessage(message.to, m);
+
         //console.log(response);
         //updateLastMessage goes here?
         //emitter.emit('scroll-to-bottom');
