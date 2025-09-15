@@ -98,6 +98,7 @@ foreach ($threads as $thread) {
     $group_uuid = $thread['group_uuid'];
     $thread_preview_opts[$z]['groupUUID'] = $group_uuid;
     $thread_preview_opts[$z]['threadUUID'] = $thread['thread_uuid'];
+    $thread_preview_opts[$z]['last_seen_timestamp'] = $thread['last_seen_timestamp'];
     // get the latest message from this thread
     $sql = "SELECT * FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
     if ($group_uuid != null) {
@@ -246,7 +247,7 @@ foreach ($threads as $thread) {
     $thread_preview_opts[$z]['groupMembers'] = $frontendOpts[$z]['groupMembers'];
     $z++;
  }
- $frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
+ //$frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
  if($_SESSION['user']['multiple_wt_extensions']){
     $frontendOpts['multiple_wt_extensions'] =true;
  }

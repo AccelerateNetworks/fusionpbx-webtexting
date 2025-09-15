@@ -1,7 +1,7 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
 import { MessageData, emitter, ThreadChangePayload } from '../../lib/global'
-
+import moment from 'moment';
 
 
 export default {
@@ -67,6 +67,9 @@ export default {
             }
             return false;
         },
+        updatedTimestamp(){
+           return moment.utc(this.$props.timestamp).fromNow()
+        }
     },
     emits: {
         'thread-change': String,
@@ -108,6 +111,7 @@ export default {
         }
     },
     mounted(){
+
         emitter.on("update-last-message",(message:MessageData) =>{
             if(message.cpim){
                 // console.log(message.cpim.headers['Group-UUID'])
@@ -153,7 +157,7 @@ export default {
                     <span class='thread-name' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{
                         this.displayName }}</span>
                     <span class='timestamp' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'"
-                        :data-timestamp="this.timestamp"></span>
+                        :data-timestamp="this.timestamp">{{updatedTimestamp}}</span>
 
                     <span class='thread-last-message' v-bind:class="currentThread ? 'activeThread' : 'inactiveThread'">{{
                         this.bodyPreview }}</span>
