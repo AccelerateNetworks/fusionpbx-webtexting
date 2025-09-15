@@ -3,7 +3,7 @@ import { emitter, addPreview, QUERY_LIMIT } from './global';
 let fetching = false;
 
 type ThreadPreviewResponse = {
-    remoteNumber?: string,
+    remoteNumber: string,
     displayName: string,
     contactEditLink: string,
     threadUUID?: string,
@@ -97,7 +97,7 @@ export async function loadPreviews(extensionUUID: string, older_than: string) {
 // Calls addPreview for each object in a supplied rpeviews array
 // INPUTS: previews = untyped array of objects that contain the data needed to construct a valid ThreadPreview component
 // OUTPUTS: None (the threadPreviews state object is constructed/updated in addPreview ) 
-export const buildPreviews = function buildPreviews(previews: ThreadPreviewResponse[]) {
+export const buildPreviews = function buildPreviews(previews: ThreadPreviewResponse[]):void {
     //console.log( previews)
     if (previews && previews.length) {
         for (let x = 0; x < previews.length; x++) {
