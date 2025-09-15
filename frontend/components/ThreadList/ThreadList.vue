@@ -1,8 +1,8 @@
 <script lang="ts" >
 import ThreadSearch from '../ThreadSearch/ThreadSearch.vue';
-import ThreadPreview, { ThreadPreviewData } from '../ThreadPreview/ThreadPreview.vue';
+import ThreadPreview from '../ThreadPreview/ThreadPreview.vue';
 import PaginatorButton from '../PaginatorButton/PaginatorButton.vue';
-import {emitter, ThreadChangePayload} from '../../lib/global';
+import {emitter, ThreadChangePayload, ThreadPreviewData} from '../../lib/global';
 
 
 
@@ -94,12 +94,12 @@ export default {
     mounted(){
         
         
-        let touchstartY = 0;
+        let touchstartY:any = 0;
         const refreshElement = document.getElementsByClassName("threadlist-header")[0];
-        refreshElement.addEventListener('touchstart', e => {
+        refreshElement.addEventListener('touchstart', (e:any) => {
             touchstartY = e.touches[0].clientY;
         });
-        refreshElement.addEventListener('touchmove', e => {
+        refreshElement.addEventListener('touchmove', (e:any) => {
             const touchY = e.touches[0].clientY;
             const touchDiff = touchY - touchstartY;
             let pullToRefresh = document.querySelector('.pull-to-refresh');
@@ -233,6 +233,7 @@ export default {
     max-width: 320px;
 }
 .hide-if-small{
+    display:block;
 }
 
 .threadlist-header{

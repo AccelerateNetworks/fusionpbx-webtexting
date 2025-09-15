@@ -1,18 +1,16 @@
 <script lang="ts">
 import Conversation from '../conversation/Conversation.vue';
 import ThreadList from '../ThreadList/ThreadList.vue';
-import { ThreadPreviewData } from '../ThreadPreview/ThreadPreview.vue';
 import moment from 'moment';
 import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
-import { saveTemplate, saveTemplateQuery } from '../../lib/saveTemplates';
+import { saveTemplate, saveTemplateQuery, } from '../../lib/saveTemplates';
 import { useMatchMedia } from '../../lib/matchMedia';
-import { emitter, MessageData, ThreadChangePayload, state } from '../../lib/global';
+import { emitter, MessageData, ThreadChangePayload, state, ThreadPreviewData } from '../../lib/global';
 import { searchPreviews, loadPreviews } from '../../lib/backfillPreviews';
 import { loadTemplates, loadTemplateQuery } from '../../lib/loadTemplates';
 import { deleteTemplateQuery, deleteTemplate } from '../../lib/deleteTemplate';
 import { registerForwardAddress, registerForwardingRequest } from '../../lib/messageForwarding';
-import { computePosition } from 'https://cdn.jsdelivr.net/npm/@floating-ui/dom@1.6.11/+esm';
 import AlertFactory from '../Alerts/AlertFactory.vue';
 import { checkIfForwardedAddress, checkForwardingRequest } from '../../lib/checkIfForwarded';
 import { ForwardingCheckResponseObject } from '../EmailForwardMenu/EmailForwardMenu.vue';
@@ -75,7 +73,7 @@ export default {
             console.log(`ULM: `);
             // const timezoneOffset = new Date().getTimezoneOffset();
             // console.log(timezoneOffset)
-            let now: Moment = moment.utc(Date.now());
+            let now: moment.Moment = moment.utc(Date.now());
             //console.log(now);
             //const timestamp:Date = now.toUTCString();
             //now = now + timezoneOffset;

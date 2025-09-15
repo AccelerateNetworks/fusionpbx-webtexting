@@ -56,7 +56,7 @@ export default {
 </script>
 <template>
     <div class="alert-box">
-        <Alert v-for="(alert,index) in this.$data.AlertList" :status="alert.status" :error="alert.error" :message="alert.message" :type="alert.type"/>
+        <Alert v-for="(alert,index) in this.$data.AlertList" :status="alert.status" :error="alert.error" :message="alert.message" :type="alert.type" v-bind:key="index"/>
     </div>
 </template>
 <style scoped>

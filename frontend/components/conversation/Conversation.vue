@@ -1,426 +1,476 @@
 <script lang="ts">
-
-import { MessageData, emitter, state } from '../../lib/global';
-import { CPIM } from '../../lib/CPIM'
-import Message from '../message/Message.vue';
-import moment from 'moment';
-import SendBox from '../SendBox/SendBox.vue';
+import { MessageData, emitter, state } from "../../lib/global";
+import { CPIM } from "../../lib/CPIM";
+import Message from "../message/Message.vue";
+import moment from "moment";
+import SendBox from "../SendBox/SendBox.vue";
 let fetchingActive = false;
 interface TestURLParams {
-    extension_uuid: String,
-    number?: String
+  extension_uuid: String;
+  number?: String;
 }
 interface ConversationProps {
-    extension_uuid: String,
-    number?: String,
-    group?: String
+  extension_uuid: String;
+  number?: String;
+  group?: String;
 }
-type MessageBundle = {
-    messages: MessageData[]
-}
+type MessageResponseBundle = {
+  messages: MessageQueryResponse[];
+};
 type MessageQuery = {
-    extension_uuid: string,
-    number?: string,
-    group?: string,
-    older_than?: string,
-}
-
+  extension_uuid: string;
+  number?: string;
+  group?: string;
+  older_than?: string;
+};
+type MessageQueryResponse = {
+  direction: string;
+  start_stamp: string;
+  content_type: string;
+  message: string;
+  group_uuid: string;
+  to_number: string;
+  from_number: string;
+  id?: string;
+  body?: string;
+  cpim?: CPIM;
+  extension_uuid?: string;
+};
+type MessageBundle = {
+  messages: MessageData[];
+};
+const responseConverter = (arg: MessageQueryResponse): MessageData => {
+  let cleanResponse: MessageData;
+  cleanResponse.to = arg.to_number;
+  cleanResponse.from = arg.from_number;
+  cleanResponse.direction = arg.direction;
+  cleanResponse.id = arg.id;
+  cleanResponse.body = arg.body;
+  cleanResponse.extensionUUID = arg.extension_uuid;
+  cleanResponse.timestamp = moment.utc(arg.start_stamp);
+  //console.log(m);
+  switch (arg.content_type) {
+    case "message/cpim":
+      cleanResponse.cpim = CPIM.fromString(arg.message);
+  }
+  return cleanResponse;
+};
 const getMessages = async (queryParams: MessageQuery) => {
-    if (fetchingActive) {
-        //console.log("skipping duplicate message fetches");
-        return;
+  if (fetchingActive) {
+    //console.log("skipping duplicate message fetches");
+    return;
+  }
+  fetchingActive = true;
+  try {
+    let params: MessageQuery = {
+      extension_uuid: queryParams.extension_uuid,
+    };
+    if (queryParams.number) {
+      params.number = queryParams.number;
     }
-    fetchingActive = true;
-    try {
-        let params: MessageQuery = {
-            extension_uuid: queryParams.extension_uuid
-        }
-        if (queryParams.number) {
-            params.number = queryParams.number
-        }
-        if (queryParams.group) {
-            params.group = queryParams.group
-        }
-        let key = '';
-        //console.log(params);
-        let r = await fetch('/app/webtexting/messages.php?' + new URLSearchParams(params).toString());
-        let response: MessageBundle = await r.json();
-
-        //console.log(`getMessages message response ${response.messages}`)
-        response.messages = response.messages.reverse();
-        for (let i = 0; i < response.messages.length; i++) {
-            let m = response.messages[i];
-            m.timestamp = moment.utc(m.start_stamp);
-            //console.log(m);
-          switch (m.content_type) {
-                case "message/cpim":
-                    m.cpim = CPIM.fromString(m.message)
-            }
-            if (m.group_uuid) {
-                key = m.group_uuid;
-            }
-            else {
-                //outgoing for 2P conversation
-                if (m.to_number == queryParams.number) {
-                    key = m.to_number
-                }
-                else {
-                    key = m.from_number
-                }
-            }
-
-        }
-
-        fetchingActive = false;
-        return response.messages;
+    if (queryParams.group) {
+      params.group = queryParams.group;
     }
-    catch (e) {
-        fetchingActive = false;
-        //console.log("error retrieving messages", e)
+    let key = "";
+    //console.log(params);
+    let r = await fetch(
+      "/app/webtexting/messages.php?" + new URLSearchParams(params).toString()
+    );
+    let response: MessageResponseBundle = await r.json();
+    let messagesToReturn: MessageBundle;
+    //console.log(`getMessages message response ${response.messages}`)
+    response.messages = response.messages.reverse();
+    for (let i = 0; i < response.messages.length; i++) {
+      let m = response.messages[i];
+
+      let clean: MessageData = responseConverter(m);
+      messagesToReturn.messages.push(clean);
     }
 
-}
+    fetchingActive = false;
+    return messagesToReturn.messages;
+  } catch (e) {
+    fetchingActive = false;
+    //console.log("error retrieving messages", e)
+  }
+};
 export default {
-    name: 'convo',
-    props: {
-        extension_uuid: {
-            type: String,
-        },
-        remoteNumber: {
-            type: String,
-        },
-        groupUUID: {
-            type: String,
-        },
-        displayName: {
-            type: String,
-        },
-        ownNumber: {
-            type: String,
-            required: true,
-        },
-        contactEditLink: {
-            type: String,
-        },
-        groupMembers: {
-            type: Array<String>,
-        },
-        selectedConvo: {
-            type: Boolean,
-        },
-        threadUUID:{
-            type: String
-        },
+  name: "convo",
+  props: {
+    extension_uuid: {
+      type: String,
     },
-    components: { Message, SendBox },
+    remoteNumber: {
+      type: String,
+    },
+    groupUUID: {
+      type: String,
+    },
+    displayName: {
+      type: String,
+    },
+    ownNumber: {
+      type: String,
+      required: true,
+    },
+    contactEditLink: {
+      type: String,
+    },
+    groupMembers: {
+      type: Array<String>,
+    },
+    selectedConvo: {
+      type: Boolean,
+    },
+    threadUUID: {
+      type: String,
+    },
+  },
+  components: { Message, SendBox },
 
-    data() {
+  data() {
+    let title = "";
+    if (this.displayName) {
+      title = this.displayName;
+    } else if (this.groupMembers) {
+      title = this.groupMembers.join(", ");
+    } else if (this.remoteNumber) {
+      if (title.length > 0) {
+        title += " (" + this.remoteNumber + ")";
+      } else {
+        title += this.remoteNumber;
+      }
+    } else if (this.groupUUID) {
+      title += this.groupUUID;
+    }
+    let conversationKey = this.remoteNumber
+      ? this.remoteNumber
+      : this.groupUUID;
+    return {
+      bottomVisible: true,
+      topVisible: false,
+      backfillAvailable: true,
+      state: state,
+      enteredText: "",
+      pendingAttachment: null,
+      atBottom: true,
+      title: title,
+      conversationKey: conversationKey,
+      messages: new Array<MessageData>(),
+    };
+  },
 
-        let title = "";
-        if (this.displayName) {
-            title = this.displayName;
-        } else if (this.groupMembers) {
-            title = this.groupMembers.join(", ");
+  mounted() {
+    if (this.$route.query.number) {
+      this.conversationKey = this.$route.query.number;
+      //emitter.emit('backfill-requested', this.conversationKey);
+    } else if (this.$route.query.group) {
+      this.conversationKey = this.$route.query.group;
+      //emitter.emit('backfill-requested', this.conversationKey);
+      const groupTag:any = document.getElementsByName("group");
+      groupTag[0].value = this.$route.query.group;
+    }
+
+    emitter.on("scroll-to-bottom", this.toBottom);
+
+    let observer = new IntersectionObserver(this.onObserve, {
+      root: this.$refs.message_container,
+      rootMargin: "0px",
+      threshold: 0.5,
+    });
+    observer.observe(this.$refs.top);
+    observer.observe(this.$refs.bottom);
+
+    emitter.on("backfill-complete", () => {
+      if (!this.backfillAvailable) {
+        console.log(
+          "conversation fully backfilled, refusing to attempt to backfill more"
+        );
+        return;
+      } else if (this.topVisible && this.bottomVisible) {
+        console.log(
+          "top and bottom of conversation visible, attempting to backfill immediately"
+        );
+        emitter.emit("backfill-requested", this.conversationKey);
+        return;
+      }
+
+      //console.log('will backfill if top is still visible in 1 second');
+      setTimeout(() => {
+        if (this.topVisible) {
+          console.log("top still visible backfill");
+          emitter.emit("backfill-requested", this.conversationKey);
         }
+      }, 5000);
+    });
 
-        else if (this.remoteNumber) {
-            if (title.length > 0) {
-                title += " (" + this.remoteNumber + ")";
-            } else {
-                title += this.remoteNumber;
-            }
+    emitter.on("conversation-fully-backfilled", () => {
+      console.log(
+        "preventing future backfilling attempts, this conversation has been fully backfilled"
+      );
+      this.backfillAvailable = false;
+    });
+
+    emitter.on("thread-changed", (newDisplayName: String) => {
+      console.log(`thread changed new display name is ${newDisplayName}`);
+      this.title = newDisplayName;
+    });
+
+    let touchstartY:any = 0;
+    const refreshElement = document.getElementsByClassName("thread-header")[0];
+    refreshElement.addEventListener("touchstart", (e:any) => {
+      touchstartY = e.touches[0].clientY;
+    });
+    refreshElement.addEventListener("touchmove", (e:any) => {
+      const touchY:any = e.touches[0].clientY;
+      const touchDiff = touchY - touchstartY;
+      let pullToRefresh = document.querySelector(".pull-to-refresh");
+      if (touchDiff > 0 && window.scrollY === 0 && pullToRefresh) {
+        pullToRefresh.classList.add("visible");
+        //e.preventDefault();
+      }
+    });
+    refreshElement.addEventListener("touchend", (e) => {
+      console.log("touch end");
+      let pullToRefresh = document.querySelector(".pull-to-refresh");
+
+      if (pullToRefresh && pullToRefresh.classList.contains("visible")) {
+        pullToRefresh.classList.remove("visible");
+        location.reload();
+      }
+    });
+    //console.log(this.state.messages);
+    //console.log("Conversation.vue mounted with props:\nremoteNumber:", this.remoteNumber, "\ngroupUUID:", this.groupUUID, "\ndisplayName:", this.displayName, "\nownNumber:", this.ownNumber);
+  },
+  beforeUpdate() {
+    //console.log("changing active component");
+    if (this.$route.query.group) {
+      const groupTag:any = document.getElementsByName("group");
+      groupTag[0].value = this.$route.query.group;
+    }
+  },
+  watch: {
+    remoteNumber: async function (rN) {
+      this.messages = [];
+      this.backfillAvailable = true;
+      //console.log("remote number changed changing this.messages")
+      if (this.remoteNumber) {
+        if (this.state.conversations[rN]) {
+          //conversation found
+          //console.log("conversation found skipping fetch")
+          this.messages = this.state.conversations[rN];
+        } else {
+          this.messages = this.state.conversations[rN];
         }
-        else if (this.groupUUID) {
-            title += this.groupUUID;
+        this.conversationKey = rN;
+        emitter.emit("backfill-requested", rN);
+        //console.log("changed Rn " + rN);
+      }
+    },
+    groupUUID: function (gUUID) {
+      this.messages = [];
+      if (this.$route.query.group) {
+        //console.log(observedChangeQueryParams)
+        this.messages = this.state.conversations[this.$route.query.group];
+        //this.title = this.$route.query.group;
+      }
+      this.conversationKey = this.$route.query.group;
+      this.backfillAvailable = true;
+      emitter.emit("backfill-requested", this.$route.query.group);
+    },
+  },
+  methods: {
+    scrollToBottom() {
+      //console.log('scrolling conversation to bottom');
+      const messageContainer = this.$refs.message_container;
+      messageContainer.scrollTo(0, messageContainer.scrollHeight);
+    },
+    onObserve(entries: IntersectionObserverEntry[]) {
+      entries.forEach((e) => {
+        switch (e.target) {
+          case this.$refs.bottom:
+            this.bottomVisible = e.isIntersecting;
+            if (e.isIntersecting) {
+              this.atBottom = true;
+              //console.log(this.atBottom ? "enabling" : "disabling", "scrolling to bottom for new messages");
+            }
+            //console.log("bottom is", e.isIntersecting ? "visible" : "hidden");
+            break;
+          case this.$refs.top:
+            this.topVisible = e.isIntersecting;
+            if (e.isIntersecting && this.backfillAvailable) {
+              console.log("isIntersecting and backfillavailable");
+              emitter.emit("backfill-requested", this.conversationKey);
+            }
+            //console.log("top is", e.isIntersecting ? "visible" : "hidden");
+            break;
+          default:
+          //console.log("observed event on unknown target:", e);
         }
-        let conversationKey = this.remoteNumber ? this.remoteNumber : this.groupUUID;
-        return {
-            bottomVisible: true,
-            topVisible: false,
-            backfillAvailable: true,
-            state: state,
-            enteredText: "",
-            pendingAttachment: null,
-            atBottom: true,
-            title: title,
-            conversationKey: conversationKey,
-            messages: new Array<MessageData>
-        };
+      });
     },
-
-    mounted() {
-        if (this.$route.query.number) {
-            this.conversationKey = this.$route.query.number;
-            //emitter.emit('backfill-requested', this.conversationKey);
+    onScroll() {
+      if (this.atBottom != this.bottomVisible) {
+        this.atBottom = this.bottomVisible;
+        //console.log(this.atBottom ? "enabling" : "disabling", "scrolling to bottom for new messages");
+      }
+    },
+    toBottom() {
+      //console.log("new message added to bottom. scrolling?", this.atBottom);
+      if (this.atBottom) {
+        const messageContainer = this.$refs.message_container;
+        if (messageContainer) {
+          messageContainer.scrollTo(0, messageContainer.scrollHeight);
         }
-        else if (this.$route.query.group) {
-            this.conversationKey = this.$route.query.group
-            //emitter.emit('backfill-requested', this.conversationKey);
-            const groupTag = document.getElementsByName("group");
-            groupTag[0].value = this.$route.query.group;
-
-        }
-
-
-        emitter.on('scroll-to-bottom', this.toBottom);
-
-        let observer = new IntersectionObserver(this.onObserve, {
-            root: this.$refs.message_container,
-            rootMargin: "0px",
-            threshold: 0.5,
-        });
-        observer.observe(this.$refs.top);
-        observer.observe(this.$refs.bottom);
-
-        emitter.on('backfill-complete', () => {
-            if (!this.backfillAvailable) {
-                console.log('conversation fully backfilled, refusing to attempt to backfill more');
-                return;
-            }
-
-            else if (this.topVisible && this.bottomVisible) {
-                console.log('top and bottom of conversation visible, attempting to backfill immediately');
-                emitter.emit('backfill-requested', this.conversationKey);
-                return;
-            }
-
-            //console.log('will backfill if top is still visible in 1 second');
-            setTimeout(() => {
-                if (this.topVisible) {
-                    console.log("top still visible backfill")
-                    emitter.emit('backfill-requested', this.conversationKey);
-                }
-            }, 5000);
-        });
-
-        emitter.on('conversation-fully-backfilled', () => {
-            console.log('preventing future backfilling attempts, this conversation has been fully backfilled');
-            this.backfillAvailable = false;
-        })
-
-        emitter.on('thread-changed', (newDisplayName: String) => {
-            console.log(`thread changed new display name is ${newDisplayName}`);
-            this.title = newDisplayName;
-        })
-
-        let touchstartY = 0;
-        const refreshElement = document.getElementsByClassName("thread-header")[0];
-        refreshElement.addEventListener('touchstart', e => {
-            touchstartY = e.touches[0].clientY;
-        });
-        refreshElement.addEventListener('touchmove', e => {
-            const touchY = e.touches[0].clientY;
-            const touchDiff = touchY - touchstartY;
-            let pullToRefresh = document.querySelector('.pull-to-refresh');
-            if (touchDiff > 0 && window.scrollY === 0 && pullToRefresh) {
-                pullToRefresh.classList.add('visible');
-                //e.preventDefault();
-            }
-        });
-        refreshElement.addEventListener('touchend', e => {
-            console.log("touch end")
-            let pullToRefresh = document.querySelector('.pull-to-refresh');
-
-            if (pullToRefresh && pullToRefresh.classList.contains('visible')) {
-                pullToRefresh.classList.remove('visible');
-                location.reload();
-            }
-        });
-        //console.log(this.state.messages);
-        //console.log("Conversation.vue mounted with props:\nremoteNumber:", this.remoteNumber, "\ngroupUUID:", this.groupUUID, "\ndisplayName:", this.displayName, "\nownNumber:", this.ownNumber);
+      }
     },
-    beforeUpdate() {
-        //console.log("changing active component");
-        if (this.$route.query.group) {
-            const groupTag = document.getElementsByName("group");
-            groupTag[0].value = this.$route.query.group;
-        }
-    },
-    watch: {
-        remoteNumber: async function (rN) {
-            this.messages = [];
-            this.backfillAvailable = true;
-            //console.log("remote number changed changing this.messages")
-            if (this.remoteNumber) {
-
-                if (this.state.conversations[rN]) {
-                    //conversation found
-                    //console.log("conversation found skipping fetch")
-                    this.messages = this.state.conversations[rN];
-                }
-                else {
-                    this.messages = this.state.conversations[rN];
-                }
-                this.conversationKey = rN;
-                emitter.emit("backfill-requested", rN)
-                //console.log("changed Rn " + rN);
-
-            }
-        },
-        groupUUID: function (gUUID) {
-            this.messages = [];
-            if (this.$route.query.group) {
-                //console.log(observedChangeQueryParams)
-                this.messages = this.state.conversations[this.$route.query.group];
-                //this.title = this.$route.query.group;
-
-            }
-            this.conversationKey = this.$route.query.group;
-            this.backfillAvailable = true;
-            emitter.emit("backfill-requested", this.$route.query.group)
-        },
-    },
-    methods: {
-        scrollToBottom() {
-            //console.log('scrolling conversation to bottom');
-            const messageContainer = this.$refs.message_container;
-            messageContainer.scrollTo(0, messageContainer.scrollHeight);
-        },
-        onObserve(entries: IntersectionObserverEntry[]) {
-            entries.forEach((e) => {
-                switch (e.target) {
-                    case this.$refs.bottom:
-                        this.bottomVisible = e.isIntersecting;
-                        if (e.isIntersecting) {
-                            this.atBottom = true;
-                            //console.log(this.atBottom ? "enabling" : "disabling", "scrolling to bottom for new messages");
-                        }
-                        //console.log("bottom is", e.isIntersecting ? "visible" : "hidden");
-                        break;
-                    case this.$refs.top:
-                        this.topVisible = e.isIntersecting;
-                        if (e.isIntersecting && this.backfillAvailable) {
-                            console.log("isIntersecting and backfillavailable");
-                            emitter.emit('backfill-requested', this.conversationKey);
-                        }
-                        //console.log("top is", e.isIntersecting ? "visible" : "hidden");
-                        break;
-                    default:
-                    //console.log("observed event on unknown target:", e);
-                }
-            })
-        },
-        onScroll() {
-            if (this.atBottom != this.bottomVisible) {
-                this.atBottom = this.bottomVisible;
-                //console.log(this.atBottom ? "enabling" : "disabling", "scrolling to bottom for new messages");
-            }
-        },
-        toBottom() {
-            //console.log("new message added to bottom. scrolling?", this.atBottom);
-            if (this.atBottom) {
-                const messageContainer = this.$refs.message_container;
-                if (messageContainer) {
-                    messageContainer.scrollTo(0, messageContainer.scrollHeight);
-                }
-            }
-        },
-    },
-    beforeDestroy() {
-        const refreshElement = document.getElementsByClassName("thread-header")[0];
-        refreshElement.removeEventListener('touchend', e );
-        refreshElement.removeEventListener('touchmove', e );
-        refreshElement.removeEventListener('touchestart', e );
-    },
-}
-
+  },
+  beforeDestroy() {
+    const refreshElement = document.getElementsByClassName("thread-header")[0];
+    refreshElement.removeEventListener("touchend", e);
+    refreshElement.removeEventListener("touchmove", e);
+    refreshElement.removeEventListener("touchestart", e);
+  },
+};
 </script>
 
 <template>
-    <div class="thread-container" v-bind:class="selectedConvo ? 'show-convo' : 'hide'" id="THREAD">
-        <div class="thread-header  d-flex justify-content-between align-items-center">
-            <div class="back-container">
-                <router-link class="back-link fa fa-arrow-left btn btn-large "
-                    :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`"
-                    aria="Go Back to threadlist!"></router-link>
-            </div>
-            <div class="m-auto">
-                <h5 class="m-auto">{{ title }}</h5>
-            </div>
-            <div class="justify-content-end">
-                <a v-if="contactEditLink" :href="contactEditLink" class="white btn btn-large" target="_blank">
-                    <span class='fas fa-edit fa-fw'> </span>
-                </a>
+  <div
+    class="thread-container"
+    v-bind:class="selectedConvo ? 'show-convo' : 'hide'"
+    id="THREAD"
+  >
+    <div
+      class="thread-header d-flex justify-content-between align-items-center"
+    >
+      <div class="back-container">
+        <router-link
+          class="back-link fa fa-arrow-left btn btn-large"
+          :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`"
+          aria="Go Back to threadlist!"
+        ></router-link>
+      </div>
+      <div class="m-auto">
+        <h5 class="m-auto">{{ title }}</h5>
+      </div>
+      <div class="justify-content-end">
+        <a
+          v-if="contactEditLink"
+          :href="contactEditLink"
+          class="white btn btn-large"
+          target="_blank"
+        >
+          <span class="fas fa-edit fa-fw"> </span>
+        </a>
 
-                <a v-else-if="this.$route.query.group" href="javascript: void(0);" class="white btn btn-large"
-                    onclick="modal_open('modal-rename-group');">
-                    <span class='fas fa-edit fa-fw'> </span>
-                </a>
-                <a v-else href="/app/contacts/contact_edit.php" class="white btn btn-large" target="_blank">
-                    <span class='fas fa-edit fa-fw'> </span>
-                </a>
-            </div>
-        </div>
-        <div class="messages">
-            <div class="message-container" ref="message_container" v-on:scroll="onScroll">
-                <div ref="top" :backfillAvailable="backfillAvailable" />
-                <div ref="top">
-                    <div class="backfill" v-if="backfillAvailable">loading older messages</div>
-                </div>
-                <Message :message="message" :key="message.id" :displayName="this.displayName ? this.displayName : null"
-                    :lastSender="index - 1 >= 0 ? this.state.conversations[conversationKey][index - 1].from : '-1'"
-                    v-for="(message, index) in this.state.conversations[conversationKey]"
-                    :mode='this.groupUUID ? "group" : "solo"' />
-                <div class="message-wrapper" ref="bottom">&nbsp;</div>
-            </div>
-            <SendBox :remoteNumber="remoteNumber" :groupUUID="this.$route.query.group" :ownNumber="ownNumber"
-                location="Conversation" />
-            <div class="statusbox">{{ state.connectivityStatus }} - Sending as {{ ownNumber }}</div>
-        </div>
+        <a
+          v-else-if="this.$route.query.group"
+          href="javascript: void(0);"
+          class="white btn btn-large"
+          onclick="modal_open('modal-rename-group');"
+        >
+          <span class="fas fa-edit fa-fw"> </span>
+        </a>
+        <a
+          v-else
+          href="/app/contacts/contact_edit.php"
+          class="white btn btn-large"
+          target="_blank"
+        >
+          <span class="fas fa-edit fa-fw"> </span>
+        </a>
+      </div>
     </div>
+    <div class="messages">
+      <div
+        class="message-container"
+        ref="message_container"
+        v-on:scroll="onScroll"
+      >
+        <div ref="top" :backfillAvailable="backfillAvailable" />
+        <div ref="top">
+          <div class="backfill" v-if="backfillAvailable">
+            loading older messages
+          </div>
+        </div>
+        <Message
+          :message="message"
+          :key="message.id"
+          :displayName="this.displayName ? this.displayName : null"
+          :lastSender="
+            index - 1 >= 0
+              ? this.state.conversations[conversationKey][index - 1].from
+              : '-1'
+          "
+          v-for="(message, index) in this.state.conversations[conversationKey]"
+          :mode="this.groupUUID ? 'group' : 'solo'"
+        />
+        <div class="message-wrapper" ref="bottom">&nbsp;</div>
+      </div>
+      <SendBox
+        :remoteNumber="remoteNumber"
+        :groupUUID="this.$route.query.group"
+        :ownNumber="ownNumber"
+        location="Conversation"
+      />
+      <div class="statusbox">
+        {{ state.connectivityStatus }} - Sending as {{ ownNumber }}
+      </div>
+    </div>
+  </div>
 </template>
 
 <style>
 #conversation {
-    grid-column-start: 2;
-    grid-column-end: 2;
+  grid-column-start: 2;
+  grid-column-end: 2;
 }
 
 .hide {
-    display: none;
+  display: none;
 }
 
 .messages {
-    height: 77vh;
-    margin: 0 auto;
+  height: 77vh;
+  margin: 0 auto;
 
-    border-bottom-left-radius: 0.5em;
-    border-bottom-right-radius: 0.5em;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
+  border-bottom-left-radius: 0.5em;
+  border-bottom-right-radius: 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
 
-    /* stupid hack to get the text entry box to display inside the bounds of the thread */
-    display: flex;
-    flex-direction: column;
+  /* stupid hack to get the text entry box to display inside the bounds of the thread */
+  display: flex;
+  flex-direction: column;
 }
 
 .thread-header {
-    box-shadow: 0 4px 4px -2px white;
-    margin: 0 auto 3px auto;
-    padding: 1em;
-    background-color: #5f9fd3;
-    color: #fff;
-    display: flex;
-    font-weight: bold;
+  box-shadow: 0 4px 4px -2px white;
+  margin: 0 auto 3px auto;
+  padding: 1em;
+  background-color: #5f9fd3;
+  color: #fff;
+  display: flex;
+  font-weight: bold;
 }
 
 .message-container {
-    height: 100%;
-    overflow-y: auto;
-    display: flex;
-    flex-flow: column;
-    justify-content: flex-start;
-    margin-bottom: 0.5em;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-flow: column;
+  justify-content: flex-start;
+  margin-bottom: 0.5em;
 }
 
 .backfill {
-    max-width: 50em;
-    margin: 0 auto;
-    padding: 1em;
+  max-width: 50em;
+  margin: 0 auto;
+  padding: 1em;
 }
 
 .white {
-    color: white;
+  color: white;
 }
 
 /* td:active {
@@ -433,14 +483,14 @@ td:hover {
 }
 */
 table {
-    width: 100%;
-    table-layout: fixed;
+  width: 100%;
+  table-layout: fixed;
 }
 
 .timestamp {
-    color: #999;
-    font-size: 8pt;
-    padding-left: 0.5em;
+  color: #999;
+  font-size: 8pt;
+  padding-left: 0.5em;
 }
 /*
 td {
@@ -449,37 +499,35 @@ td {
 }
 */
 
-
 .thread-container {
-    border: solid #5f9fd3 2px;
-    border-bottom-left-radius: 0.5em;
-    border-bottom-right-radius: 0.5em;
-    border-top-left-radius: 0.5em;
-    border-top-right-radius: 0.5em;
-    height:85vh;
+  border: solid #5f9fd3 2px;
+  border-bottom-left-radius: 0.5em;
+  border-bottom-right-radius: 0.5em;
+  border-top-left-radius: 0.5em;
+  border-top-right-radius: 0.5em;
+  height: 85vh;
 }
 
 @media screen and (width >700px) {
-    .back-link {
-        display: none;
-    }
+  .back-link {
+    display: none;
+  }
 }
 
 @media screen and (width <=700px) {
-    #THREAD {
-        z-index: 5;
-        grid-column-start: 1;
-        grid-column-end: 1;
-        height: 91vh;
-    }
+  #THREAD {
+    z-index: 5;
+    grid-column-start: 1;
+    grid-column-end: 1;
+    height: 91vh;
+  }
 
-    .thread-container {
-        height: 90vh;
-    }
+  .thread-container {
+    height: 90vh;
+  }
 
-    .messages {
-        height: 80vh;
-    }
-
+  .messages {
+    height: 80vh;
+  }
 }
 </style>

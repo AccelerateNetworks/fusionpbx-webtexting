@@ -1,42 +1,18 @@
 <script lang='ts'>
 //lets add a delete button and an edit button
 import {emitter} from '../../lib/global';
-type TemplatePreviewInterface = {
-        link:{
-            type:String,
-            optional: true
-        },
-        template_uuid:{
-            type: string,
-            optional: true
-        },
-        body:{
-            type: String
-        },
-        category:{
-            type: String
-        },
-        subcategory:{
-            type: String
-        },
-        language:{
-            type: String
-        },
-        subject:{
-            type: String,
-        },
-        templateType:{
-            type: String
-        },
-        templateName:{
-            type: String
-        },
-        enabled:{
-            type: String
-        },
-        description: {
-            type: String
-        },
+export type TemplatePreviewInterface = {
+        link?:string,
+        template_uuid?:string,
+        body: string,
+        category: string,
+        subcategory: string,
+        language: string,
+        subject: string,
+        templateType: string,
+        templateName: string,
+        enabled: string,
+        description: string,
     
 }
 

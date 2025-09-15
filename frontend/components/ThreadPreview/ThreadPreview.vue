@@ -2,42 +2,6 @@
 import Conversation from '../conversation/Conversation.vue';
 import { MessageData, emitter, ThreadChangePayload } from '../../lib/global'
 
-type ThreadPreviewData = {
-    displayName: {
-        type: String,
-    },
-    bodyPreview: {
-        type: String,
-    },
-    link: {
-        type: String,
-    },
-    timestamp: {
-        type: String,
-    },
-    remoteNumber: {
-        type: String,
-    },
-    groupUUID: {
-        type: String,
-    },
-    ownNumber: {
-        type: String,
-        required: true,
-    },
-    contactEditLink: {
-        type: String,
-    },
-    groupMembers: {
-        type: Array<String>,
-    },
-    threadUUID:{
-        type:String
-    },
-    unreads:{
-        type:number
-    },
-}
 
 
 export default {
@@ -82,9 +46,6 @@ export default {
         },
         threadUUID:{
             type:String
-        },
-        unreads:{ 
-            type:Number 
         },
     },
     components: { Conversation },

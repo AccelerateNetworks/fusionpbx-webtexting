@@ -24,7 +24,7 @@ function calculatePlainThreadID(message: Message, direction: string, originalTo:
 
         case "outgoing": {
             //console.log(`outgoing message to ${originalTo} from ${messageFromUser}.`)
-            return message.to;
+            return originalTo;
         }
     }
 
@@ -246,7 +246,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
 
         //these only matter if there are SIP side issues
         //this is not for sms.callpipe issues!
-        const delFuncs: OutgoingRequestDelegate = {
+        const delegateFuncs: OutgoingRequestDelegate = {
             onAccept: (response: IncomingResponse): void => {
                 console.log("[SIP.outbound-message] 200 Accept")
                 console.log(response);
@@ -261,7 +261,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             },
         }
         const messageOptions: MessagerMessageOptions = {
-            requestDelegate: delFuncs,
+            requestDelegate: delegateFuncs,
         }
 
         //send message

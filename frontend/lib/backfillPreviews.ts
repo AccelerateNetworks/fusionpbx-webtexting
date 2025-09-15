@@ -3,16 +3,16 @@ import { emitter, addPreview, QUERY_LIMIT } from './global';
 let fetching = false;
 
 type ThreadPreviewResponse = {
-    remoteNumber?: String,
-    displayName: String,
-    contactEditLink: String,
-    threadUUID?: String,
-    groupUUID?: String,
-    groupMembers?: String[],
-    link: String,
-    ownNumber: String,
-    timestamp: String,
-    bodyPreview: String,
+    remoteNumber?: string,
+    displayName: string,
+    contactEditLink: string,
+    threadUUID?: string,
+    groupUUID?: string,
+    groupMembers?: string[],
+    link: string,
+    ownNumber: string,
+    timestamp: string,
+    bodyPreview: string,
     newMessages: Number
 }
 
@@ -20,7 +20,7 @@ type ThreadPreviewResponse = {
 // INPUTS: extensionUUID = the user's extension we want to build previews for
 //        queryString = the user's string that they want to search their threads for
 // OUTPUT: None (buildPreviews calls addPreviews which constructs the previews map for global state)
-export async function searchPreviews(queryString: String, extensionUUID: String) {
+export async function searchPreviews(queryString: string, extensionUUID: string) {
     emitter.emit("previews-loading");
 
     if (fetching) {

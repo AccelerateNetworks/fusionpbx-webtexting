@@ -2,19 +2,16 @@ import { Moment } from 'moment';
 import { reactive } from 'vue'
 import { CPIM } from './CPIM';
 import mitt from 'mitt';
-import  ThreadPreviewData  from '../components/ThreadPreview/ThreadPreview.vue';
 
 type ConversationData = Record<string,Array<MessageData>>;
-type PreviewData = Map<String, ThreadPreviewData>;
 type ThreadChangePayload = {
-  key: String, 
-
+  key: string, 
   editLink?:  string,
   threadUUID?: string
   
 };
 type MenuChangePayload = {
-    name: String
+    name: string
 }
 
 type MessageData = {
@@ -28,22 +25,45 @@ type MessageData = {
     cpim?: CPIM;
     extensionUUID?: string;
 }
+
+type ThreadPreviewData = {
+    displayName: string,
+    bodyPreview:  string,
+    link: string,
+    timestamp:string,
+    remoteNumber: string,
+    groupUUID?: string,
+    ownNumber: string,
+    contactEditLink?: string,
+    groupMembers?: Array<string>,
+    threadUUID?: string,
+}
+type ThreadPreviewConstructorArgs ={
+    displayName: string
+                bodyPreview: string,
+                link: string,
+                timestamp: string,
+                remoteNumber: string,
+                ownNumber: string,   
+}
 //what do we do when we need to add a thread to threadlist
 type GlobalState = {
     conversations: ConversationData,
-    connectivityStatus: String,
+    connectivityStatus: string,
     connected: Boolean,
     previews: PreviewData,
     page: number,
-    oldestMessage: Number,
+    oldestMessage: string,
 };
 const QUERY_LIMIT = 20;  //this limits the number of threadpreview results per load request
+type PreviewData = Map<string, ThreadPreviewData>;
+
 
 const state = reactive<GlobalState>({
     conversations:  {},
     connectivityStatus: 'loading',
     connected: false,
-    previews:         new Map<String,  ThreadPreviewData>(),
+    previews: new Map<string,  ThreadPreviewData>(),
     page:0,
     oldestMessage: null
 });
@@ -89,8 +109,9 @@ function addMessage(key:string, message: MessageData) {
 function addThread(key:string, message?:MessageData){
     //console.log(state.conversations)
     if(message){
+        //if a message doesn't have message.id we have to make one
         if(!message.id){
-            message.id = message.message_uuid;
+            message.id = crypto.randomUUID();
         }
         console.log(message);
         const newConversation = Array<MessageData>(message);
@@ -102,7 +123,7 @@ function addThread(key:string, message?:MessageData){
         //TODO: refactor to allow MMS messages on new message
         if(message.direction==='outgoing' && message.extensionUUID){
             const newConversationLink: string=`thread.php?extension_uuid=${message.extensionUUID}&number=${message.to}`;
-            const newOutgoingPreview: ThreadPreviewData = {
+            const newOutgoingPreview: ThreadPreviewConstructorArgs = {
                 displayName: message.to,
                 bodyPreview: message.body,
                 link: newConversationLink,
@@ -111,12 +132,12 @@ function addThread(key:string, message?:MessageData){
                 ownNumber: message.from,        
 
             }
-            addPreview(newOutgoingPreview);
+            addTempPreview(newOutgoingPreview);
         }
         //new inbound messages have no message.to somehow
         else if(message.direction==='incoming' && !message.to){
             const newConversationLink: string=`thread.php?extension_uuid=${message.extensionUUID}&number=${message.from}`;
-            const newIncomingPreview: ThreadPreviewData = {
+            const newIncomingPreview: ThreadPreviewConstructorArgs = {
                 displayName: message.from,
                 bodyPreview: message.body,
                 link: newConversationLink,
@@ -125,7 +146,7 @@ function addThread(key:string, message?:MessageData){
                 ownNumber: message.to,        
 
             }
-            addPreview(newIncomingPreview);
+            addTempPreview(newIncomingPreview);
         }
         
     }
@@ -143,12 +164,30 @@ function addPreview(preview : ThreadPreviewData){
         }
         else{
             //console.log(Date.parse(preview.timestamp))
-            updateOldestMessage(Date.parse(preview.timestamp));
+            updateOldestMessage(preview.timestamp);
             state.previews.set(conversationKey,preview);
         }
     }
     else{   //first add also creates the map
-        state.previews = new Map<String,  ThreadPreviewData>();
+        state.previews = new Map<string,  ThreadPreviewData>();
+        state.previews.set(conversationKey, preview);
+    }
+}
+function addTempPreview(preview : ThreadPreviewConstructorArgs){
+    //console.log(preview)
+    const conversationKey:string = preview.remoteNumber;
+    if(state.previews){
+        if(previewsContainKey(conversationKey)){
+            //don't add duplicates
+        }
+        else{
+            //console.log(Date.parse(preview.timestamp))
+            updateOldestMessage(preview.timestamp);
+            state.previews.set(conversationKey,preview);
+        }
+    }
+    else{   //first add also creates the map
+        state.previews = new Map<string,  ThreadPreviewData>();
         state.previews.set(conversationKey, preview);
     }
 }
@@ -165,9 +204,10 @@ function updatePageNumber(){
     state.page = state.page+1;
     return state.page;
 }
-function updateOldestMessage(newOldestTimestamp: Number){
+function updateOldestMessage(newOldestTimestamp: string){
     if(state.oldestMessage){
-        if(newOldestTimestamp < state.oldestMessage){
+        //cast to numbers for this comparison
+        if(Date.parse(newOldestTimestamp) < Date.parse(state.oldestMessage)){
             state.oldestMessage = newOldestTimestamp;
         }
     }
@@ -178,4 +218,4 @@ function updateOldestMessage(newOldestTimestamp: Number){
     //console.log(state.oldestMessage)
     return state.oldestMessage;
 }
-export { state, emitter, QUERY_LIMIT, MessageData, GlobalState, ThreadChangePayload, MenuChangePayload, addMessage, addPreview, updatePageNumber  }
+export { state, emitter, QUERY_LIMIT, MessageData, GlobalState, ThreadChangePayload, MenuChangePayload, addMessage, addPreview, updatePageNumber, ThreadPreviewData  }

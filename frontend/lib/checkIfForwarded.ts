@@ -35,7 +35,7 @@ export async function checkIfForwardedAddress(query: checkForwardingRequest) {
         console.log("[checkIfForwardedAddress] done checking for previous email forwarding registrations")
         fetching = false;
         // TODO: Run this throught the debugger and see if it's a string or object, then correct the type.
-        emitter.emit('forwarding-check-response', JSON.parse(test));
+        emitter.emit('forwarding-check-response', JSON.parse(test.toString()));
         return test;
     }
 

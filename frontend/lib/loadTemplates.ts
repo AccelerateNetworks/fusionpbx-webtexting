@@ -2,26 +2,26 @@ import { emitter } from './global';
 import TemplateDropUpProps from '../components/TemplateDropUp/TemplateDropUpItem.vue';
 type TemplateDropUpProps = typeof TemplateDropUpProps;
 export type loadTemplateQuery = {
-    extension_uuid: String
-    older_than?: String
+    extension_uuid: string
+    older_than?: string
 }
 
 export type loadTemplateResponse = {
-    domain_uuid: String;
-    email_template_uuid: String;
-    template_body: String;
-    template_category: String;
-    template_subcategory: String;
-    template_language: String;
-    template_subject: String;
-    template_type: String;
-    template_enabled: String;
-    template_description: String;
-    template_name: String;
-    insert_date: String;
-    insert_user: String;
-    update_date: String;
-    update_user: String;
+    domain_uuid: string;
+    email_template_uuid: string;
+    template_body: string;
+    template_category: string;
+    template_subcategory: string;
+    template_language: string;
+    template_subject: string;
+    template_type: string;
+    template_enabled: string;
+    template_description: string;
+    template_name: string;
+    insert_date: string;
+    insert_user: string;
+    update_date: string;
+    update_user: string;
 };
 
 let temp: Array<TemplateDropUpProps>;

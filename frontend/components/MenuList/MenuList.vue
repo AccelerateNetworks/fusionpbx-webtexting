@@ -85,6 +85,7 @@ export default {
     border-color: none;
 }
 .hide-if-small{
+    display:block;
 }
 
 .threadlist-header{

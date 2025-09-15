@@ -1,6 +1,6 @@
 import { emitter } from './global';
 
-type saveTemplateQuery = {
+export type saveTemplateQuery = {
     template_uuid?: string,
     extension_uuid: string,
     body: string,
