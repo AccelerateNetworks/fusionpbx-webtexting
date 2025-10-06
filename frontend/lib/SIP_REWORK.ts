@@ -11,7 +11,7 @@ export async function luaSkip(message){
                                 body:JSON.stringify(message)
                             }
                         )
-            .then(res =>  res.json());
+            .then(res =>  res);
     }
     catch (e) {
         console.log(e);
