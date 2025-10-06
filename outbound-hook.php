@@ -7,11 +7,11 @@ require_once "src/AccelerateNetworks.php";
 
 $session_id = session_id();
 $status_of_session = session_status();
-if ($_SERVER['REMOTE_ADDR'] != "127.0.0.1") {
-    error_log("attempt to forge outbound message from ".$_SERVER['REMOTE_ADDR']);
-    http_response_code(401);
-    die();
-}
+// if ($_SERVER['REMOTE_ADDR'] != "127.0.0.1") {
+//     error_log("attempt to forge outbound message from ".$_SERVER['REMOTE_ADDR']);
+//     http_response_code(401);
+//     die();
+// }
 
 $event = json_decode(file_get_contents('php://input'));
 // if (!$event) {
@@ -21,25 +21,26 @@ $event = json_decode(file_get_contents('php://input'));
 // }
 
 $domain_name = $event->{'from_host'};
-$extension = $event->{'from_user'}; 
-$to = $event->{'to_user'};
-$contentType = $event->type;
-$body = urldecode($event->_body);
-$dedupeID = $event->{'sip_h_X-Message-ID'};
+$from = $event->from; 
+$to = $event->to;
+$contentType = $event->contentType;
+$body = urldecode($event->body);
+$dedupeID = random_bytes(16);
 
-$sql = "SELECT webtexting_destinations.phone_number, v_domains.domain_uuid, v_extensions.extension_uuid FROM webtexting_destinations, v_domains, v_extensions WHERE v_domains.domain_name = :domain_name AND v_domains.domain_uuid = v_extensions.domain_uuid AND v_extensions.extension = :extension AND webtexting_destinations.extension_uuid = v_extensions.extension_uuid";
-$parameters['domain_name'] = $domain_name;
-$parameters['extension'] = $extension;
-$db = new database;
-$destination = $db->select($sql, $parameters, 'row');
-if (!$destination) {
-    error_log("dropping outbound message from user with no configured destination: ".$extension."@".$domain_name);
-    die();
-}
+    $extensionUUID = $event->extensionUUID;
+    $sql = "SELECT webtexting_destinations.phone_number, v_domains.domain_uuid FROM webtexting_destinations, v_domains, v_extensions WHERE v_domains.domain_name = :domain_name AND v_domains.domain_uuid = v_extensions.domain_uuid AND v_extensions.extension_uuid = :extensionUUID AND webtexting_destinations.extension_uuid = v_extensions.extension_uuid";
+    $parameters['domain_name'] = $domain_name;
+    $parameters['extensionUUID'] = $extensionUUID;
+    $db = new database;
+    $destination = $db->select($sql, $parameters, 'row');
+    if (!$destination) {
+        error_log("dropping outbound message from user with no configured destination: ".$extension."@".$domain_name);
+        die();
+    }
+
 unset($parameters);
 $from = $destination['phone_number'];
 $domainUUID = $destination['domain_uuid'];
-$extensionUUID = $destination['extension_uuid'];
 $sql= "SELECT default_setting_subcategory, default_setting_value FROM v_default_settings  WHERE default_setting_subcategory='auth_secret' OR default_setting_subcategory='auth_email' OR default_setting_subcategory='mms_bucket' OR default_setting_subcategory='mms_bucket_endpoint' OR default_setting_subcategory='aws_access_key_id' OR default_setting_subcategory='aws_secret_key' OR default_setting_subcategory='acceleratenetworks_inbound_token' 
 ORDER BY default_setting_subcategory DESC";
 $db = new database;

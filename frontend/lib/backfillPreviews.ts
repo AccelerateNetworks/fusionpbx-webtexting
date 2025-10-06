@@ -45,8 +45,8 @@ export async function searchPreviews(queryString: string, extensionUUID: string)
         fetching = false;
         console.log('[backfillPreviews.searchPreviews] Load preview error:', e);
     } finally {
-        console.log(temp);
-        emitter.emit('[backfillPreviews.searchPreviews] Backfill-preview-complete', temp);
+        //console.log(temp);
+        //('[backfillPreviews.searchPreviews] Backfill-preview-complete', temp);
         fetching = false;
         return buildPreviews(temp);
     }

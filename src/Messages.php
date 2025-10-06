@@ -132,7 +132,7 @@ final class Messages
             $bodyStr = $body->toString();
         }
 
-        Messages::_sendSIP($source->domainName, $source->extension, $from, $source->extension, $bodyStr, $contentType, $dedupeID, $groupUUID, $to);
+        //Messages::_sendSIP($source->domainName, $source->extension, $from, $source->extension, $bodyStr, $contentType, $dedupeID, $groupUUID, $to);
     }
 
     private static function _findGroup(LocalNumber $localNumber, string $from, string $to, $additionalRecipients): ?string

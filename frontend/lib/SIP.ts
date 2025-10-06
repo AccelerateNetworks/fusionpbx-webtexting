@@ -3,7 +3,7 @@ import { CPIM } from './CPIM';
 import { state, emitter, MessageData, addMessage } from './global';
 import moment from 'moment';
 import { compileScript } from 'vue/compiler-sfc';
-
+import { luaSkip } from './SIP_REWORK';
 // nginx timeout is 300 seconds. in testing we can set this to 300 seconds too
 // and it will renew a few seconds earlier, but I don't really want to risk it.
 // must re-register before the nginx read timeout because registration is the
@@ -11,6 +11,11 @@ import { compileScript } from 'vue/compiler-sfc';
 const registrationIntervalSeconds = 270;
 
 let backoff = 0;
+//stolen from https://www.geeksforgeeks.org/javascript/generate-random-alpha-numeric-string-in-javascript/
+function randomBytes() {
+        return Math.random().toString(36).slice(2);
+}
+
 
 function calculatePlainThreadID(message: Message, direction: string, originalTo: string, messageFromUser: string) {
     //console.log(`calculatePlainThreadID: ${message}`)
@@ -66,7 +71,7 @@ function reconnect(userAgent: UserAgent) {
     }
 }
 
-function RunSIPConnection(username: string, password: string, server: string, ownNumber: string, remote_number?: string, group?: string) {
+function RunSIPConnection(username: string, password: string, server: string, ownNumber: string,  extension_uuid:string, remote_number?: string, group?: string,) {
     const uaOpts: UserAgentOptions = {
         logBuiltinEnabled: false,
         logConfiguration: false,
@@ -147,7 +152,6 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             }
         }
     };
-
     //console.log("initializing user agent with options:", uaOpts);
     const userAgent = new UserAgent(uaOpts);
 
@@ -239,6 +243,9 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             //console.log(message.id)
             options.extraHeaders.push("X-Message-ID: " + message.id);
         }
+        else{
+            options.extraHeaders.push("X-Message-ID " + randomBytes());
+        }
         const messager = new Messager(userAgent, remoteURI, message.body, message.contentType, options);
         //console.log(`Messager: `);
         //console.log(messager);
@@ -263,10 +270,16 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         const messageOptions: MessagerMessageOptions = {
             requestDelegate: delegateFuncs,
         }
+        //send message to lua hell
+        //or skip lua hell and go straight to outbound-hook.php
+        message.from_host = server;
+        message.extensionUUID = extension_uuid;
+        //const response = await messager.message(messageOptions);
 
-        //send message
-        const response = await messager.message(messageOptions);
-        console.log(`[SIP.outbound-message] Response ${response}`)
+        const luaSkipResponse = await luaSkip(message);
+        //console.log(`[SIP.outbound-message] Response ${response}`);
+        console.log(`[luaSkip] Response ${luaSkipResponse}`);
+
         //add message to state
         addMessage(message.to, m);
 

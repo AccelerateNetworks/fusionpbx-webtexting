@@ -107,6 +107,7 @@ export const initializeWebTextingContainer =
       opts.password,
       opts.server,
       opts.ownNumber,
+      opts.extensionUUID,
       opts.remoteNumber,
       opts.groupUUID
     );
