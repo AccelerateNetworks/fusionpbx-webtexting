@@ -69,9 +69,9 @@ const state = reactive<GlobalState>({
 });
 
 const emitter = mitt();
-
+// add handling for 'do not add' fail case key from SIP.ts
 function addMessage(key:string, message: MessageData) {
-    //console.log("trying to add message with key: " + key);
+    console.log("trying to add message with key: " + key);
     //console.log(message)
     emitter.emit("update-last-message",message)
 

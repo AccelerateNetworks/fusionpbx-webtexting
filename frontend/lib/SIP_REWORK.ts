@@ -1,5 +1,4 @@
 import { emitter } from "./global";
-import { ClientResponse } from "./checkIfForwarded";
 export async function luaSkip(message){
     let sending = false;
     let response;

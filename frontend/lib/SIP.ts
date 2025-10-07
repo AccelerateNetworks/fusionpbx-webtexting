@@ -38,15 +38,19 @@ function calculatePlainThreadID(message: Message, direction: string, originalTo:
 }
 
 function calculateCPIMThreadID(cpim: CPIM, direction: string, originalTo: string, messageFromUser: string) {
-    //console.log(`calculateCPIMThreadID ${cpim}`);
-    if (cpim.getHeader("Group-UUID")) {
-        //console.log("message is for a group");
-        return cpim.getHeader("Group-UUID")
+    console.log(`calculateCPIMThreadID`);
+    console.log(cpim)
+    if (cpim.headers["Group-UUID"] ) {
+        console.log("message is for a group");
+        return cpim.headers["Group-UUID"];
     }
-    else if ((originalTo || messageFromUser)) {
-        //console.log(`adding message to conversation between ${originalTo} and ${messageFromUser}.`)
-        //so addMessage it to the correct thread
+    else if ((direction =='incoming')) {
+        //not group message and inbound so key is whoever sent message
         return messageFromUser;
+    }
+    else if (direction =='outgoing') {
+        //not group and outbound so key is whoever we send message to
+        return originalTo;
     }
     //console.log("do not add")
     return 'do not add';
@@ -104,7 +108,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 //I believe this is where we need to target to add auto updatign threadlist
                 let direction = 'incoming';
                 let originalTo = message.request.getHeader("X-Original-To");
-                console.log(`[SIP.RunSIPConnection] Message requsetfrom ${message.request.from.uri.user}`)
+                //console.log(`[SIP.RunSIPConnection] Message requsetfrom ${message.request.from.uri.user}`)
                 if (message.request.from.uri.user == ownNumber) {
                     //console.log("our own message mirrored back to us: ", message.request);
                     direction = 'outgoing';
@@ -224,7 +228,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     userAgent.start();
 
     emitter.on('outbound-message', async (message: MessageData) => {
-        console.log("[SIP.outbound-message] Outbound message:", message);
+        //console.log("[SIP.outbound-message] Outbound message:", message);
 
         message.timestamp = moment();
         const m = message;
@@ -232,12 +236,12 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         // if it's cpim 
         if (message.cpim) {
             message.body = message.cpim.serialize();
-            console.log(`[SIP.outbound-message] serialized cpim message ${message.body}`)
+            //console.log(`[SIP.outbound-message] serialized cpim message ${message.body}`)
             message.contentType = 'message/cpim';
         }
 
         const remoteURI = new URI('sip', message.to || message.from, server);
-        console.log(`[SIP.outbound-message] ${remoteURI}`)
+        //console.log(`[SIP.outbound-message] ${remoteURI}`)
         let options: MessagerOptions = { extraHeaders: [] };
         if (message.id) {
             //console.log(message.id)
@@ -281,7 +285,13 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         console.log(`[luaSkip] Response ${luaSkipResponse}`);
 
         //add message to state
-        addMessage(message.to, m);
+        if(message.cpim && message.cpim.headers['Group-UUID']){
+            const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
+            addMessage(cpimThreadID, message);
+        }
+        else{
+            addMessage(message.to, message);
+        }
 
         //console.log(response);
         //updateLastMessage goes here?
