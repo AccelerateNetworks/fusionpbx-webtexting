@@ -283,7 +283,15 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         const luaSkipResponse = await luaSkip(message);
         //console.log(`[SIP.outbound-message] Response ${response}`);
         console.log(`[luaSkip] Response ${luaSkipResponse}`);
-
+        console.log(luaSkipResponse.status);
+        message.status = luaSkipResponse.status;
+        message.statusText = luaSkipResponse.statusText;
+        if(message.status == 200){
+            emitter.emit('message-failed', message);
+        }
+        else{
+            emitter.emit('message-sent', message);
+        }
         //add message to state
         if(message.cpim && message.cpim.headers['Group-UUID']){
             const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);

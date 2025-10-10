@@ -41,6 +41,11 @@ export default {
         emitter.on('template-save-failed', (payload)=>{
             this.AddAlert(payload);
         })
+        emitter.on('message-failed', (payload:AlertData)=>{
+            console.log("message failed to send make an alert about it");
+                        this.AddAlert(payload);
+
+        })
     },
     methods: {
         AddAlert(arg:AlertData){
