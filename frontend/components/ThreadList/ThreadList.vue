@@ -32,7 +32,6 @@ export default {
     },
     computed: {
         recieveEmit(threadChangeObject:ThreadChangePayload) {
-            //console.log(`active conversation: ${activeConversation}`);
             this.activeThread = threadChangeObject.key;
             return this.activeThread;
         },
@@ -41,14 +40,12 @@ export default {
     watch:{
         threadPreviews:{
             handler(oldPreviews,newPreviews){
-            console.log("threadlist thread previews changed");
         },
             deep:true,
         }
         
     },
     async created(){
-        //this.threadPreviews = await this.threadPreviews;
         if (this.threadPreviews){
             this.loaded = true;
         }
@@ -62,17 +59,15 @@ export default {
         filteredAndSortedPreviews() {
             if(this.loaded && this.threadPreviews){            
                 return new Map<String,ThreadPreviewData>([...this.threadPreviews].filter(([key, value]) => {
-                    //console.log(value)
                     if (value == null) {
-                        console.log("key for null value ", key)
+                        //console.log("key for null value ", key)
                         return false;
                     }
                     else if (value.displayName == null) {
-                        console.log("key for null value.displayName", key)
+                        //console.log("key for null value.displayName", key)
                         return false;
                     }
                     //or contains number fragment
-                    //console.log(typeof key , key)
                     return (value.displayName.toLowerCase().includes(this.filterString.toLowerCase()) || key.includes(this.filterString))
                 }
                 )
@@ -109,7 +104,6 @@ export default {
             }
         });
         refreshElement.addEventListener('touchend', e => {
-            console.log("touch end")
             let pullToRefresh = document.querySelector('.pull-to-refresh');
            
         if (pullToRefresh && pullToRefresh.classList.contains('visible')) {
@@ -118,7 +112,6 @@ export default {
         }
         });
         emitter.on('thread-change', (threadChangeObject:ThreadChangePayload) => {
-            //console.log("TL event get", activeConversation);
             this.activeThread = threadChangeObject.key;
             return this.activeThread;
         })
@@ -135,7 +128,7 @@ export default {
             this.loaded= false;
         })
         emitter.on("previews-done-loading",()=>{
-            console.log("loaded" );
+            //console.log("loaded" );
             this.loaded= null;
             this.loaded = true;
         })
@@ -181,7 +174,7 @@ export default {
                     v-bind="value" :activeThread="this.activeThread"  />
                     
                 </div>
-                <div class="load-animation-container" v-else>
+                <div v-else class="load-animation-container" >
                     <img src="../../../loading-spinner.svg" alt="loading animation" width="150" height="150"/>
                 </div>
                 <PaginatorButton/>

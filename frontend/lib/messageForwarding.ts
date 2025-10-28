@@ -9,18 +9,18 @@ export async function registerForwardAddress(query: registerForwardingRequest) {
     let fetching = false;
     let test;
     try {
-        console.log("[messageForwarding.registerForwardAddress] I'm trying " + query);
+        //console.log("[messageForwarding.registerForwardAddress] I'm trying " + query);
         fetching = true;
         test = await fetch('/app/webtexting/register-forwarding.php?' + new URLSearchParams(query).toString(), {
             method: "POST"
         }).then(res => res.json())
     }
     catch (e) {
-        console.log(e);
+        //console.log(e);
         throw (e);
     }
     finally {
-        console.log("[messageForwarding.registerForwardAddress] Finally done registering for forwarding")
+        //console.log("[messageForwarding.registerForwardAddress] Finally done registering for forwarding")
         emitter.emit("completed-email-forwarding-registration", test)
         fetching = false;
         return test;

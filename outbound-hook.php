@@ -61,7 +61,9 @@ require __DIR__."/providers/".$provider.".php";
 switch($contentType) {
 case "text/plain":
     Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $dedupeID);
-    outgoing_sms($from, $to, $body);   
+     
+    $response = outgoing_sms($from, $to, $body);  
+    return json_encode($response);
     break;
 case "message/cpim":
     $cpim = CPIM::fromString($body);
@@ -79,7 +81,7 @@ case "message/cpim":
     }
 
     // $cpim->fileURL gets mutated by Messages::OutgoingMMS to include the auth query params
-    outgoing_mms($from, $to, array($cpim->fileURL));
+    return json_encode(outgoing_mms($from, $to, array($cpim->fileURL)));
     break;
 default:
     error_log("received an outbound message of unknown type: ".$contentType);

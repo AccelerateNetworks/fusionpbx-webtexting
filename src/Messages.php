@@ -124,14 +124,14 @@ final class Messages
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
 
-        Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
+        $response = Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
         if ($body instanceof CPIM) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
             $bodyStr = $body->toString();
         }
-
+        return $response;
         //Messages::_sendSIP($source->domainName, $source->extension, $from, $source->extension, $bodyStr, $contentType, $dedupeID, $groupUUID, $to);
     }
 

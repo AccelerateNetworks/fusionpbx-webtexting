@@ -14,8 +14,8 @@ export default {
     //mounted emitter.on for menuPreview click emits
     mounted(){
         emitter.on('menu-change',(payload:string) => {
-            console.log('change menu please')
-            console.log(payload)
+            //console.log('change menu please')
+            //console.log(payload)
             if(payload){
                 this.activeMenu = payload;
                 this.selectedMenu =true;

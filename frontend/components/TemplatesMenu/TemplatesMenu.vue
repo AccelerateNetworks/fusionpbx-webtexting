@@ -39,7 +39,7 @@ export default {
         removeTemplate(targetUUID: string){
             let index = 0;
             for(let value in this.templatePreviews){
-                console.log(this.templatePreviews[value].template_uuid);
+                //console.log(this.templatePreviews[value].template_uuid);
                 if(this.templatePreviews[value].template_uuid===targetUUID){
                     this.templatePreviews.splice(index,1);
                     //console.log("match found removing template from list")

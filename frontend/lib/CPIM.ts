@@ -88,7 +88,7 @@ export class CPIM {
         serialized += 'Content-Length: ' + body.length + '\n\n';
         serialized += body;
 
-        console.log("[CPIM] Serialized CPIM", this, "->", serialized);
+        //console.log("[CPIM] Serialized CPIM", this, "->", serialized);
 
         return serialized;
     }

@@ -16,7 +16,7 @@ export default {
     },
     methods:{
         menuLinkClickHandler(){
-            console.log(this.name)
+            //console.log(this.name)
             emitter.emit("menu-change",this.name)
         }
     }

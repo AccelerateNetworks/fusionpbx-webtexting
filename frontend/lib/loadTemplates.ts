@@ -27,16 +27,16 @@ export type loadTemplateResponse = {
 let temp: Array<TemplateDropUpProps>;
 let fetching = false;
 export async function loadTemplates(args: loadTemplateQuery) {
-    console.log("[loadTemplates] Loading template Previews");
+    //console.log("[loadTemplates] Loading template Previews");
     if (fetching) {
-        console.log("[loadTemplates] Skipping duplicate load request");
+        //console.log("[loadTemplates] Skipping duplicate load request");
         return;
     }
     fetching = true;
     emitter.emit("template-previews-loading");
     try {
         if (args) {
-            console.log(args);
+            //console.log(args);
             let params: loadTemplateQuery;
             if (args.extension_uuid) {
                 params = { extension_uuid: args.extension_uuid };
@@ -52,17 +52,17 @@ export async function loadTemplates(args: loadTemplateQuery) {
 
             if (temp.length == 0) {
                 emitter.emit('no-templates-found');
-                console.log("No Message Templates found")
+                //g("No Message Templates found")
             }
         }
     } catch (e) {
         fetching = false;
-        console.log('[loadTemplates] Load template error:', e);
+        //console.log('[loadTemplates] Load template error:', e);
     } finally {
 
         emitter.emit('backfill-template-complete', temp);
         fetching = false;
-        console.log(temp)
+        //console.log(temp)
         return (temp[0]);
     }
 }

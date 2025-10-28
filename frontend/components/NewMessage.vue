@@ -14,7 +14,7 @@ export default {
     },
     methods:{
         numberPaste(e: ClipboardEvent) {
-            console.log(e);
+            //console.log(e);
         }
     },
     mounted() {
@@ -33,7 +33,7 @@ export default {
             }
         });
         refreshElement.addEventListener('touchend', e => {
-            console.log("touch end")
+            //console.log("touch end")
             let pullToRefresh = document.querySelector('.pull-to-refresh');
            
         if (pullToRefresh && pullToRefresh.classList.contains('visible')) {

@@ -77,30 +77,20 @@ export default {
     },
     methods: {
         routerLinkClickHandler(event) {
-            
             let payload:ThreadChangePayload= {key:' ',};
-            
             if(this.displayName){
                 payload.key=this.displayName;
-                //console.log(`Hey! you clicked me! I have displayName: ${this.displayName}`)
             }
             else if (this.remoteNumber) {
                 payload.key=this.remoteNumber;
-                //console.log(`Hey! you clicked me! I have remoteNumber: ${this.remoteNumber}`)
-                
             }
             else{
-                //console.log(`Hey! you clicked me! I have groupUUID: ${this.groupUUID}`)
                 payload.key=this.groupUUID;
-
             }
             if(this.threadUUID){
                 payload.threadUUID = this.threadUUID;
             }
-            //console.log(`here's the link to edit a contact ${this.contactEditLink}`)
             payload.editLink = this.contactEditLink;
-            //console.log(payload);
-            console.log(payload.key)
             this.newMessagesData=0;
             emitter.emit("thread-change",payload)
         },
@@ -111,23 +101,14 @@ export default {
         }
     },
     mounted(){
-
         emitter.on("update-last-message",(message:MessageData) =>{
             if(message.cpim){
-                // console.log(message.cpim.headers['Group-UUID'])
-                // console.log(message.cpim.headers["Group-UUID"])
-                // console.log(message.cpim.headers['group-uuid'])
-                // console.log(message.cpim.headers["group-uuid"])
-
-
                 if( message.cpim.headers["group-uuid"]){
                     if(message.direction =='incoming' && this.groupUUID == message.cpim.headers["group-uuid"] ){
                         this.newMessagesData++;
                     }
                 }
                 else{
-                    console.log(this.remoteNumber, " ", message.from)
-
                     if(message.direction=='incoming' && this.remoteNumber == message.from){
                         this.newMessagesData++;
                     }
@@ -135,7 +116,7 @@ export default {
             }
             else{
                 if(message.direction == 'incoming' && message.from == this.remoteNumber ){
-                    console.log(this.remoteNumber, " ", message.from)
+                    //console.log(this.remoteNumber, " ", message.from)
                     if(this.currentThread != 'activeThread'){
                         this.newMessagesData++;
                         //console.log(this.newMessagesData);
@@ -143,7 +124,6 @@ export default {
                 }
             }                
         })
-
     }
 }
 </script>

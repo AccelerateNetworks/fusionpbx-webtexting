@@ -87,11 +87,7 @@ export const initializeWebTextingContainer =
       threadPreviews: threadPreviewMap,
       multipleWebTextingExtensions: opts.multiple_wt_extensions,
     };
-
-    //console.log(opts)
-    //console.log("props", containerProps)
     const app = createApp(WebTextingContainer, containerProps);
-
     app.config.errorHandler = (err, instance, info) => {
       console.log("error from within vue:", info, err, instance);
       console.error(err);
@@ -113,7 +109,7 @@ export const initializeWebTextingContainer =
     );
     // any event that needs absolute global scope should be listened for here
     emitter.on("backfill-requested", (key: string) => {
-      console.log(`main.ts backfill key ${key}`);
+      //console.log(`main.ts backfill key ${key}`);
       //key is either a uuid or phone number. uuid length is  16
       if (key) {
         if (key.length < 15) {
@@ -128,15 +124,12 @@ export const initializeWebTextingContainer =
       }
     });
     emitter.on("backfill-previews-requested", () => {
-      console.log("backfilling previews");
+      //console.log("backfilling previews");
     });
     emitter.on(
       "conversation-accessed",
       (updateUserLastSeenObject: updateUserLastSeenOptions) => {
-        console.log(
-          "this is where we call updateLastSeen",
-          updateUserLastSeenObject
-        );
+        //console.log("this is where we call updateLastSeen",updateUserLastSeenObject);
         updateLastSeen(updateUserLastSeenObject);
       }
     );

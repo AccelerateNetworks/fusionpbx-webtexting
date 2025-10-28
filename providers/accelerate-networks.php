@@ -58,12 +58,12 @@ function incoming()
 
 function outgoing_sms(string $from, string $to, string $body)
 {
-    _send(["to" => $to, "msisdn" => $from, "message" => $body]);
+    return _send(["to" => $to, "msisdn" => $from, "message" => $body]);
 }
 
 function outgoing_mms(string $from, string $to, array $attachments)
 {
-    _send(["to" => $to, "msisdn" => $from, "mediaURLs" => $attachments]);
+    return _send(["to" => $to, "msisdn" => $from, "mediaURLs" => $attachments]);
 }
 
 function _send(array $body)
@@ -81,15 +81,24 @@ function _send(array $body)
     );
     if($res->getStatusCode() == 200){
         //everything's fine do nothing.
-        $responseBody = json_decode($res->getBody()->getContents());
-        //echo(json_encode($responseBody));
-        //return $responseBody;
+        $responseBody['statusCode'] = $res->getStatusCode();
+        $responseBody['ReasonPhrase'] = $res->getReasonPhrase();
+        $responseBody['sourceURL'] = "https://sms.callpipe.com/message/send";
+        $responseBody['timestamp'] = date("c");
+        $responseBody['authToken'] = $_SESSION['webtexting']['acceleratenetworks_api_key']['text'];
+        echo(json_encode($responseBody));
+        return json_encode($responseBody);
     }
     else{
         error_log("got ".$res->getStatusCode()." ".$res->getReasonPhrase()."\n");
-        $responseBody = json_decode($res->getBody()->getContents());
+        $responseBody['statusCode'] = $res->getStatusCode();
+        $responseBody['ReasonPhrase'] = $res->getReasonPhrase();
+        $responseBody['sourceURL'] = "https://sms.callpipe.com/message/send";
+        $responseBody['timestamp'] = date("c");
+        $responseBody['authToken'] = $_SESSION['webtexting']['acceleratenetworks_api_key']['text'];
         error_log("response body: ".print_r($responseBody, true)."\n");
-        //echo(json_encode($responseBody));
+        echo(json_encode($responseBody));
+        return json_encode($responseBody);
     }
 }
     

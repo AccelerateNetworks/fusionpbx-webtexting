@@ -22,17 +22,17 @@ export async function checkIfForwardedAddress(query: checkForwardingRequest) {
     let fetching = false;
     let test: ClientResponse;
     try {
-        console.log("[checkIfForwardedAddress] I'm trying " + query);
+        //console.log("[checkIfForwardedAddress] I'm trying " + query);
         fetching = true;
         test = await fetch('/app/webtexting/check-forwarding.php?' + new URLSearchParams(query).toString())
             .then(res => res.json());
     }
     catch (e) {
-        console.log(e);
+        //console.log(e);
         throw (e);
     }
     finally {
-        console.log("[checkIfForwardedAddress] done checking for previous email forwarding registrations")
+        //console.log("[checkIfForwardedAddress] done checking for previous email forwarding registrations")
         fetching = false;
         // TODO: Run this throught the debugger and see if it's a string or object, then correct the type.
         emitter.emit('forwarding-check-response', JSON.parse(test.toString()));

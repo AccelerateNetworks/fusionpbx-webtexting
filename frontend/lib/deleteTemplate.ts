@@ -9,9 +9,9 @@ let fetching = false;
 
 
 export async function deleteTemplate(args: deleteTemplateQuery) {
-    console.log("[deleteTemplate] Deleting template");
+    //console.log("[deleteTemplate] Deleting template");
     if (fetching) {
-        console.log("[deleteTemplate] Skipping duplicate delete request");
+        //console.log("[deleteTemplate] Skipping duplicate delete request");
         return;
     }
     fetching = true;

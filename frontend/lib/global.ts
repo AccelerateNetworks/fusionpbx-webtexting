@@ -71,7 +71,7 @@ const state = reactive<GlobalState>({
 const emitter = mitt();
 // add handling for 'do not add' fail case key from SIP.ts
 function addMessage(key:string, message: MessageData) {
-    console.log("trying to add message with key: " + key);
+    //console.log("trying to add message with key: " + key);
     //console.log(message)
     emitter.emit("update-last-message",message)
 
@@ -100,7 +100,7 @@ function addMessage(key:string, message: MessageData) {
         state.conversations[key].push(message);
     }
     else{
-        console.log("[Global.addMessage] Conversation not found adding conversation")
+        //console.log("[Global.addMessage] Conversation not found adding conversation")
         addThread(key,message);
     }
     
@@ -113,11 +113,11 @@ function addThread(key:string, message?:MessageData){
         if(!message.id){
             message.id = crypto.randomUUID();
         }
-        console.log(message);
+        //console.log(message);
         const newConversation = Array<MessageData>(message);
-        console.log(`[Global.addThread] New messages to add to new conversation ${newConversation}`);
+        //console.log(`[Global.addThread] New messages to add to new conversation ${newConversation}`);
         state.conversations[key] = newConversation;
-        console.log(`[Global.addThread] Adding conversation with message ${message}`)
+        //console.log(`[Global.addThread] Adding conversation with message ${message}`)
 
         //this is where we add a ThreadPreview for a new outgoing message
         //TODO: refactor to allow MMS messages on new message

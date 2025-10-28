@@ -85,7 +85,7 @@ export default {
         if (state.connected) {
           this.send();
         } else {
-          console.log("[Sendbox] Not connected, can't send message");
+          //console.log("[Sendbox] Not connected, can't send message");
         }
         return false;
       }
@@ -139,7 +139,7 @@ export default {
             const attachment = this.pendingAttachments.shift();
             await attachment.upload;
 
-            console.log("[Sendbox] sending attachment:", attachment);
+            //console.log("[Sendbox] sending attachment:", attachment);
             const cpim = new CPIM(attachment.uploadedURL, attachment.file.type);
             if (this.groupUUID) {
               cpim.headers["Group-UUID"] = this.groupUUID;
@@ -154,7 +154,7 @@ export default {
 
           if (this.enteredText.length > 0) {
             let message = this.getMessageData();
-            console.log(message);
+            //console.log(message);
             if (this.groupUUID) {
               const url = await uploadText(this.enteredText);
               const cpim = new CPIM(url, "text/plain");
@@ -162,7 +162,7 @@ export default {
               if (this.groupUUID) {
                 cpim.headers["Group-UUID"] = this.groupUUID;
               }
-              console.log("outgoing cpim", cpim);
+              //console.log("outgoing cpim", cpim);
               message.contentType = "message/cpim";
               message.cpim = cpim;
               message.body = cpim.serialize();
@@ -227,7 +227,7 @@ export default {
               cpim.headers["Group-UUID"] = this.groupUUID;
             }
 
-            console.log("[Sendbox.sendnewMessage] Outgoing CPIM", cpim);
+            //console.log("[Sendbox.sendnewMessage] Outgoing CPIM", cpim);
 
             message.contentType = "message/cpim";
             message.cpim = cpim;
@@ -242,12 +242,7 @@ export default {
           //console.log('emitting message', message);
           emitter.emit("outbound-message", message);
           setTimeout(
-            () =>
-              console.log(
-                "[Sendbox.sendnewMessage] duplicate send prevention timeout"
-              ),
-            500
-          );
+            () => console.log("[Sendbox.sendnewMessage] duplicate send prevention timeout"),500);
           this.enteredText = "";
         }
       } else {
@@ -296,11 +291,7 @@ export default {
     },
     removeAttachment(attachment: PendingAttachment) {
       let position = this.pendingAttachments.indexOf(attachment);
-      console.log(
-        "[Sendbox.removeAttachment] Removing attachment",
-        position,
-        attachment
-      );
+      //console.log("[Sendbox.removeAttachment] Removing attachment", position, attachment);
       this.pendingAttachments.splice(position, 1);
     },
     async uploadAttachment(attachment: PendingAttachment): Promise<void> {
@@ -312,7 +303,7 @@ export default {
 
         attachment.uploadedURL = uploadTarget.download_url;
 
-        console.log("[Sendbox.uploadAttachment] Uploading ", uploadTarget);
+        //console.log("[Sendbox.uploadAttachment] Uploading ", uploadTarget);
         const resp = await fetch(uploadTarget.upload_url, {
           method: "PUT",
           body: await attachment.file.arrayBuffer(),
@@ -320,7 +311,7 @@ export default {
 
         attachment.progress = 100;
 
-        console.log("[Sendbox] uploaded: ", resp);
+        //console.log("[Sendbox] uploaded: ", resp);
       } else {
         //alert('Attachments not supported for new conversations at this time.')
       }
@@ -356,7 +347,7 @@ export default {
     },
     onPaste(e: ClipboardEvent)  {
       var items = e.clipboardData.items;
-      console.log(JSON.stringify(items)); // will give you the mime types
+      //console.log(JSON.stringify(items)); // will give you the mime types
       for (const item of items) {
         switch (item.type) {
           case "image/png":
@@ -397,10 +388,7 @@ export default {
           case "text/plain":
             continue;
           default:
-            console.log(
-              "[Sendbox.onPaste] Discarding clipboard data of unknown type:",
-              item
-            );
+            //console.log("[Sendbox.onPaste] Discarding clipboard data of unknown type:", item);
         }
       }
     },
@@ -422,7 +410,7 @@ export default {
       }
     };
     emitter.on("dropup-selection-recieved", (payload: String) => {
-      console.log("[Sendbox] Selection Recieved. You selected: " + payload);
+      //console.log("[Sendbox] Selection Recieved. You selected: " + payload);
       this.enteredText = payload;
     });
     emitter.on(

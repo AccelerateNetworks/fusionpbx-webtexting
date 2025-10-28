@@ -28,7 +28,7 @@ let fetching = false;
 
 export async function backfillMessages(extensionUUID: string, remoteNumber?: string, group?: string) {
     if (fetching) {
-        console.log("[backfill.backfillMessages] skipping duplicate backfill request");
+        //console.log("[backfill.backfillMessages] skipping duplicate backfill request");
         return;
     }
     fetching = true;
@@ -55,9 +55,9 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
 
         // console.log(params)
         const response: BackfillResponse = await fetch('/app/webtexting/messages.php?' + new URLSearchParams(params).toString()).then(r => r.json());
-        console.log("[backfill.backfillMessages] received", response.messages, "as backlog");
+        //console.log("[backfill.backfillMessages] received", response.messages, "as backlog");
         if (response.messages) {
-            console.log("[backfill.backfillMessages] received", response.messages.length, "message from backlog");
+            //console.log("[backfill.backfillMessages] received", response.messages.length, "message from backlog");
             for (let i = 0; i < response.messages.length; i++) {
                 let m = response.messages[i];
                 //console.log(m)
@@ -104,14 +104,14 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
 
         }
         else {
-            console.log("no messages found for ", params);
+            //console.log("no messages found for ", params);
             emitter.emit('conversation-fully-backfilled');
         }
         emitter.emit('backfill-complete');
 
     } catch (e) {
         fetching = false;
-        console.log('[backfill.backfillMessages] backfill error:', e);
+        //console.log('[backfill.backfillMessages] backfill error:', e);
     }
 }
 

@@ -4,7 +4,7 @@ let updatingLastSeen = false;
 //this is how we keep track of persistent unreads
 export async function updateLastSeen(updateULSObject: updateUserLastSeenOptions) {
     if (updatingLastSeen) {
-        console.log("[updateLastSeen] Skipping duplicate userLastSeen update")
+        //console.log("[updateLastSeen] Skipping duplicate userLastSeen update")
         return;
     }
     updatingLastSeen = true;
@@ -14,7 +14,7 @@ export async function updateLastSeen(updateULSObject: updateUserLastSeenOptions)
     }
     catch (e) {
         updatingLastSeen = false;
-        console.log('[updateLastSeen] Update last seen error:', e);
+        //console.log('[updateLastSeen] Update last seen error:', e);
     }
     finally {
         updatingLastSeen = false;

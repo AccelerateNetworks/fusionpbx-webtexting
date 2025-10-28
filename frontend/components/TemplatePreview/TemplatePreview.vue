@@ -57,7 +57,7 @@ export default {
     },
     methods:{
         menuLinkClickHandler(){
-            console.log(this.description)
+            //console.log(this.description)
             emitter.emit("template-change",this.props)
         },
         deleteTemplateRequest(){

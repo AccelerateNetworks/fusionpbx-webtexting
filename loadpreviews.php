@@ -37,12 +37,12 @@ if (!$ownNumber) {
 }
 //this is for Limiting the list of threads on initial load
 
-$QUERY_LIMIT = 25;
+$QUERY_LIMIT = 20;
 
 
 $sql = 'SELECT * FROM webtexting_threads WHERE domain_uuid = :domain_uuid AND local_number = :local_number ';
 if($_GET['older_than'] ){
-    $sql .= 'AND last_message < to_timestamp(:older_than/1000.00)';
+    $sql .= 'AND last_message < to_timestamp(:older_than,\'YYYY-MM-DD HH24:MI:SS\')';
 }
 $sql.= ' ORDER BY last_message DESC LIMIT :QUERY_LIMIT ;';
 $parameters['domain_uuid'] = $domain_uuid;
@@ -310,4 +310,4 @@ if($conversations){
 }
 echo(json_encode($threadPreviews));
 return json_encode($threadPreviews);
-//This handles group and contact search jsut need to add number search
+//This handles group and contact search just need to add number search

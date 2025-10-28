@@ -183,14 +183,10 @@ export default {
 
     emitter.on("backfill-complete", () => {
       if (!this.backfillAvailable) {
-        console.log(
-          "conversation fully backfilled, refusing to attempt to backfill more"
-        );
+        //console.log("conversation fully backfilled, refusing to attempt to backfill more");
         return;
       } else if (this.topVisible && this.bottomVisible) {
-        console.log(
-          "top and bottom of conversation visible, attempting to backfill immediately"
-        );
+        //console.log("top and bottom of conversation visible, attempting to backfill immediately");
         emitter.emit("backfill-requested", this.conversationKey);
         return;
       }
@@ -198,21 +194,19 @@ export default {
       //console.log('will backfill if top is still visible in 1 second');
       setTimeout(() => {
         if (this.topVisible) {
-          console.log("top still visible backfill");
+          //console.log("top still visible backfill");
           emitter.emit("backfill-requested", this.conversationKey);
         }
       }, 5000);
     });
 
     emitter.on("conversation-fully-backfilled", () => {
-      console.log(
-        "preventing future backfilling attempts, this conversation has been fully backfilled"
-      );
+      //console.log("preventing future backfilling attempts, this conversation has been fully backfilled");
       this.backfillAvailable = false;
     });
 
     emitter.on("thread-changed", (newDisplayName: String) => {
-      console.log(`thread changed new display name is ${newDisplayName}`);
+      //console.log(`thread changed new display name is ${newDisplayName}`);
       this.title = newDisplayName;
     });
 
@@ -231,7 +225,7 @@ export default {
       }
     });
     refreshElement.addEventListener("touchend", (e) => {
-      console.log("touch end");
+      //console.log("touch end");
       let pullToRefresh = document.querySelector(".pull-to-refresh");
 
       if (pullToRefresh && pullToRefresh.classList.contains("visible")) {
@@ -299,7 +293,7 @@ export default {
           case this.$refs.top:
             this.topVisible = e.isIntersecting;
             if (e.isIntersecting && this.backfillAvailable) {
-              console.log("isIntersecting and backfillavailable");
+              //console.log("isIntersecting and backfillavailable");
               emitter.emit("backfill-requested", this.conversationKey);
             }
             //console.log("top is", e.isIntersecting ? "visible" : "hidden");

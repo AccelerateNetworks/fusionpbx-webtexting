@@ -45,7 +45,7 @@ export default {
         },
         requestTemplateSave(event){
             event.preventDefault();
-            console.log(this.formInputs)
+            //console.log(this.formInputs)
             if(this.formInputs.templateName  || this.formInputs.body ){
                 if(this.formInputs.body.length>1600){
                     console.error('Error Submitting Form. Quick Response templates must contain less than 160 characters')

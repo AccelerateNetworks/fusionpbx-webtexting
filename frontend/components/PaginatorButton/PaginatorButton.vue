@@ -13,10 +13,10 @@ export default{
 
     paginatorClickFunction(){
             const buttonData = document.getElementById('MORE-PREVIEWS');
-            console.log("Button data:  ", buttonData);
+            //console.log("Button data:  ", buttonData);
             emitter.emit("backfill-previews-requested");
-            console.log(state.page);
-            console.log(updatePageNumber());
+            //console.log(state.page);
+            //console.log(updatePageNumber());
 
         },
     },

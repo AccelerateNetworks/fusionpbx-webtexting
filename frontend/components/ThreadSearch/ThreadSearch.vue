@@ -17,7 +17,7 @@ export default{
                emitter.emit("thread-search-request",searchString),500;
             }
             else{
-                console.log("ThreadSearch PDL emergency release valve");
+                //console.log("ThreadSearch PDL emergency release valve");
                 emitter.emit("previews-done-loading");
             }
         }

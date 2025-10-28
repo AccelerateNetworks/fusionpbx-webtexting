@@ -16,14 +16,14 @@ export type saveTemplateQuery = {
 let temp;
 export async function saveTemplate(query: saveTemplateQuery) {
     try {
-        console.log("[saveTemplates] I'm trying", query)
+        //console.log("[saveTemplates] I'm trying", query)
         const response = await fetch('/app/webtexting/message-templates.php?' + new URLSearchParams(query).toString()).then(r => r);
         temp = response;
-        console.log(response);
+        //console.log(response);
         //await fetch 
     }
     catch (e) {
-        console.log(e, '[saveTemplates] Failed to add template. Please contact Accelerate Networks Support.');
+        //console.log(e, '[saveTemplates] Failed to add template. Please contact Accelerate Networks Support.');
         //alert("Failed to add template. Please contact Accelerate Networks Support.");
         temp.message = "Failed to add template. Please contact Accelerate Networks Support.";
         emitter.emit("template-save-failed", temp);
@@ -32,7 +32,7 @@ export async function saveTemplate(query: saveTemplateQuery) {
         if (temp.status == 200) {
             temp.action = 'Template Saved!'
             emitter.emit("template-save-complete", temp)
-            console.log("[saveTemplates] Finally done")
+            //console.log("[saveTemplates] Finally done")
         }
         else {
             temp.message = "Failed to save template. Please contact Accelerate Networks support.";

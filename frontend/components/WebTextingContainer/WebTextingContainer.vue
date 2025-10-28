@@ -58,41 +58,26 @@ export default {
         calculateDisplayName() {
             if (this.$route.query.group) {
                 for (let m in this.state.previews) {
-                    console.log(`group: ${m}`);
+                    //console.log(`group: ${m}`);
                 }
             }
             else {
                 for (let m in this.state.previews) {
-                    console.log(`contact: ${m}`);
+                    //console.log(`contact: ${m}`);
                 }
             }
-            console.log("display name calculated");
+            //console.log("display name calculated");
             return "tested";
         },
         updateLastMessage(message: MessageData) {
-            console.log(`ULM: `);
             // const timezoneOffset = new Date().getTimezoneOffset();
-            // console.log(timezoneOffset)
             let now: moment.Moment = moment.utc(Date.now());
-            //console.log(now);
             //const timestamp:Date = now.toUTCString();
             //now = now + timezoneOffset;
-            //console.log(message)
             if (message.contentType == "message/cpim") {
-                //console.log(message.cpim.headers['group-uuid']);
-                // console.log(this.state.previews.get(message.cpim.headers['group-uuid']));
-                //bump this thread somehow?
-                //this mightnot work for a new message 
-                // console.log(message.cpim.headers["group-uuid"])
-                // console.log(message.cpim.headers["Group-UUID"])
-                // console.log(message.cpim.headers['Group-UUID'])
-                console.log(message.cpim.headers['group-uuid'])
-
-
                 //outbound message case
                 if (message.direction == 'outgoing') {
                     if (message.cpim.headers['group-uuid']) {
-
                         let temp = this.state.previews.get(message.cpim.headers['group-uuid']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
@@ -106,18 +91,15 @@ export default {
                     else {
                         if (this.$route.query.number) {
                             let temp = this.state.previews.get(this.$route.query.number);
-                            console.log(this.state.previews.get(this.$route.query.number), " ", this.$route.query.number);
+                            //console.log(this.state.previews.get(this.$route.query.number), " ", this.$route.query.number);
                             temp.bodyPreview = "New MMS Message";
                             temp.timestamp = now;
                             this.state.previews.set(this.$route.query.number, temp);
-
                         }
-
                     }
                 }
                 else if (message.direction == 'incoming') {
                     if (message.cpim.headers['group-uuid']) {
-
                         let temp = this.state.previews.get(message.cpim.headers['group-uuid']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
@@ -131,42 +113,32 @@ export default {
                     else {
                         if (this.$route.query.number) {
                             let temp = this.state.previews.get(this.$route.query.number);
-                            console.log(this.state.previews.get(this.$route.query.number), " ", this.$route.query.number);
+                            //console.log(this.state.previews.get(this.$route.query.number), " ", this.$route.query.number);
                             temp.bodyPreview = "New MMS Message";
                             temp.timestamp = now;
                             this.state.previews.set(this.$route.query.number, temp);
-
                         }
-
                     }
                 }
             }
             else {
-                //console.log("not message.cpim")
                 if (message.from == this.ownNumber) {
-                    //console.log(this.state.previews.get(message.to))
                     //set this.state.previews.get(message.to)bodyPreview to message.body
                     if (this.state.previews.get(message.to)) {
                         let temp = this.state.previews.get(message.to);
                         temp.bodyPreview = message.body;
                         temp.timestamp = now.toString();
                         this.state.previews.set(message.to, temp);
-
                     }
-
                 }
                 else if (message.to == undefined) {
-
-                    // console.log(this.state.previews.get(message.from))
                     //set this.state.previews.get(message.from)bodyPreview to message.body
                     if (this.state.previews.get(message.from)) {
                         let temp = this.state.previews.get(message.from);
                         temp.bodyPreview = message.body;
                         temp.timestamp = now.toString();
                         this.state.previews.set(message.from, temp);
-
                     }
-
                 }
             }
             this.$forceUpdate();
@@ -175,14 +147,12 @@ export default {
     watch: {
         threadPreviews: {
             handler(oldPreviews, newPreviews) {
-                console.log("wtc thread previews changed");
             },
             deep: true,
         },
         smallScreen: {
             handler(oldScreen, newScreen) {
                 let smallScreen = useMatchMedia('(max-width<=700px)');
-                console.log("smallscreen handler")
                 if (smallScreen) {
                     let pullToRefresh = document.querySelector('.pull-to-refresh');
                 }
@@ -191,19 +161,15 @@ export default {
                 }
             }
         }
-
     },
     async created() {
-        //getPreviews();
-        console.log(this.state);
         loadPreviews(this.extensionUUID, state.oldestMessage);
     },
     mounted() {
-        //console.log(this.$route.query.extension_uuid);
         emitter.on('thread-change', (payload: ThreadChangePayload) => {
             this.contactEditLink = payload.editLink;
             this.threadUUID = payload.threadUUID;
-            console.log(`wtc thread change ${payload.threadUUID}`)
+            //console.log(`wtc thread change ${payload.threadUUID}`)
             this.title = payload.key;
             const updateUserLastSeenObject = { thread_uuid: payload.threadUUID, extension_uuid: this.$route.query.extension_uuid }
             emitter.emit("conversation-accessed", updateUserLastSeenObject)
@@ -215,15 +181,12 @@ export default {
         });
         emitter.on("update-last-message", (message: MessageData) => {
             this.updateLastMessage(message);
-
         });
         emitter.on("thread-search-request", async (queryString: string) => {
             if (this.$route.query.extension_uuid) {
                 this.loaded = false;
                 this.loadedPreviews = false;
-                console.log("we've got a route")
                 await searchPreviews(queryString, this.$route.query.extension_uuid);
-                console.log(this.state.previews);
             }
             else {
                 alert("No Extension detected. Reload the page")
@@ -234,10 +197,10 @@ export default {
             this.load = true;
         });
         emitter.on("backfill-previews-requested", () => {
+            console.log("bpl")
             loadPreviews(this.extensionUUID, state.oldestMessage);
         });
         emitter.on("add-template", async (queryString: saveTemplateQuery) => {
-            //console.log(queryString)
             if (queryString.template_uuid) {
                 queryString.template_uuid = null;
             }
@@ -245,7 +208,6 @@ export default {
             await saveTemplate(queryString);
         });
         emitter.on("edit-template", async (queryString: saveTemplateQuery) => {
-            //console.log(queryString);
             queryString.extension_uuid = this.extensionUUID;
             await saveTemplate(queryString);
         });
@@ -263,7 +225,7 @@ export default {
             await registerForwardAddress(args)
         });
         emitter.on("forwarded-email-check", async (args: checkForwardingRequest) => {
-            console.log("check if email already registered")
+            //console.log("check if email already registered")
             args.extension_uuid = this.extensionUUID;
             await checkIfForwardedAddress(args);
         })
@@ -284,9 +246,7 @@ export default {
             }
             emitter.emit("email-forwarding-register-success", args);
         })
-
     },
-
 }
 </script>
 
@@ -347,7 +307,8 @@ The blank space should notify the user that they can select a thread to display 
 }
 
 #TEST_DIV_FOR_TESTING_WEBTEXTING {
-    height: 85vh;
+    /* height: 85vh; */
+    background: none;
 }
 
 

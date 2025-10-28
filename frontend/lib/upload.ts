@@ -5,14 +5,12 @@ async function uploadAttachment(file: File): Promise<string> {
         body: JSON.stringify({ filename: file.name })
     }).then(r => r.json());
 
-    console.log("[upload] uploading ", uploadTarget);
+    //console.log("[upload] uploading ", uploadTarget);
     const resp = await fetch(uploadTarget.upload_url, {
         method: "PUT",
         body: await file.arrayBuffer(),
     });
-
-    console.log("[upload] uploaded: ", resp);
-
+    //console.log("[upload] uploaded: ", resp);
     return uploadTarget.download_url;
 }
 
@@ -26,7 +24,6 @@ async function uploadText(text: string): Promise<string> {
         method: "PUT",
         body: text,
     });
-
     return uploadTarget.download_url;
 }
 
