@@ -104,11 +104,13 @@ export default {
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
                         this.state.previews.set(message.cpim.headers['group-uuid'], temp);
+                        return;
                     } else if (message.cpim.headers["Group-UUID"]) {
                         let temp = this.state.previews.get(message.cpim.headers['Group-UUID']);
                         temp.bodyPreview = "New MMS Message";
                         temp.timestamp = now;
                         this.state.previews.set(message.cpim.headers['Group-UUID'], temp);
+                        return;
                     }
                     else {
                         if (this.$route.query.number) {
@@ -117,6 +119,7 @@ export default {
                             temp.bodyPreview = "New MMS Message";
                             temp.timestamp = now;
                             this.state.previews.set(this.$route.query.number, temp);
+                            return;
                         }
                     }
                 }
@@ -129,6 +132,7 @@ export default {
                         temp.bodyPreview = message.body;
                         temp.timestamp = now.toString();
                         this.state.previews.set(message.to, temp);
+                        return;
                     }
                 }
                 else if (message.to == undefined) {
@@ -138,6 +142,7 @@ export default {
                         temp.bodyPreview = message.body;
                         temp.timestamp = now.toString();
                         this.state.previews.set(message.from, temp);
+                        return;
                     }
                 }
             }

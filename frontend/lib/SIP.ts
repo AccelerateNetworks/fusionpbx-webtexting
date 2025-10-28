@@ -34,6 +34,9 @@ function calculateCPIMThreadID(cpim: CPIM, direction: string, originalTo: string
     if (cpim.headers["Group-UUID"] ) {
         return cpim.headers["Group-UUID"];
     }
+    else if (cpim.headers["group-uuid"] ) {
+        return cpim.headers["group-uuid"];
+    }
     else if ((direction =='incoming')) {
         //not group message and inbound so key is whoever sent message
         return messageFromUser;
@@ -95,7 +98,8 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                 //console.log(message.request.getHeader("Content-Type"));
                 switch (message.request.getHeader("Content-Type")) {
                     case "text/plain":
-
+                        console.log("onMessage")
+                    console.log(message)
                         const plainThreadID = calculatePlainThreadID(message, direction, originalTo, messageFromUser);
                         addMessage(plainThreadID, {
                             direction: direction,
@@ -111,7 +115,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                     case "message/cpim":
                         let cpim = CPIM.fromString(message.request.body);
                         //console.log("[SIP.RunSIPConnection] Received CPIM ", cpim);
-
+                        console.log('addMessage call stack check')
 
                         //console.log("adding new message to the thread from CPIM");
 
