@@ -11,7 +11,6 @@ export default {
             timestampText: "-",
             interval: null,
             loaded: false,
-            status: "-1",
         }
     },
     props: {
@@ -35,7 +34,6 @@ export default {
     methods: {
         bumpTimestamp() {
             this.timestampText = this.message.timestamp.fromNow();
-
         },
         emitLoaded() {
             emitter.emit('scroll-to-bottom');
@@ -106,7 +104,13 @@ export default {
             <p class="message-body" v-if="this.download">
                 <a :href="download" target="_blank">click to download</a>
             </p>
-            <span class="ts">{{ timestampText }}</span>
+            <span class="ts">{{ timestampText }} </span>
+            <div class="d-inline-block" v-if="this.message.direction=='outgoing'">
+                <i class="fa fa-regular fa-circle-check pl-4" v-if="this.message.delivered" aria-hidden="true" title="Message Delivered"></i>                
+                <i class="fa fa-regular fa-circle pl-4" v-else-if="this.message.delivered == undefined" aria-hidden="true" title="Message Delivered"></i>
+
+                <i class="fa fa-regular fa-circle-xmark pl-4" v-else aria-hidden="true" title="Message Sending"></i>
+            </div>
         </div>
     </div>
 </template>

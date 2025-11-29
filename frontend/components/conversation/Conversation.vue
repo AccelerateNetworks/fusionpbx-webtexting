@@ -212,11 +212,11 @@ export default {
 
     let touchstartY:any = 0;
     const refreshElement = document.getElementsByClassName("thread-header")[0];
-    refreshElement.addEventListener("touchstart", (e:any) => {
-      touchstartY = e.touches[0].clientY;
+    refreshElement.addEventListener("touchstart", (touchStartEvent:TouchEvent) => {
+      touchstartY = touchStartEvent.touches[0].clientY;
     });
-    refreshElement.addEventListener("touchmove", (e:any) => {
-      const touchY:any = e.touches[0].clientY;
+    refreshElement.addEventListener("touchmove", (touchmove:TouchEvent) => {
+      const touchY:any = touchmove.touches[0].clientY;
       const touchDiff = touchY - touchstartY;
       let pullToRefresh = document.querySelector(".pull-to-refresh");
       if (touchDiff > 0 && window.scrollY === 0 && pullToRefresh) {
@@ -224,7 +224,7 @@ export default {
         //e.preventDefault();
       }
     });
-    refreshElement.addEventListener("touchend", (e) => {
+    refreshElement.addEventListener("touchend", (touchend:TouchEvent) => {
       //console.log("touch end");
       let pullToRefresh = document.querySelector(".pull-to-refresh");
 
@@ -321,9 +321,9 @@ export default {
   },
   beforeDestroy() {
     const refreshElement = document.getElementsByClassName("thread-header")[0];
-    refreshElement.removeEventListener("touchend", e);
-    refreshElement.removeEventListener("touchmove", e);
-    refreshElement.removeEventListener("touchestart", e);
+    refreshElement.removeEventListener("touchend", ontouchend);
+    refreshElement.removeEventListener("touchmove", ontouchmove);
+    refreshElement.removeEventListener("touchstart", ontouchstart);
   },
 };
 </script>
@@ -390,14 +390,14 @@ export default {
         <Message
           :message="message"
           :key="message.id"
-          :displayName="this.displayName ? this.displayName : null"
+          :displayName="displayName ? displayName : null"
           :lastSender="
             index - 1 >= 0
-              ? this.state.conversations[conversationKey][index - 1].from
+              ? state.conversations[conversationKey][index - 1].from
               : '-1'
           "
-          v-for="(message, index) in this.state.conversations[conversationKey]"
-          :mode="this.groupUUID ? 'group' : 'solo'"
+          v-for="(message, index) in state.conversations[conversationKey]"
+          :mode="groupUUID ? 'group' : 'solo'"
         />
         <div class="message-wrapper" ref="bottom">&nbsp;</div>
       </div>

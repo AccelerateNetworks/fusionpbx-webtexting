@@ -60,11 +60,11 @@ export default {
             if(this.loaded && this.threadPreviews){            
                 return new Map<String,ThreadPreviewData>([...this.threadPreviews].filter(([key, value]) => {
                     if (value == null) {
-                        //console.log("key for null value ", key)
+                        console.log("key for null value ", key)
                         return false;
                     }
                     else if (value.displayName == null) {
-                        //console.log("key for null value.displayName", key)
+                        console.log("key for null value.displayName", key)
                         return false;
                     }
                     //or contains number fragment

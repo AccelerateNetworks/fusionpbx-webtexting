@@ -1,6 +1,7 @@
 import { CPIM } from './CPIM';
 import { MessageData, emitter, state } from './global';
 import moment from 'moment';
+import { LuaSkipMessageData } from './SIP_REWORK';
 
 type BackfillResponse = {
     messages: BackfilMessage[],
@@ -15,6 +16,7 @@ type BackfilMessage = {
     start_stamp: string,
     to_number: string,
     message_uuid: string,
+    delivered?: boolean,
 };
 
 type backfillQuery = {
@@ -63,6 +65,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                 //console.log(m)
                 switch (m.content_type) {
                     case "text/plain":
+                        //types
                         insertMessageInHistory(remoteNumber, {
                             direction: m.direction,
                             contentType: m.content_type,
@@ -71,6 +74,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                             from: m.from_number,
                             to: m.to_number,
                             body: m.message,
+                            delivered: m.delivered,
                         });
                         break;
                     case "message/cpim":
@@ -89,6 +93,8 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                             from: m.from_number,
                             to: m.to_number,
                             cpim: CPIM.fromString(m.message),
+                            delivered: m.delivered,
+
                         });
                         break;
                 }
@@ -115,7 +121,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
     }
 }
 
-export function insertMessageInHistory(key: string, message: MessageData) {
+export function insertMessageInHistory(key: string, message: LuaSkipMessageData) {
     //check for message in history
     if (state.conversations[key]) {
         for (let i = 0; i < state.conversations[key].length; i++) {
@@ -132,7 +138,7 @@ export function insertMessageInHistory(key: string, message: MessageData) {
     }
     //add a new history if no history is found
     else {
-        state.conversations[key] = new Array<MessageData>();
+        state.conversations[key] = new Array<LuaSkipMessageData>();
     }
     // no existing message matched, append to end    
     state.conversations[key].push(message);

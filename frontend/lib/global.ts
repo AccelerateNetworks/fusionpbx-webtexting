@@ -2,6 +2,7 @@ import { Moment } from 'moment';
 import { reactive } from 'vue'
 import { CPIM } from './CPIM';
 import mitt from 'mitt';
+import {v4 as uuidv4} from 'uuid';
 
 type ConversationData = Record<string,Array<MessageData>>;
 type ThreadChangePayload = {
@@ -24,6 +25,17 @@ type MessageData = {
     body?: string;
     cpim?: CPIM;
     extensionUUID?: string;
+    delivered?: boolean;
+}
+type MessageSuccessPayload={
+ReasonPhrase: string;
+authToken:string;
+id: string;
+key: string;
+sourceURL: string;
+statusCode: number;
+timestamp: string;
+
 }
 
 type ThreadPreviewData = {
@@ -70,9 +82,29 @@ const state = reactive<GlobalState>({
 
 const emitter = mitt();
 // add handling for 'do not add' fail case key from SIP.ts
+function  updateMessageStatus(key:string, id: string, status: boolean):MessageSuccessPayload {
+    console.log("trying to update message with key: " + key + " to status: " + status);
+    if(state.conversations[key]){
+        let messages = state.conversations[key];
+        if(messages){
+
+            for(let m of messages) {
+                //console.log("checking message id: " + m.id)
+                if (m.id == id) {
+                    console.log("updating message", id);
+                    m.delivered = status;
+                    return;
+                }
+            }
+        }
+    }
+    else{
+
+    }
+}
 function addMessage(key:string, message: MessageData) {
     //console.log("trying to add message with key: " + key);
-    //console.log(message)
+    console.log(message)
     emitter.emit("update-last-message",message)
 
     if(state.conversations[key]){
@@ -82,6 +114,7 @@ function addMessage(key:string, message: MessageData) {
             let messages = state.conversations[key];
             if(messages){
                 for(let m of messages) {
+                    //console.log("checking message id: " + m.id);
                     if (m.id == message.id) {
                         //console.log("not re-inserting message", message.id);
                         return;
@@ -89,7 +122,6 @@ function addMessage(key:string, message: MessageData) {
                 }
                 //console.log("inserting new message", message.id);
             }
-            
         } else {
             //console.log("adding message with no ID!", message);       
         }
@@ -103,15 +135,15 @@ function addMessage(key:string, message: MessageData) {
         //console.log("[Global.addMessage] Conversation not found adding conversation")
         addThread(key,message);
     }
-    
 }
 
 function addThread(key:string, message?:MessageData){
-    //console.log(state.conversations)
+    console.log(state.conversations)
     if(message){
         //if a message doesn't have message.id we have to make one
         if(!message.id){
-            message.id = crypto.randomUUID();
+            message.id = uuidv4();
+            console.log(`[Global.addThread] Message had no ID, assigned new UUID: ${message.id}`);
         }
         //console.log(message);
         const newConversation = Array<MessageData>(message);
@@ -218,4 +250,4 @@ function updateOldestMessage(newOldestTimestamp: string){
     //console.log(state.oldestMessage)
     return state.oldestMessage;
 }
-export { state, emitter, QUERY_LIMIT, MessageData, GlobalState, ThreadChangePayload, MenuChangePayload, addMessage, addPreview, updatePageNumber, ThreadPreviewData  }
+export { state, emitter, QUERY_LIMIT, MessageData, GlobalState, ThreadChangePayload, MenuChangePayload, addMessage, addPreview, updatePageNumber, ThreadPreviewData, updateMessageStatus,MessageSuccessPayload  }

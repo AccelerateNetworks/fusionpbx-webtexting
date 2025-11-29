@@ -14,7 +14,7 @@ final class Messages
             return false;
         }
 
-        Messages::_incoming($destination, $from, $to, $body, "text/plain");
+        Messages::_incoming($destination, $from, $to, $body,  "text/plain",  null);
 
         return true;
     }
@@ -63,18 +63,18 @@ final class Messages
             $c->fileURL = $attachment;
             $c->fileContentType = $info['ContentType'];
             $c->fileSize = $info['ContentLength'];
-            Messages::_incoming($destination, $from, $to, $c, "message/cpim", $groupUUID);
+            Messages::_incoming($destination, $from, $to, $c, "message/cpim",  $groupUUID);
         }
 
         return true;
     }
 
-    private static function _incoming(LocalNumber $destination, string $from, string $to, $body, string $contentType, $groupUUID=null)
+    private static function _incoming(LocalNumber $destination, string $from, string $to, $body, string $contentType, ?string $groupUUID)
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
-
+        $message_uuid = uuid();
         // store message in the database
-        $dedupeID = Messages::Save('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
+         $messageUUID = Messages::Save('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType,  $message_uuid,  $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
         if ($body instanceof CPIM) {
@@ -89,13 +89,17 @@ final class Messages
         }
 
         // deliver via SIP
-        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $dedupeID, $groupUUID);
+        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
     }
 
-    public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $dedupeID=null)
+    public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $messageUUID)
     {
         $source = LocalNumber::Get($from);
-        Messages::_outgoing($source, $to, $from, $body, "text/plain", $dedupeID);
+        if ($source == null) {
+            return false;
+        }
+        $responseUUID = Messages::_outgoing($source, $to, $from, $body, "text/plain", $messageUUID, null);
+        return $responseUUID;
     }
 
     /**
@@ -108,31 +112,40 @@ final class Messages
      *
      * @return null
      */
-    public static function OutgoingMMS(string $extensionUUID, string $domainUUID, string $from, string $to, CPIM $body, string $groupUUID=null, string $dedupeID=null)
+    public static function OutgoingMMS(string $extensionUUID, string $domainUUID, string $from, string $to, CPIM $body, string $messageUUID, ?string $groupUUID )
     {
         $source = LocalNumber::Get($from);
         if ($source == null) {
             return false;
         }
+        if($groupUUID){
+            $responseUUID = Messages::_outgoing($source, $to, $from, $body,  "message/cpim",  $messageUUID,  $groupUUID);
+        }
+        else{
+            $responseUUID = Messages::_outgoing($source, $to, $from, $body,  "message/cpim",  $messageUUID,  null);
 
-        Messages::_outgoing($source, $to, $from, $body, "message/cpim", $dedupeID, $groupUUID);
+        }
 
-        return true;
+        return $responseUUID;
     }
 
-    public static function _outgoing(LocalNumber $source, string $to, string $from, $body, string $contentType, ?string $dedupeID, string $groupUUID=null)
+    public static function _outgoing(LocalNumber $source, string $to, string $from, $body, string $contentType, string $messageUUID, ?string $groupUUID)
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
+        if($groupUUID){
+            $response = Messages::Save( 'outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
+        }
+        else{
+            $response = Messages::Save( 'outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, null);
 
-        $response = Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $groupUUID);
-
+        }
         // generate a pre-signed download URL before delivering it to things that will download it
         if ($body instanceof CPIM) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
             $bodyStr = $body->toString();
         }
         return $response;
-        //Messages::_sendSIP($source->domainName, $source->extension, $from, $source->extension, $bodyStr, $contentType, $dedupeID, $groupUUID, $to);
+        //Messages::_sendSIP($source->domainName, $source->extension, $from, $source->extension, $bodyStr, $contentType, $messageUUID, $groupUUID, $to);
     }
 
     private static function _findGroup(LocalNumber $localNumber, string $from, string $to, $additionalRecipients): ?string
@@ -185,11 +198,16 @@ final class Messages
         return implode(",", $membersArray);
     }
 
-    public static function Save(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $groupUUID=null): string
+    public static function Save(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $messageUUID,  ?string $groupUUID): string
     {
         $db = new database;
+        // check if uuid collides
+        //if collides, generate a new one
+        // $sql = "SELECT message_uuid FROM webtexting_messages WHERE message_uuid = :message";
+        // $parameters['message'] = $messageUUID;
+        // $uuid_in_use = $db->execute($sql, $parameters);
+        // unset($parameters);
 
-        $messageUUID = uuid();
 
         $local_number = $from;
         $remote_number = $to;
@@ -234,6 +252,33 @@ final class Messages
         unset($parameters);
 
         return $messageUUID;
+    }///
+     /* Update the delivery status of a message
+     *
+     * @param string $messageUUID   the UUID of the message to update
+     * @param bool   $sentStatus    the new delivery status
+     * @param string $extensionUUID the extension UUID associated with the message
+     *
+     * @return bool true on success, false on failure
+     */
+    public static function UpdateStatus(string $messageUUID, bool $sentStatus, string $extensionUUID)
+    {
+        $database = new database;
+        $sql = "UPDATE webtexting_messages SET delivered = :delivered WHERE message_uuid = :message_uuid AND extension_uuid = :extension_uuid";
+        $parameters['delivered'] = $sentStatus;
+        $parameters['message_uuid'] = $messageUUID;
+        $parameters['extension_uuid'] = $extensionUUID;
+        if(!$database->execute($sql, $parameters)) {
+            unset($parameters);
+            return array(
+                "error" => "failed to update sms destination",
+                "messages" => $database->message,
+                "statusCode" => 520,
+            );
+        }return array(
+                "messages" => $database->message,
+                "statusCode" => 200,
+            );
     }
 
     private static function _sendWebPush(string $domainUUID, string $extensionUUID, string $from, string $to, string $body, ?string $groupUUID)
@@ -330,7 +375,7 @@ final class Messages
         }
     }
     
-    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $dedupeID, ?string $groupUUID=null, ?string $originalTo=null)
+    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $messageUUID, ?string $groupUUID=null, ?string $originalTo=null)
     {
         $SIPProfiles = array("websocket"); // TODO: make this list configurable
         $toAddress = $extension."@".$domainName;
@@ -354,7 +399,7 @@ final class Messages
                 "hint" => "the hint", // is this required? what is it? fusionpbx's sms app does this
                 "replying" => "true", // what is this?
                 "DP_MATCH" => $toAddress, // what is this?
-                "sip_h_X-Message-ID" => $dedupeID,
+                "sip_h_X-Message-ID" => $messageUUID,
                 "Content-Length" => strlen($body),
             );
 

@@ -5,8 +5,6 @@ import Alert, { AlertData } from './Alert.vue';
 export default {
   components: { Alert },
     name: 'AlertFactory',
-    props:{
-    },
     data() {
         let AlertList:Array<AlertData>=[];
         return {
@@ -15,7 +13,6 @@ export default {
     },
     mounted() {
         emitter.on('delete-template-failed', (payload:AlertData)=>{
-            payload.message = "failed to delete template make an alert about it.";
             payload.type='Error';
                         this.AddAlert(payload);
         })
@@ -36,9 +33,11 @@ export default {
         })
         emitter.on('message-failed', (payload:AlertData)=>{
             this.AddAlert(payload);
+            emitter.emit('update-db-message-failed', payload);
+
         })
         emitter.on('message-sent', (payload:AlertData)=>{
-            this.AddAlert(payload);
+            //this.AddAlert(payload);
         })
     },
     methods: {

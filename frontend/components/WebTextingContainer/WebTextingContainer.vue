@@ -6,7 +6,7 @@ import NewMessage from '../NewMessage.vue';
 import { RouterView } from 'vue-router';
 import { saveTemplate, saveTemplateQuery, } from '../../lib/saveTemplates';
 import { useMatchMedia } from '../../lib/matchMedia';
-import { emitter, MessageData, ThreadChangePayload, state, ThreadPreviewData } from '../../lib/global';
+import { emitter, MessageData, ThreadChangePayload, state, ThreadPreviewData, updateMessageStatus, MessageSuccessPayload } from '../../lib/global';
 import { searchPreviews, loadPreviews } from '../../lib/backfillPreviews';
 import { loadTemplates, loadTemplateQuery } from '../../lib/loadTemplates';
 import { deleteTemplateQuery, deleteTemplate } from '../../lib/deleteTemplate';
@@ -251,6 +251,14 @@ export default {
             }
             emitter.emit("email-forwarding-register-success", args);
         })
+        emitter.on("update-db-message-failed", (payload) => {
+            //console.log("update db message failed called in wtc");
+        });
+        emitter.on("message-success", (payload: MessageSuccessPayload) =>{
+            //update message matching payload.messageuuid with status it sent 
+            //console.log(payload);
+            updateMessageStatus(payload.key, payload.id, true);
+        })
     },
 }
 </script>
@@ -265,18 +273,18 @@ The blank space should notify the user that they can select a thread to display 
             <div v-if="smallScreen" class="pull-to-refresh">
                 <div class="spinner-border"></div>
             </div>
-            <RouterView name="leftSide" :ownNumber="this.$props.ownNumber" :threads="this.$props.threads"
-                :threadPreviews="this.state.previews" :previewsLoaded="this.loadedPreviews"
-                :selectedConvo="this.conversationSelected" :newThreadView="this.newThreadSelected"
-                :extensionUUID="this.extensionUUID" :multipleWebTextingExtensions="this.multipleWebTextingExtensions" />
+            <RouterView name="leftSide" :ownNumber="ownNumber" :threads="threads"
+                :threadPreviews="previews" :previewsLoaded="loadedPreviews"
+                :selectedConvo="conversationSelected" :newThreadView="newThreadSelected"
+                :extensionUUID="extensionUUID" :multipleWebTextingExtensions="multipleWebTextingExtensions" />
 
 
             <suspense>
-                <RouterView name="rightSide" :extension_uuid="this.$route.query.extension_uuid"
-                    :remoteNumber="this.$route.query.number" :groupUUID="this.$route.query.group"
-                    :ownNumber="this.$props.ownNumber" :displayName="this.title"
-                    :selectedConvo="this.conversationSelected" :contactEditLink="contactEditLink" :title="this.title"
-                    :threadUUID="this.threadUUID" />
+                <RouterView name="rightSide" :extension_uuid="$route.query.extension_uuid"
+                    :remoteNumber="$route.query.number" :groupUUID="$route.query.group"
+                    :ownNumber="ownNumber" :displayName="title"
+                    :selectedConvo="conversationSelected" :contactEditLink="contactEditLink"
+                    :threadUUID="threadUUID" />
             </suspense>
             <link type="text/css" href="../../../js/style.css">
         </div>

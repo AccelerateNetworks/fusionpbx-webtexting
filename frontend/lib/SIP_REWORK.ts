@@ -1,5 +1,8 @@
 import { BaseTransitionPropsValidators } from "vue";
 import { emitter } from "./global";
+import { CPIM } from "./CPIM";
+import { Moment } from "moment";
+
 //new type for luaSkip[ response?]
 export type LuaSkipMessageData = {
     direction: string;
@@ -12,8 +15,9 @@ export type LuaSkipMessageData = {
     cpim?: CPIM;
     extensionUUID?: string;
     from_host?: string;
-    status?: string;
+    delivered?: boolean;
     statusText?: string;
+    key?: string;
 }
 export async function luaSkip(message: LuaSkipMessageData) {
     let sending = false;
@@ -21,6 +25,7 @@ export async function luaSkip(message: LuaSkipMessageData) {
     try {
         //console.log("[luaSkip] I'm trying " + message);
         sending = true;
+        //what happens if urlsearchparams has nothing to serialize?
         response = await fetch('/app/webtexting/outbound-hook.php?' + new URLSearchParams(message).toString(),
                             {   method:'POST',
                                 body:JSON.stringify(message)
@@ -32,7 +37,6 @@ export async function luaSkip(message: LuaSkipMessageData) {
                     return   testResponse;
                 }
                 const responseJSON = await response.text();
-                
                 return JSON.parse(responseJSON);
             });
     }

@@ -1,4 +1,4 @@
-import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions, MessagerMessageOptions, OutgoingRequestDelegate, IncomingResponse } from 'sip.js';
+import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions, MessagerMessageOptions,  } from 'sip.js';
 import { CPIM } from './CPIM';
 import { state, emitter, MessageData, addMessage } from './global';
 import moment from 'moment';
@@ -206,7 +206,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
 
     userAgent.start();
 
-    emitter.on('outbound-message', async (message: MessageData) => {
+    emitter.on("outbound-message", async (message: MessageData) => {
         //console.log("[SIP.outbound-message] Outbound message:", message);
         message.timestamp = moment();
         const m = message;
@@ -221,28 +221,32 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         let luaMessage: LuaSkipMessageData = message;
         luaMessage.from_host = server;
         luaMessage.extensionUUID = extension_uuid;
-
         let luaSkipResponse = await luaSkip(luaMessage);
         //luaSkipResponse = JSON.parse(luaSkipResponse);
         //luaMessage.status = luaSkipResponse.status;
         //luaMessage.statusText = luaSkipResponse.statusText;
         console.log(luaSkipResponse);
         if(luaSkipResponse.statusCode == 200){
-            //emitter.emit('message-success', luaSkipResponse);
-            console.log('message sent successfully');
+            console.log(message);
+            console.log(luaMessage);
+            console.log(luaSkipResponse);
+            emitter.emit('message-success', luaSkipResponse);
+            luaMessage.id = luaSkipResponse.id;
+            luaMessage.key = luaSkipResponse.key;
+            luaMessage.delivered = true;
         }
         else{
             //console.log('message failed to send');
-
             emitter.emit('message-failed', luaSkipResponse);
         }
         //add message to state
-        if(message.cpim && message.cpim.headers['Group-UUID']){
+        //probably just add the status codes here lmao
+        if(message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])){
             const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
-            addMessage(cpimThreadID, message);
+            addMessage(cpimThreadID, luaMessage);
         }
         else{
-            addMessage(message.to, message);
+            addMessage(message.to, luaMessage);
         }
     });
 }

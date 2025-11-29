@@ -20,11 +20,11 @@ export default {
     mounted() {
         let touchstartY = 0;
         const refreshElement = document.getElementsByClassName("thread-header")[0];
-        refreshElement.addEventListener('touchstart', e => {
-            touchstartY = e.touches[0].clientY;
+        refreshElement.addEventListener('touchstart', (touchStartEvent:TouchEvent) => {
+            touchstartY = touchStartEvent.touches[0].clientY;
         });
-        refreshElement.addEventListener('touchmove', e => {
-            const touchY = e.touches[0].clientY;
+        refreshElement.addEventListener('touchmove', (touchmove:TouchEvent) => {
+            const touchY = touchmove.touches[0].clientY;
             const touchDiff = touchY - touchstartY;
             let pullToRefresh = document.querySelector('.pull-to-refresh');
             if (touchDiff > 0 && window.scrollY === 0 && pullToRefresh) {
@@ -32,7 +32,7 @@ export default {
                 //e.preventDefault();
             }
         });
-        refreshElement.addEventListener('touchend', e => {
+        refreshElement.addEventListener('touchend', (touchend:TouchEvent) => {
             //console.log("touch end")
             let pullToRefresh = document.querySelector('.pull-to-refresh');
            
@@ -44,9 +44,9 @@ export default {
     },
     beforeDestroy() {
         const refreshElement = document.getElementsByClassName("thread-header")[0];
-        refreshElement.removeEventListener('touchend', e );
-        refreshElement.removeEventListener('touchmove', e );
-        refreshElement.removeEventListener('touchestart', e );
+        refreshElement.removeEventListener('touchend', ontouchend );
+        refreshElement.removeEventListener('touchmove', ontouchmove );
+        refreshElement.removeEventListener('touchstart', ontouchstart );
     },
 }
 
@@ -57,7 +57,7 @@ export default {
                 <div class="thread-header new-message-header">
                     <div class="thread-header-container  d-flex justify-content-between align-items-center">
                         <div>
-                            <router-link class="back-link fa fa-arrow-left btn btn-large " :to="`/threadlist.php?extension_uuid=${this.$route.query.extension_uuid}`" aria="Go Back to threadlist!"></router-link>
+                            <router-link class="back-link fa fa-arrow-left btn btn-large " :to="`/threadlist.php?extension_uuid=${$route.query.extension_uuid}`" aria="Go Back to threadlist!"></router-link>
                         </div>
                         <div>
                             <div class="new-message-headline"><h6 class="mb-0">New Conversation</h6></div>
@@ -67,11 +67,11 @@ export default {
                 </div>
                 <div class="form-group pt-1">
                     <label for="new-thread-number" class='new-thread-message'>Enter Number:</label>
-                        <input class='form-control form-control-lg' type="tel" size="11" min="10000000000" max="19999999999" @paste="this.numberPaste" v-model="number" id="new-thread-number" name="new-thread-number" placeholder="12065551212" />
+                        <input class='form-control form-control-lg' type="tel" size="11" min="10000000000" max="19999999999" @paste="numberPaste" v-model="number" id="new-thread-number" name="new-thread-number" placeholder="12065551212" />
                         <label for="new-thread-number">Outbound Number must include Country Code and Area Code.</label>
 
                     </div>
-                <SendBox :remoteNumber="number" :ownNumber="ownNumber" location="New-Message" :extensionUUID="this.extensionUUID"/>    
+                <SendBox :remoteNumber="number" :ownNumber="ownNumber" location="New-Message" :extensionUUID="extensionUUID"/>    
             </div>
         </div>
    

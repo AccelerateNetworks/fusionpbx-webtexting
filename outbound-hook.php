@@ -26,6 +26,7 @@ $to = $event->to;
 $contentType = $event->contentType;
 $body = urldecode($event->body);
 $dedupeID = random_bytes(16);
+$message_uuid = urldecode($event->id);
 
     $extensionUUID = $event->extensionUUID;
     $sql = "SELECT webtexting_destinations.phone_number, v_domains.domain_uuid FROM webtexting_destinations, v_domains, v_extensions WHERE v_domains.domain_name = :domain_name AND v_domains.domain_uuid = v_extensions.domain_uuid AND v_extensions.extension_uuid = :extensionUUID AND webtexting_destinations.extension_uuid = v_extensions.extension_uuid";
@@ -60,28 +61,78 @@ require __DIR__."/providers/".$provider.".php";
 
 switch($contentType) {
 case "text/plain":
-    Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $dedupeID);
-     
+    $message_uuid = Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $message_uuid);
+    if(!$message_uuid){
+        error_log("failed to write outgoing SMS message record to database for $from to $to");
+        http_response_code(501);
+        die();
+    }
     $response = outgoing_sms($from, $to, $body);  
-    return json_encode($response);
+    $response = json_decode($response);
+    if(!$response){
+        error_log("failed to send outgoing SMS message from $from to $to");
+        http_response_code(504);
+        die();
+    }
+        if($response->statusCode == 200){
+            Messages::UpdateStatus( $message_uuid,  true, $extensionUUID);
+        }
+        else{
+            //TODO recover this fail state
+            error_log("failed to update send status for outgoing SMS message from $from to $to: ".$response->error);
+            http_response_code(505);
+            die();
+        }
+    
+    // db update message status to true
+    $mixins['id'] = $message_uuid;
+    $mixins['key'] = $to;
+    $extended = (object) array_merge((array)$response, (array)$mixins);
+    echo json_encode($extended);
+    return json_encode($extended);
     break;
 case "message/cpim":
     $cpim = CPIM::fromString($body);
     $groupUUID = $cpim->getHeader('Group-UUID');
-    Messages::OutgoingMMS($extensionUUID, $domainUUID, $from, $to, $cpim, $groupUUID, $dedupeID);
-
     if ($groupUUID) {
         $to = Messages::findRecipients($domainUUID, $extensionUUID, $from, $groupUUID);
         if ($to == null) {
             error_log("dropping message for unknown group: domain_uuid=".$domainUUID." extension_uuid=".$extensionUUID." group_uuid=".$groupUUID."\n");
             die();
         }
-
+        $mixins['key'] = $groupUUID;
         error_log("sending to: ".$to."\n");
     }
-
+    $message_uuid = Messages::OutgoingMMS($extensionUUID, $domainUUID, $from, $to, $cpim,  $message_uuid,  $groupUUID );
+    if(!$message_uuid){
+        error_log("failed to write outgoing SMS message record to database for $from to $to");
+        http_response_code(501);
+        die();
+    }
+    $response = outgoing_mms($from, $to, array($cpim->fileURL));
+    $response = json_decode($response);
+    if(!$response){
+        error_log("failed to send outgoing SMS message from $from to $to");
+        http_response_code(504);
+        die();
+    }
+        if($response->statusCode == 200){
+            Messages::UpdateStatus( $message_uuid,  true, $extensionUUID);
+        }
+        else{
+            error_log("failed to update send status for outgoing SMS message from $from to $to: ".$response->error);
+            http_response_code(505);
+            die();
+        }
+    
     // $cpim->fileURL gets mutated by Messages::OutgoingMMS to include the auth query params
-    return json_encode(outgoing_mms($from, $to, array($cpim->fileURL)));
+    $mixins['id'] = $message_uuid;
+    if(!isset($mixins['key'])){
+        $mixins['key'] = $to;
+    }
+    $extended = (object) array_merge((array)$response, (array)$mixins);
+    echo json_encode($extended);
+    return json_encode($extended);
     break;
 default:
     error_log("received an outbound message of unknown type: ".$contentType);

@@ -5,6 +5,7 @@ import { MessageData, GlobalState, emitter, state } from "../../lib/global";
 import TemplateDropUpItem from "../TemplateDropUp/TemplateDropUpItem.vue";
 import TemplateDropUpProps from "../TemplateDropUp/TemplateDropUpItem.vue";
 import moment from "moment";
+import {v4 as uuidv4} from 'uuid';
 
 type PendingAttachment = {
   file: File;
@@ -13,6 +14,9 @@ type PendingAttachment = {
   upload: Promise<void>;
   uploadedURL: string;
 };
+function validNumber(value:any):Boolean {
+  return !isNaN(Number(value));
+}
 
 type TemplateDropUpProps = typeof TemplateDropUpProps;
 
@@ -102,7 +106,7 @@ export default {
         direction: "outgoing",
         contentType: "text/plain",
         timestamp: moment(),
-        id: createRandomToken(8),
+        id: uuidv4(),
         from: this.ownNumber,
         to: this.remoteNumber || this.ownNumber, // remoteNumber is null for groups but we still need a To field, so set it to our own number and strip it out server side
       };
@@ -194,10 +198,11 @@ export default {
         this.sendNewMessage();
       }
     },
+     
     async sendNewMessage() {
       const phoneString = this.remoteNumber;
       if (
-        (this.remoteNumber &&
+        (validNumber(this.remoteNumber) &&
           (phoneString.length === 11 ||
             phoneString.length === 5 ||
             phoneString.length === 6)) ||
@@ -239,7 +244,7 @@ export default {
           if (this.extensionUUID) {
             message.extensionUUID = this.extensionUUID;
           }
-          //console.log('emitting message', message);
+          console.log('emitting message', message);
           emitter.emit("outbound-message", message);
           setTimeout(
             () => console.log("[Sendbox.sendnewMessage] duplicate send prevention timeout"),500);
@@ -257,7 +262,9 @@ export default {
         } else {
           errorString += `GroupUUID: ${this.groupUUID}`;
         }
-
+        if(!validNumber(this.remoteNumber)){
+          errorString = `Outbound Number has non-numeric characters ${this.remoteNumber}`;
+        }
         alert(errorString);
       }
     },

@@ -38,15 +38,17 @@ if($_GET['template_uuid']){
         $parameters['template_enabled'] = $_GET['enabled'];
         $parameters['template_desc'] = $_GET['description'];
         $parameters['template_name'] = $_GET['templateName'];
-        $response = $database->execute($sql, $parameters);
+        $response = $database->execute($sql, $parameters);  
+         unset($parameters);
+
         if($response) {
             //message::add("Template Added.");
+            return $response;
         } else {
             //message::add("Error Creating Template.", 'negative');
             http_response_code(400);
             return $response;
         }
-        unset($parameters);
     }
     else{
         //valid template_uuid = update instead of add

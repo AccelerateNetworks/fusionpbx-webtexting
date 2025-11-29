@@ -23,7 +23,7 @@ export default {
 </script>
 <template>
     <div class="position-absolute top-0 start-50 alert alert-dismissible alert-danger fade show z-6 mb-3 w-100 translate-middle-x" role="alert">
-        {{"Status Code: " + this.statusCode + "\n" + this.ReasonPhrase + "."}}
+        {{"Status Code: " + statusCode + "\n" + ReasonPhrase + "."}}
         <p> Please contact support for assistance.</p>
         <button type="button" class="close" data-dismiss="alert" aria-label="Close" >
             <span aria-hidden="true">&times;</span>

@@ -21,7 +21,7 @@ if (!$extension) {
 
 $database = new database;
 
-$sql = "SELECT content_type, direction, from_number, message, start_stamp, to_number, group_uuid, message_uuid FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
+$sql = "SELECT content_type, direction, from_number, message, start_stamp, to_number, group_uuid, message_uuid, delivered FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
 if ($_GET['group']) {
     $sql .= "group_uuid = :group_uuid";
     $parameters['group_uuid'] = $_GET['group'];
