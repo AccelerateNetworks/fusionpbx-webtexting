@@ -1,6 +1,7 @@
 <script lang="ts">
-import { MessageData, emitter } from '../../lib/global';
+import {  MessageData,emitter } from '../../lib/global';
 import type { PropType } from 'vue'
+import Moment from 'moment';
 export default {
     data() {
         return {
@@ -33,7 +34,13 @@ export default {
     },
     methods: {
         bumpTimestamp() {
-            this.timestampText = this.message.timestamp.fromNow();
+            //console.log( this.message);
+            if(this.message.timestamp ){
+                this.timestampText = Moment(this.message.timestamp).fromNow();
+            }
+            else{
+                this.timestampText = Moment().fromNow();
+            }
         },
         emitLoaded() {
             emitter.emit('scroll-to-bottom');
@@ -104,13 +111,18 @@ export default {
             <p class="message-body" v-if="this.download">
                 <a :href="download" target="_blank">click to download</a>
             </p>
-            <span class="ts">{{ timestampText }} </span>
-            <div class="d-inline-block" v-if="this.message.direction=='outgoing'">
-                <i class="fa fa-regular fa-circle-check pl-4" v-if="this.message.delivered" aria-hidden="true" title="Message Delivered"></i>                
-                <i class="fa fa-regular fa-circle pl-4" v-else-if="this.message.delivered == undefined" aria-hidden="true" title="Message Delivered"></i>
-
-                <i class="fa fa-regular fa-circle-xmark pl-4" v-else aria-hidden="true" title="Message Sending"></i>
+            <div class="d-flex flex-row-reverse text-end" v-if="this.message.direction=='outgoing'">
+                <div class="" >
+                    <i class="fa fa-regular fa-circle-check pl-4 end-0 mr-0 right-0" v-if="this.message.delivered" aria-hidden="true" title="Message Delivered"></i>                
+                    <i class="fa fa-regular fa-circle pl-4 end-0 mr-0 right-0" v-else-if="this.message.delivered == undefined" aria-hidden="true" title="No Status"></i>
+                    <i class="fa fa-regular fa-circle-xmark pl-4 end-0 mr-0 right-0" v-else aria-hidden="true" title="Message Failed to Send"></i>
+                </div>
+                <span class="ts">{{ timestampText }} </span>
             </div>
+            <div class="text-end" v-else>
+                <span class="ts">{{ timestampText }} </span>
+            </div>
+            
         </div>
     </div>
 </template>

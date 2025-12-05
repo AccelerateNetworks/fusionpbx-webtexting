@@ -1,9 +1,9 @@
 import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions, MessagerMessageOptions,  } from 'sip.js';
 import { CPIM } from './CPIM';
-import { state, emitter, MessageData, addMessage } from './global';
+import { sendMessage } from './sendMessage';
+import { state, emitter,  MessageData, addMessage } from './global';
 import moment from 'moment';
 import { compileScript } from 'vue/compiler-sfc';
-import { luaSkip, LuaSkipMessageData } from './SIP_REWORK';
 import { AlertData } from '@/components/Alerts/Alert.vue';
 // nginx timeout is 300 seconds. in testing we can set this to 300 seconds too
 // and it will renew a few seconds earlier, but I don't really want to risk it.
@@ -208,7 +208,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
 
     emitter.on("outbound-message", async (message: MessageData) => {
         //console.log("[SIP.outbound-message] Outbound message:", message);
-        message.timestamp = moment();
+        //message.timestamp = moment();
         const m = message;
         // if plain/text use to number as key
         // if it's cpim 
@@ -218,36 +218,39 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         }
         //send message to lua hell
         //or skip lua hell and go straight to outbound-hook.php
-        let luaMessage: LuaSkipMessageData = message;
-        luaMessage.from_host = server;
-        luaMessage.extensionUUID = extension_uuid;
-        let luaSkipResponse = await luaSkip(luaMessage);
-        //luaSkipResponse = JSON.parse(luaSkipResponse);
-        //luaMessage.status = luaSkipResponse.status;
-        //luaMessage.statusText = luaSkipResponse.statusText;
-        console.log(luaSkipResponse);
-        if(luaSkipResponse.statusCode == 200){
-            console.log(message);
-            console.log(luaMessage);
-            console.log(luaSkipResponse);
-            emitter.emit('message-success', luaSkipResponse);
-            luaMessage.id = luaSkipResponse.id;
-            luaMessage.key = luaSkipResponse.key;
-            luaMessage.delivered = true;
+        let sendMessageQuery: MessageData = message;
+        sendMessageQuery.from_host = server;
+        sendMessageQuery.extensionUUID = extension_uuid;
+        let sendMessageResponse = await sendMessage(sendMessageQuery);
+        console.log(sendMessageResponse);
+        if(sendMessageResponse && sendMessageResponse.statusCode && sendMessageResponse.statusCode == 200){
+            sendMessageQuery.id = sendMessageResponse.id;
+            sendMessageQuery.key = sendMessageResponse.key;
+            sendMessageQuery.delivered = true;
+            sendMessageResponse.delivered = true;
+                //add message to state
+            //probably just add the status codes here lmao
+            if(message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])){
+                const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
+                addMessage(cpimThreadID, sendMessageQuery);
+            }
+            else{
+                addMessage(message.to, sendMessageQuery);
+            }
+            emitter.emit('message-success', sendMessageQuery);
         }
         else{
             //console.log('message failed to send');
-            emitter.emit('message-failed', luaSkipResponse);
+            if(message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])){
+                const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
+                addMessage(cpimThreadID, sendMessageQuery);
+            }
+            else{
+                addMessage(message.to, sendMessageQuery);
+            }
+            emitter.emit('message-failed', sendMessageQuery);
         }
-        //add message to state
-        //probably just add the status codes here lmao
-        if(message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])){
-            const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
-            addMessage(cpimThreadID, luaMessage);
-        }
-        else{
-            addMessage(message.to, luaMessage);
-        }
+        
     });
 }
 

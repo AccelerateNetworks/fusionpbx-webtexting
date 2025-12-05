@@ -1,5 +1,5 @@
 <script lang="ts">
-import { MessageData, emitter, state } from "../../lib/global";
+import { emitter, state, MessageData } from "../../lib/global";
 import { CPIM } from "../../lib/CPIM";
 import Message from "../message/Message.vue";
 import moment from "moment";

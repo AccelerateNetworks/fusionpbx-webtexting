@@ -105,7 +105,7 @@ export default {
       return {
         direction: "outgoing",
         contentType: "text/plain",
-        timestamp: moment(),
+        timestamp: moment(new Date()),
         id: uuidv4(),
         from: this.ownNumber,
         to: this.remoteNumber || this.ownNumber, // remoteNumber is null for groups but we still need a To field, so set it to our own number and strip it out server side

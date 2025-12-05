@@ -18,14 +18,17 @@ type MenuChangePayload = {
 type MessageData = {
     direction: string;
     contentType: string;
-    timestamp: Moment;
-    id?: string;
+    timestamp: Moment;    
     from: string;
     to: string;
+    id?: string;
     body?: string;
     cpim?: CPIM;
     extensionUUID?: string;
     delivered?: boolean;
+    from_host?: string;
+    statusText?: string;
+    key?: string;
 }
 type MessageSuccessPayload={
 ReasonPhrase: string;
@@ -87,11 +90,10 @@ function  updateMessageStatus(key:string, id: string, status: boolean):MessageSu
     if(state.conversations[key]){
         let messages = state.conversations[key];
         if(messages){
-
             for(let m of messages) {
                 //console.log("checking message id: " + m.id)
                 if (m.id == id) {
-                    console.log("updating message", id);
+                    //console.log("updating message", id);
                     m.delivered = status;
                     return;
                 }
@@ -99,12 +101,12 @@ function  updateMessageStatus(key:string, id: string, status: boolean):MessageSu
         }
     }
     else{
-
+        console.log("[Global.updateMessageStatus] Conversation not found, cannot update message status")
     }
 }
 function addMessage(key:string, message: MessageData) {
     //console.log("trying to add message with key: " + key);
-    console.log(message)
+    //console.log(message)
     emitter.emit("update-last-message",message)
 
     if(state.conversations[key]){
@@ -176,11 +178,9 @@ function addThread(key:string, message?:MessageData){
                 timestamp: message.timestamp.toISOString(true),
                 remoteNumber: message.from,
                 ownNumber: message.to,        
-
             }
             addTempPreview(newIncomingPreview);
-        }
-        
+        }        
     }
     else{
         state.conversations[key] = new Array<MessageData>();
@@ -192,7 +192,7 @@ function addPreview(preview : ThreadPreviewData){
     const conversationKey:string = preview.groupUUID ? preview.groupUUID : preview.remoteNumber;
     if(state.previews){
         if(previewsContainKey(conversationKey)){
-            //don't add duplicates
+            //Don't add duplicates.
         }
         else{
             //console.log(Date.parse(preview.timestamp))
@@ -205,12 +205,13 @@ function addPreview(preview : ThreadPreviewData){
         state.previews.set(conversationKey, preview);
     }
 }
+//this is for adding Thread Previews fro threads that are generated while the user is active on the webtexting client
 function addTempPreview(preview : ThreadPreviewConstructorArgs){
     //console.log(preview)
     const conversationKey:string = preview.remoteNumber;
     if(state.previews){
         if(previewsContainKey(conversationKey)){
-            //don't add duplicates
+            //Don't add duplicates.
         }
         else{
             //console.log(Date.parse(preview.timestamp))

@@ -1,7 +1,6 @@
 import { CPIM } from './CPIM';
-import { MessageData, emitter, state } from './global';
+import { emitter, state, MessageData } from './global';
 import moment from 'moment';
-import { LuaSkipMessageData } from './SIP_REWORK';
 
 type BackfillResponse = {
     messages: BackfilMessage[],
@@ -121,7 +120,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
     }
 }
 
-export function insertMessageInHistory(key: string, message: LuaSkipMessageData) {
+export function insertMessageInHistory(key: string, message: MessageData) {
     //check for message in history
     if (state.conversations[key]) {
         for (let i = 0; i < state.conversations[key].length; i++) {
@@ -138,7 +137,7 @@ export function insertMessageInHistory(key: string, message: LuaSkipMessageData)
     }
     //add a new history if no history is found
     else {
-        state.conversations[key] = new Array<LuaSkipMessageData>();
+        state.conversations[key] = new Array<MessageData>();
     }
     // no existing message matched, append to end    
     state.conversations[key].push(message);

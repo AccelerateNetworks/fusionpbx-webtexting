@@ -19,6 +19,7 @@
     "sourceMap": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "ignoreDeprecations": "6.0"
   },
   "references": [
     {
