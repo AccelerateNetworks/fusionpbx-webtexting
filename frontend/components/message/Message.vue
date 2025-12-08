@@ -33,8 +33,7 @@ export default {
         },
     },
     methods: {
-        bumpTimestamp() {
-            //console.log( this.message);
+        bumpTimestamp() {            
             if(this.message.timestamp ){
                 this.timestampText = Moment(this.message.timestamp).fromNow();
             }
@@ -53,9 +52,16 @@ export default {
         }
     },
     async mounted() {
-        //console.log(this.message); 
-        this.bumpTimestamp();
-        this.interval = setInterval(this.bumpTimestamp, 10000);
+        //console.log(this.message.timestamp.toString()); 
+        if(this.message.timestamp.isAfter( Moment(new Date()).subtract(2, 'days'))){
+             this.bumpTimestamp();
+            //is there a way to only add the timestamp bump for messages in the past week?
+            this.interval = setInterval(this.bumpTimestamp, 10000);
+        }
+        else{
+            this.timestampText = this.message.timestamp.format('MMM DD, YYYY h:mm');
+        }
+       
         if (this.message.cpim) {
             if (this.message.cpim.bodyText) {
                 this.text = this.message.cpim.bodyText;
