@@ -53,15 +53,7 @@ export default {
     },
     async mounted() {
         //console.log(this.message.timestamp.toString()); 
-        if(this.message.timestamp.isAfter( Moment(new Date()).subtract(2, 'days'))){
-             this.bumpTimestamp();
-            //is there a way to only add the timestamp bump for messages in the past week?
-            this.interval = setInterval(this.bumpTimestamp, 10000);
-        }
-        else{
-            this.timestampText = this.message.timestamp.format('MMM DD, YYYY h:mm');
-        }
-       
+        this.timestampText = this.message.timestamp.format('MMM DD, YYYY h:mm');
         if (this.message.cpim) {
             if (this.message.cpim.bodyText) {
                 this.text = this.message.cpim.bodyText;
@@ -123,10 +115,10 @@ export default {
                     <i class="fa fa-regular fa-circle pl-4 end-0 mr-0 right-0" v-else-if="this.message.delivered == undefined" aria-hidden="true" title="No Status"></i>
                     <i class="fa fa-regular fa-circle-xmark pl-4 end-0 mr-0 right-0" v-else aria-hidden="true" title="Message Failed to Send"></i>
                 </div>
-                <span class="ts">{{ timestampText }} </span>
+                <span class="ts" :title="this.message.timestamp.format('MMM DD, YYYY h:mm')">{{ timestampText }} </span>
             </div>
             <div class="text-end" v-else>
-                <span class="ts">{{ timestampText }} </span>
+                <span class="ts" :title="this.message.timestamp.format('MMM DD, YYYY h:mm')">{{ timestampText }} </span>
             </div>
             
         </div>
