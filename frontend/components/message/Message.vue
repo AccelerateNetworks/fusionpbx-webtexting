@@ -35,7 +35,7 @@ export default {
     methods: {
         bumpTimestamp() {            
             if(this.message.timestamp ){
-                this.timestampText = Moment(this.message.timestamp).fromNow();
+                this.timestampText = this.message.timestamp.fromNow();
             }
             else{
                 this.timestampText = Moment().fromNow();
@@ -53,7 +53,7 @@ export default {
     },
     async mounted() {
         //console.log(this.message.timestamp.toString()); 
-        this.timestampText = this.message.timestamp.format('MMM DD, YYYY h:mm');
+        this.timestampText = Moment(this.message.timestamp).local().format('MMM DD, YYYY h:mm');
         if (this.message.cpim) {
             if (this.message.cpim.bodyText) {
                 this.text = this.message.cpim.bodyText;
