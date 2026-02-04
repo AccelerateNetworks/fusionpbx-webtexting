@@ -57,7 +57,8 @@ export async function searchPreviews(queryString: string, extensionUUID: string)
 // INPUTS: extensionUUID = string representation of the user's extension we want to build previews for
 //        (optional) older_than = string representation of a timestamp that we want to check if previews are older than (used for loading older previews)
 // OUTPUT: None (buildPreviews calls addPreviews which constructs the previews map for global state)
-export async function loadPreviews(extensionUUID: string, older_than: string) {
+export async function loadPreviews(extensionUUID: string, older_than?: string) {
+    console.log("[backfillPreviews.loadPreviews] Loading more previews...", extensionUUID, older_than);
     if (fetching) {
         //console.log("[backfillPreviews.loadPreviews] Skipping duplicate search request.");
         return;
@@ -70,7 +71,7 @@ export async function loadPreviews(extensionUUID: string, older_than: string) {
         const params = older_than ? `extension_uuid=${extensionUUID}&older_than=${older_than}` : `extension_uuid=${extensionUUID}`;
         const initialResponse: ThreadPreviewResponse[] = await fetch('/app/webtexting/loadpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         temp = initialResponse;
-
+        console.log(initialResponse);
 
         fetching = false;
         //console.log('backfillPreviews request complete');
@@ -86,7 +87,7 @@ export async function loadPreviews(extensionUUID: string, older_than: string) {
         
         emitter.emit('backfill-preview-complete', temp);
         fetching = false;
-        console.log(temp)
+        //console.log(temp)
         console.log('bpc')
         if (temp.length < QUERY_LIMIT) {
             emitter.emit("no-more-previews");

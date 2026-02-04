@@ -97,6 +97,14 @@ export const initializeWebTextingContainer =
     }
     app.use(router);
     app.mount("#TEST_DIV_FOR_TESTING_WEBTEXTING");
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        console.log(opts.extensionUUID);
+        console.log("document unhidden");
+        emitter.emit("document-unhidden");
+        //emitter.emit("backfill-previews-requested");
+      }
+    });
 
     RunSIPConnection(
       opts.username,
@@ -122,9 +130,6 @@ export const initializeWebTextingContainer =
       } else {
         console.log("ignoring backfill request with no key");
       }
-    });
-    emitter.on("backfill-previews-requested", () => {
-      //console.log("backfilling previews");
     });
     emitter.on(
       "conversation-accessed",

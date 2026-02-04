@@ -193,6 +193,9 @@ function addPreview(preview : ThreadPreviewData){
     if(state.previews){
         if(previewsContainKey(conversationKey)){
             //Don't add duplicates.
+            console.log('conversation already exists in state.previews, updating entry for: ', conversationKey);
+            updateOldestMessage(preview.timestamp);
+            state.previews.set(conversationKey,preview);
         }
         else{
             //console.log(Date.parse(preview.timestamp))

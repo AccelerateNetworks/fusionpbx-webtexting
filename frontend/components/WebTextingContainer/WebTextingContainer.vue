@@ -171,6 +171,10 @@ export default {
         loadPreviews(this.extensionUUID, state.oldestMessage);
     },
     mounted() {
+        emitter.on('document-unhidden', () => {
+            //console.log("document unhidden - wtc");
+            loadPreviews(this.extensionUUID);
+        });
         emitter.on('thread-change', (payload: ThreadChangePayload) => {
             this.contactEditLink = payload.editLink;
             this.threadUUID = payload.threadUUID;
@@ -202,7 +206,6 @@ export default {
             this.load = true;
         });
         emitter.on("backfill-previews-requested", () => {
-            console.log("bpl")
             loadPreviews(this.extensionUUID, state.oldestMessage);
         });
         emitter.on("add-template", async (queryString: saveTemplateQuery) => {

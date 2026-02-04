@@ -39,7 +39,6 @@ if (!$ownNumber) {
 
 $QUERY_LIMIT = 20;
 
-
 $sql = 'SELECT * FROM webtexting_threads WHERE domain_uuid = :domain_uuid AND local_number = :local_number ';
 if($_GET['older_than'] ){
     $sql .= 'AND last_message < to_timestamp(:older_than,\'YYYY-MM-DD HH24:MI:SS\')';

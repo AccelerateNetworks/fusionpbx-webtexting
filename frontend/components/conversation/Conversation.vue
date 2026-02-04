@@ -204,6 +204,14 @@ export default {
       //console.log("preventing future backfilling attempts, this conversation has been fully backfilled");
       this.backfillAvailable = false;
     });
+    emitter.on("new-message-ingested", () =>{
+      //this.backfillAvailable = true;
+    });
+    emitter.on("document-unhidden", () => {
+      //console.log("document unhidden, attempting to backfill conversation");
+      //this.backfillAvailable = true;
+      //emitter.emit("backfill-requested", this.conversationKey);
+    });
 
     emitter.on("thread-changed", (newDisplayName: String) => {
       //console.log(`thread changed new display name is ${newDisplayName}`);
