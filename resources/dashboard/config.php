@@ -1,0 +1,87 @@
+<?php
+
+//webtexting
+$array['dashboard'][$x]['dashboard_uuid'] = '5c934ced-5aeb-4cd4-b4e7-d9e8cbd01693';
+$array['dashboard'][$x]['dashboard_name'] = 'Webtexting';
+$array['dashboard'][$x]['dashboard_path'] = 'webtexting/webtexting';
+$array['dashboard'][$x]['dashboard_icon'] = '';
+$array['dashboard'][$x]['dashboard_url'] = '/app/webtexting/index.php';
+$array['dashboard'][$x]['dashboard_target'] = 'self';
+$array['dashboard'][$x]['dashboard_width'] = '';
+$array['dashboard'][$x]['dashboard_height'] = '';
+$array['dashboard'][$x]['dashboard_content'] = '';
+$array['dashboard'][$x]['dashboard_content_text_align'] = '';
+$array['dashboard'][$x]['dashboard_content_details'] = '';
+$array['dashboard'][$x]['dashboard_chart_type'] = '';
+$array['dashboard'][$x]['dashboard_label_enabled'] = 'true';
+$array['dashboard'][$x]['dashboard_label_text_color'] = '';
+$array['dashboard'][$x]['dashboard_label_text_color_hover'] = '';
+$array['dashboard'][$x]['dashboard_label_background_color'] = '';
+$array['dashboard'][$x]['dashboard_label_background_color_hover'] = '';
+$array['dashboard'][$x]['dashboard_number_background_color'] = '';
+$array['dashboard'][$x]['dashboard_number_text_color'] = '';
+$array['dashboard'][$x]['dashboard_number_text_color_hover'] = '';
+$array['dashboard'][$x]['dashboard_background_color'] ='';
+$array['dashboard'][$x]['dashboard_background_color_hover'] = '';
+$array['dashboard'][$x]['dashboard_detail_background_color'] = '';
+$array['dashboard'][$x]['dashboard_column_span'] = '1';
+$array['dashboard'][$x]['dashboard_row_span'] = '2';
+$array['dashboard'][$x]['dashboard_details_state'] = 'expanded';
+$array['dashboard'][$x]['dashboard_order'] = '11';
+$array['dashboard'][$x]['dashboard_enabled'] = 'true';
+$array['dashboard'][$x]['dashboard_description'] = 'Send and receive text messages.';
+$y = 0;
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_group_uuid'] = '0e7dfe37-3a3a-4ecb-a6e1-1c4317322f7d';
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_uuid'] = '5c934ced-5aeb-4cd4-b4e7-d9e8cbd01693';
+$array['dashboard'][$x]['dashboard_groups'][$y]['group_name'] = 'superadmin';
+$y++;
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_group_uuid'] = 'ae16d37b-5203-4430-ab2a-745fdc2ff0b8';
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_uuid'] = '5c934ced-5aeb-4cd4-b4e7-d9e8cbd01693';
+$array['dashboard'][$x]['dashboard_groups'][$y]['group_name'] = 'admin';
+$y++;
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_group_uuid'] = 'be3bc30d-8f79-4c3b-837f-79f319282229';
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_uuid'] = '5c934ced-5aeb-4cd4-b4e7-d9e8cbd01693';
+$array['dashboard'][$x]['dashboard_groups'][$y]['group_name'] = 'user';
+$x++;
+
+//webtexting icon
+$array['dashboard'][$x]['dashboard_uuid'] = '5abf0e7b-ada2-4b21-bf41-b502ab295451';
+$array['dashboard'][$x]['dashboard_name'] = 'Webtexting';
+$array['dashboard'][$x]['dashboard_path'] = 'core/dashboard/resources/dashboard/icon.php';
+$array['dashboard'][$x]['dashboard_icon'] = 'fa-comments';
+$array['dashboard'][$x]['dashboard_url'] = '/app/webtexting/index.php';
+$array['dashboard'][$x]['dashboard_target'] = 'self';
+$array['dashboard'][$x]['dashboard_width'] = '';
+$array['dashboard'][$x]['dashboard_height'] = '';
+$array['dashboard'][$x]['dashboard_content'] = '';
+$array['dashboard'][$x]['dashboard_content_text_align'] = '';
+$array['dashboard'][$x]['dashboard_content_details'] = '';
+$array['dashboard'][$x]['dashboard_chart_type'] = '';
+$array['dashboard'][$x]['dashboard_label_enabled'] = 'true';
+$array['dashboard'][$x]['dashboard_label_text_color'] = '';
+$array['dashboard'][$x]['dashboard_label_text_color_hover'] = '';
+$array['dashboard'][$x]['dashboard_label_background_color'] = '';
+$array['dashboard'][$x]['dashboard_label_background_color_hover'] = '';
+$array['dashboard'][$x]['dashboard_number_background_color'] = '';
+$array['dashboard'][$x]['dashboard_number_text_color'] = '#0292ff';
+$array['dashboard'][$x]['dashboard_number_text_color_hover'] = '';
+$array['dashboard'][$x]['dashboard_background_color'] ='';
+$array['dashboard'][$x]['dashboard_background_color_hover'] = '';
+$array['dashboard'][$x]['dashboard_detail_background_color'] = '';
+$array['dashboard'][$x]['dashboard_column_span'] = '1';
+$array['dashboard'][$x]['dashboard_row_span'] = '1';
+$array['dashboard'][$x]['dashboard_details_state'] = 'disabled';
+$array['dashboard'][$x]['dashboard_order'] = '50';
+$array['dashboard'][$x]['dashboard_enabled'] = 'true';
+$array['dashboard'][$x]['dashboard_description'] = '';
+$y = 0;
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_group_uuid'] = '3b38c3aa-0231-4450-9f3e-448de871b6a5';
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_uuid'] = '5abf0e7b-ada2-4b21-bf41-b502ab295451';
+$array['dashboard'][$x]['dashboard_groups'][$y]['group_name'] = 'superadmin';
+$y++;
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_group_uuid'] = '89bd8f7c-8549-4dfd-b97c-d374107c8612';
+$array['dashboard'][$x]['dashboard_groups'][$y]['dashboard_uuid'] = '5abf0e7b-ada2-4b21-bf41-b502ab295451';
+$array['dashboard'][$x]['dashboard_groups'][$y]['group_name'] = 'admin';
+$y++;
+
+?>
