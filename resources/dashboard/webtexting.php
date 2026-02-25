@@ -9,7 +9,7 @@
 	unset($assigned_extension);
 echo "<div class='hud_box'>\n";
 echo "<div class='hud_content'>\n";
-echo "	<span class='hud_title'><a onclick=\"document.location.href='".PROJECT_PATH."/app/webtexting/index.php'\">".'Webtexting'."</a></span>";
+echo "	<span class=''><a onclick=\"document.location.href='".PROJECT_PATH."/app/webtexting/index.php'\">".'Webtexting'."</a></span>";
 
 if(sizeof($_SESSION['user']['extension']) <1){
 	echo "<table style='width: 100%;'>";
