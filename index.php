@@ -13,7 +13,7 @@ require_once __DIR__."/vendor/autoload.php";
 
 
 if(!$_SESSION['user']['extension']) {
-	echo "no extensions assigned to user";
+	echo "No extensions assigned to user. Please contact support@acceleratenetworks.com to get started with WebTexting!";
 	include_once "footer.php";
 	die();
 }
