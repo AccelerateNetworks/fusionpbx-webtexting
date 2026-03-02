@@ -104,7 +104,7 @@ export default {
                     <span class="fas fa-plus fa-fw"></span>
                     <span>Add New Template</span>
                 </router-link>
-                <div class="conditional_container table-responsive overflow-scroll" v-if="this.templatesLoaded" ref="conditional_container" >
+                <div class="conditional_container table-responsive overflow-scroll"  ref="conditional_container" >
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -119,8 +119,8 @@ export default {
                         </tbody>
                     </table>
                 </div>
-                <div class="load-animation-container" v-else>
-                    <img src="../../../loading-spinner.svg" alt="loading animation" width="150" height="150"/>
+                <div class="load-animation-container" >
+                    <img src="../../../loading-spinner.svg" alt="loading animation" width="75" height="75"/>
                 </div>
             </div>
 

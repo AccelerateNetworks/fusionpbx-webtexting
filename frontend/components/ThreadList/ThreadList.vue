@@ -169,13 +169,13 @@ export default {
         <div class='threadlist-table'>
             <div class="preview_list_container">
 
-                <div class="conditional_container" v-if="this.loaded" ref="conditional_container" @scroll="onScroll">
+                <div class="conditional_container"  ref="conditional_container" @scroll="onScroll">
                     <ThreadPreview   v-for="[key,value] in filteredAndSortedPreviews()" :key="key"
                     v-bind="value" :activeThread="this.activeThread"  />
                     
                 </div>
-                <div v-else class="load-animation-container" >
-                    <img src="../../../loading-spinner.svg" alt="loading animation" width="150" height="150"/>
+                <div  class="load-animation-container" >
+                    <img src="../../../loading-spinner.svg" alt="loading animation" width="75" height="75"/>
                 </div>
                 <PaginatorButton/>
             </div>
