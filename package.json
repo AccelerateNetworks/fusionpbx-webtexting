@@ -6,9 +6,10 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "npm-run-all build-only",
+    "build": "run-p build-sip && run-p build-only",
     "preview": "vite preview",
     "build-only": "vite build",
+    "build-sip": "sh ./build-sip.sh",
     "type-check": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
@@ -26,6 +27,7 @@
     "@vitejs/plugin-vue": "^6.0.3",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.6.0",
+    "vue-eslint-parser": "^10.2.0",
     "@vue/tsconfig": "^0.8.1",
     "eslint": "^9.39.2",
     "eslint-plugin-vue": "^10.6.2",
@@ -34,7 +36,6 @@
     "typescript": "~5.9.3",
     "uuid": "13.0.0",
     "vite": "^7.3.0",
-    "vue-eslint-parser": "^10.2.0",
     "vue-tsc": "^3.2.1"
   }
 }
