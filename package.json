@@ -5,6 +5,7 @@
   "license": "AGPL3",
   "private": true,
   "scripts": {
+    "action-build": "sh ./build-sip.sh && vite build",
     "dev": "vite",
     "build": "run-p build-sip && run-p build-only",
     "preview": "vite preview",
