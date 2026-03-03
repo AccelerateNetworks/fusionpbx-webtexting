@@ -12,6 +12,8 @@ jobs:
         with:
           # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
           node-version: '>=20'
+      - name: Install Vite
+        run: yarn add vite
      
       - run: yarn action-build
       - uses: actions/upload-artifact@v4
