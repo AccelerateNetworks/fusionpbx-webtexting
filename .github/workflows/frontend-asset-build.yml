@@ -11,7 +11,7 @@ jobs:
         uses: actions/setup-node@v6.2.0
         with:
           # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
-          node-version: '>=22.12.0'
+          node-version: 24
       - run: yarn build
       - uses: actions/upload-artifact@v4
         with:
