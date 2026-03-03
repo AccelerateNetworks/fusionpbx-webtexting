@@ -2267,9 +2267,10 @@ side-channel@^1.1.0:
     side-channel-map "^1.0.1"
     side-channel-weakmap "^1.0.2"
 
-"sip.js@https://github.com/radioprotector/SIP.js#feature/override-via-transport-header":
+sip.js@^0.21.2:
   version "0.21.2"
-  resolved "https://github.com/radioprotector/SIP.js#e15f5783e3ceb181e2771e4836ad512036ebb6e6"
+  resolved "https://registry.yarnpkg.com/sip.js/-/sip.js-0.21.2.tgz#621a2c996472042d5554db655ed1767bc7a865ea"
+  integrity sha512-tSqTcIgrOd2IhP/rd70JablvAp+fSfLSxO4hGNY6LkWRY1SKygTO7OtJEV/BQb8oIxtMRx0LE7nUF2MaqGbFzA==
 
 source-map-js@^1.2.1:
   version "1.2.1"
