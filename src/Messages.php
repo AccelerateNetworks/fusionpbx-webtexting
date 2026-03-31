@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-
+require_once "app/webtexting/sse.php";
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
@@ -14,7 +14,7 @@ final class Messages
             return false;
         }
 
-        Messages::_incoming($destination, $from, $to, $body,  "text/plain",  null);
+        Messages::_incoming($destination, $from, $to, $body, "text/plain", null);
 
         return true;
     }
@@ -38,12 +38,12 @@ final class Messages
             return false;
         }
 
-        $cpim->headers["From"] = "sip:".$from."@".$destination->domainName;
-        $cpim->headers["To"] = "sip:".$destination->extension."@".$destination->domainName;
+        $cpim->headers["From"] = "sip:" . $from . "@" . $destination->domainName;
+        $cpim->headers["To"] = "sip:" . $destination->extension . "@" . $destination->domainName;
 
         $cc = array();
         foreach ($additionalRecipients as $number) {
-            $cc[] = "<".$number."@".$destination->domainName.">";
+            $cc[] = "<" . $number . "@" . $destination->domainName . ">";
         }
         $cpim->headers["CC"] = implode(", ", $cc);
 
@@ -63,7 +63,7 @@ final class Messages
             $c->fileURL = $attachment;
             $c->fileContentType = $info['ContentType'];
             $c->fileSize = $info['ContentLength'];
-            Messages::_incoming($destination, $from, $to, $c, "message/cpim",  $groupUUID);
+            Messages::_incoming($destination, $from, $to, $c, "message/cpim", $groupUUID);
         }
 
         return true;
@@ -74,22 +74,23 @@ final class Messages
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
         $message_uuid = uuid();
         // store message in the database
-         $messageUUID = Messages::Save('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType,  $message_uuid,  $groupUUID);
+        $messageUUID = Messages::Save('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType, $message_uuid, $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
         if ($body instanceof CPIM) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
             $bodyStr = $body->toString();
             // deliver the webpush notification with "MMS Message" instead of an xml
+            //todo figure out how to add groupuuid to the payload 
             Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, "MMS Message", $groupUUID);
-        }
-        else{
+        } else {
             // deliver the webpush notification 
             Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
         }
 
-        // deliver via SIP
-        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
+        // deliver via SSE or SIP or don't deliver
+        //_sendEvent("message", $bodyStr);
+        //Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
     }
 
     public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $messageUUID)
@@ -112,17 +113,16 @@ final class Messages
      *
      * @return null
      */
-    public static function OutgoingMMS(string $extensionUUID, string $domainUUID, string $from, string $to, CPIM $body, string $messageUUID, ?string $groupUUID )
+    public static function OutgoingMMS(string $extensionUUID, string $domainUUID, string $from, string $to, CPIM $body, string $messageUUID, ?string $groupUUID)
     {
         $source = LocalNumber::Get($from);
         if ($source == null) {
             return false;
         }
-        if($groupUUID){
-            $responseUUID = Messages::_outgoing($source, $to, $from, $body,  "message/cpim",  $messageUUID,  $groupUUID);
-        }
-        else{
-            $responseUUID = Messages::_outgoing($source, $to, $from, $body,  "message/cpim",  $messageUUID,  null);
+        if ($groupUUID) {
+            $responseUUID = Messages::_outgoing($source, $to, $from, $body, "message/cpim", $messageUUID, $groupUUID);
+        } else {
+            $responseUUID = Messages::_outgoing($source, $to, $from, $body, "message/cpim", $messageUUID, null);
 
         }
 
@@ -132,11 +132,10 @@ final class Messages
     public static function _outgoing(LocalNumber $source, string $to, string $from, $body, string $contentType, string $messageUUID, ?string $groupUUID)
     {
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
-        if($groupUUID){
-            $response = Messages::Save( 'outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
-        }
-        else{
-            $response = Messages::Save( 'outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, null);
+        if ($groupUUID) {
+            $response = Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
+        } else {
+            $response = Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, null);
 
         }
         // generate a pre-signed download URL before delivering it to things that will download it
@@ -145,7 +144,6 @@ final class Messages
             $bodyStr = $body->toString();
         }
         return $response;
-        //Messages::_sendSIP($source->domainName, $source->extension, $from, $source->extension, $bodyStr, $contentType, $messageUUID, $groupUUID, $to);
     }
 
     private static function _findGroup(LocalNumber $localNumber, string $from, string $to, $additionalRecipients): ?string
@@ -174,17 +172,17 @@ final class Messages
         }
         unset($parameters);
 
-        return $groupUUID;        
+        return $groupUUID;
     }
 
     public static function findRecipients(string $domainUUID, string $extensionUUID, string $ourNumber, string $groupUUID): string
     {
-        error_log("finding recipients for group:\ndomainUUID=".$domainUUID."\nextensionUUID=".$extensionUUID."\nourNumber=".$ourNumber."\ngroupUUID=".$groupUUID."\n");
+        error_log("finding recipients for group:\ndomainUUID=" . $domainUUID . "\nextensionUUID=" . $extensionUUID . "\nourNumber=" . $ourNumber . "\ngroupUUID=" . $groupUUID . "\n");
         $sql = "SELECT members FROM webtexting_groups WHERE domain_uuid = :domain_uuid AND extension_uuid = :extension_uuid AND group_uuid = :group_uuid";
         $parameters['domain_uuid'] = $domainUUID;
         $parameters['extension_uuid'] = $extensionUUID;
         $parameters['group_uuid'] = $groupUUID;
-        error_log("finding group members: ".print_r($parameters, true)."\n");
+        error_log("finding group members: " . print_r($parameters, true) . "\n");
         $db = new database;
         $members = $db->select($sql, $parameters, 'column');
         if (!$members) {
@@ -198,7 +196,7 @@ final class Messages
         return implode(",", $membersArray);
     }
 
-    public static function Save(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $messageUUID,  ?string $groupUUID): string
+    public static function Save(string $direction, string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $contentType, string $messageUUID, ?string $groupUUID): string
     {
         $db = new database;
         // check if uuid collides
@@ -211,7 +209,7 @@ final class Messages
 
         $local_number = $from;
         $remote_number = $to;
-        if($direction == "incoming") {
+        if ($direction == "incoming") {
             $local_number = $to;
             $remote_number = $from;
         }
@@ -253,7 +251,7 @@ final class Messages
 
         return $messageUUID;
     }///
-     /* Update the delivery status of a message
+    /* Update the delivery status of a message
      *
      * @param string $messageUUID   the UUID of the message to update
      * @param bool   $sentStatus    the new delivery status
@@ -268,17 +266,18 @@ final class Messages
         $parameters['delivered'] = $sentStatus;
         $parameters['message_uuid'] = $messageUUID;
         $parameters['extension_uuid'] = $extensionUUID;
-        if(!$database->execute($sql, $parameters)) {
+        if (!$database->execute($sql, $parameters)) {
             unset($parameters);
             return array(
                 "error" => "failed to update sms destination",
                 "messages" => $database->message,
                 "statusCode" => 520,
             );
-        }return array(
-                "messages" => $database->message,
-                "statusCode" => 200,
-            );
+        }
+        return array(
+            "messages" => $database->message,
+            "statusCode" => 200,
+        );
     }
 
     private static function _sendWebPush(string $domainUUID, string $extensionUUID, string $from, string $to, string $body, ?string $groupUUID)
@@ -289,21 +288,20 @@ final class Messages
         $database = new database;
         $contact = $database->select($sql, $parameters, 'row');
         unset($parameters);
-    
+
         $displayName = $from;
         if ($contact) {
-            $displayName = $contact['contact_name_given']." ".$contact['contact_name_family'];
+            $displayName = $contact['contact_name_given'] . " " . $contact['contact_name_family'];
         }
-    
         $payload = json_encode(
             [
-            "display_name" => $displayName,
-            "from" => $from,
-            "to" => $to,
-            "body" => $body
+                "display_name" => $displayName,
+                "from" => $from,
+                "to" => $to,
+                "body" => $body
             ]
         );
-    
+
         $sql = "SELECT webtexting_clients.* FROM webtexting_clients, webtexting_subscriptions, v_extensions WHERE ";
         $sql .= "v_extensions.extension_uuid = :extension_uuid AND v_extensions.domain_uuid = :domain_uuid AND ";
         $sql .= "webtexting_subscriptions.extension_uuid = v_extensions.extension_uuid AND ";
@@ -314,82 +312,82 @@ final class Messages
         $parameters['remote_identifier'] = $from;
         $targets = $database->select($sql, $parameters, 'all');
         unset($parameters);
-    
+
         if (!$targets) {
             error_log("no webpush subscriptions for this extension\n");
             return;
         }
-    
+
         $vapid = ['subject' => 'mailto:admin@example.com'];
-    
+
         $sql = "SELECT * FROM webtexting_settings WHERE setting = 'vapid_public_key' OR setting = 'vapid_private_key'";
         foreach ($database->select($sql, null, 'all') as $key) {
-            switch($key['setting']) {
-            case 'vapid_public_key':
-                $vapid['publicKey'] = $key['value'];
-                break;
-            case 'vapid_private_key':
-                $vapid['privateKey'] = $key['value'];
-                break;
+            switch ($key['setting']) {
+                case 'vapid_public_key':
+                    $vapid['publicKey'] = $key['value'];
+                    break;
+                case 'vapid_private_key':
+                    $vapid['privateKey'] = $key['value'];
+                    break;
             }
         }
-    
+
         $webPush = new WebPush(['VAPID' => $vapid]);
-    
+
         foreach ($targets as $target) {
             $webPush->queueNotification(
                 Subscription::create(
                     [
-                    'endpoint' => $target['endpoint'],
-                    'keys' => [
-                        'auth' => $target['auth'],
-                        'p256dh' => $target['p256dh'],
-                    ],
+                        'endpoint' => $target['endpoint'],
+                        'keys' => [
+                            'auth' => $target['auth'],
+                            'p256dh' => $target['p256dh'],
+                        ],
                     ]
                 ),
                 $payload,
             );
         }
-    
+
         foreach ($webPush->flush() as $report) {
             $endpoint = $report->getRequest()->getUri()->__toString();
             if ($report->isSuccess()) {
                 continue;
             }
-    
+
             if (!$report->isSubscriptionExpired()) {
-                error_log("unknown error from push endpoint: ".$report->getReason()."\n");
+                error_log("unknown error from push endpoint: " . $report->getReason() . "\n");
                 continue;
             }
-    
+
             error_log("got expiration from push endpoint, deleting subscription from database\n");
-    
+
             $sql = "DELETE FROM webtexting_subscriptions USING webtexting_clients WHERE webtexting_subscriptions.client_uuid = webtexting_clients.client_uuid AND webtexting_clients.endpoint = :endpoint";
             $parameters['endpoint'] = $endpoint;
             $database->execute($sql, $parameters);
-    
+
             $sql = "DELETE FROM webtexting_clients WHERE endpoint = :endpoint";
             $database->execute($sql, $parameters);
-    
+
             unset($parameters);
         }
     }
-    
-    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $messageUUID, ?string $groupUUID=null, ?string $originalTo=null)
+
+    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $messageUUID, ?string $groupUUID = null, ?string $originalTo = null)
     {
         $SIPProfiles = array("websocket"); // TODO: make this list configurable
-        $toAddress = $extension."@".$domainName;
-        $fromAddress = $from."@".$domainName;
-    
+        $toAddress = $extension . "@" . $domainName;
+        $fromAddress = $from . "@" . $domainName;
+
         foreach ($SIPProfiles as $SIPProfile) {
             $eventHeaders = array(
                 "Event-Subclass" => "SMS::SEND_MESSAGE",
                 "proto" => "sip",
                 "dest_proto" => "sip",
-                "from" => "sip:".$from,
+                "from" => "sip:" . $from,
                 "from_user" => $from,
                 "from_host" => $domainName,
-                "from_full" => "sip:".$fromAddress,
+                "from_full" => "sip:" . $fromAddress,
                 "sip_profile" => $SIPProfile,
                 "to" => $toAddress,
                 "to_user" => $extension,
@@ -412,11 +410,11 @@ final class Messages
             }
 
             $cmd = "sendevent CUSTOM\n";
-            foreach ($eventHeaders as $k=>$v) {
-                $cmd .= "$k: ".$v."\n";
+            foreach ($eventHeaders as $k => $v) {
+                $cmd .= "$k: " . $v . "\n";
             }
-    
-            $cmd .= "\n".$body;
+
+            $cmd .= "\n" . $body;
 
             event_socket_request_cmd($cmd);
         }

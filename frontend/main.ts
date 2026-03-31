@@ -1,21 +1,16 @@
 import { createApp } from "vue";
-import {
-  createWebHistory,
-  createRouter,
-  RouteRecordRaw,
-  RouterViewProps,
-  RouterView,
-} from "vue-router";
+
 import { router } from "./routes";
-import { RunSIPConnection } from "./lib/SIP";
+import { calculateCPIMThreadID, RunSIPConnection } from "./lib/SIP";
 import WebTextingContainer from "./components/WebTextingContainer/WebTextingContainer.vue";
 import { backfillMessages } from "./lib/backfill";
-import { emitter, addPreview } from "./lib/global";
+import { backfillFromTimestamp } from "./lib/backfillFromTimestamp";
+import { emitter, MessageData, addMessage } from "./lib/global";
+import { sendMessage } from "./lib/sendMessage";
 import {
   updateLastSeen,
   updateUserLastSeenOptions,
 } from "./lib/updateLastSeen";
-import { stringify } from "querystring";
 // these are passed to initializeThreadJS from php when initializeThreadJS() is called in thread.php
 type ThreadOptions = {
   username: string;
@@ -106,26 +101,26 @@ export const initializeWebTextingContainer =
       }
     });
 
-    RunSIPConnection(
-      opts.username,
-      opts.password,
-      opts.server,
-      opts.ownNumber,
-      opts.extensionUUID,
-      opts.remoteNumber,
-      opts.groupUUID
-    );
+    // RunSIPConnection(
+    //   opts.username,
+    //   opts.password,
+    //   opts.server,
+    //   opts.ownNumber,
+    //   opts.extensionUUID,
+    //   opts.remoteNumber,
+    //   opts.groupUUID
+    // );
     // any event that needs absolute global scope should be listened for here
     emitter.on("backfill-requested", (key: string) => {
-      //console.log(`main.ts backfill key ${key}`);
+      console.log(`main.ts backfill key ${key}`);
       //key is either a uuid or phone number. uuid length is  16
       if (key) {
         if (key.length < 15) {
           console.log(`backfill using remotenumber: ${key}`);
-          backfillMessages(opts.extensionUUID, key, null);
+          backfillMessages(opts.extensionUUID, key, undefined);
         } else {
           console.log(`backfill using group ${key}`);
-          backfillMessages(opts.extensionUUID, null, key);
+          backfillMessages(opts.extensionUUID, undefined, key);
         }
       } else {
         console.log("ignoring backfill request with no key");
@@ -138,4 +133,51 @@ export const initializeWebTextingContainer =
         updateLastSeen(updateUserLastSeenObject);
       }
     );
-  };
+
+    emitter.on("outbound-message", async (message: MessageData) => {
+      //message.timestamp = moment();
+      const m = message;
+      // if plain/text use to number as key
+      // if it's cpim
+      if (message.cpim) {
+        message.body = message.cpim.serialize();
+        message.contentType = 'message/cpim';
+      }
+      //send message to lua hell
+      //or skip lua hell and go straight to outbound-hook.php
+      let sendMessageQuery: MessageData = message;
+      sendMessageQuery.from_host = opts.server;
+      sendMessageQuery.extensionUUID = opts.extensionUUID;
+      let sendMessageResponse = await sendMessage(sendMessageQuery);
+      console.log(sendMessageResponse);
+      if (sendMessageResponse && sendMessageResponse.statusCode && sendMessageResponse.statusCode == 200) {
+        sendMessageQuery.id = sendMessageResponse.id;
+        sendMessageQuery.key = sendMessageResponse.key;
+        sendMessageQuery.delivered = true;
+        sendMessageResponse.delivered = true;
+        //add message to state
+        //probably just add the status codes here lmao
+        if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
+          const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
+          addMessage(cpimThreadID, sendMessageQuery);
+        }
+        else {
+          addMessage(message.to, sendMessageQuery);
+        }
+        emitter.emit('message-success', sendMessageQuery);
+      }
+      else {
+        //console.log('message failed to send');
+        if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
+          const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
+          addMessage(cpimThreadID, sendMessageQuery);
+        }
+        else {
+          addMessage(message.to, sendMessageQuery);
+        }
+        emitter.emit('message-failed', sendMessageQuery);
+      }
+
+    });
+
+  }

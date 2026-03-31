@@ -1,6 +1,6 @@
 const channel = new BroadcastChannel('message-pushes');
-console.log("channel state", channel);
-console.log("self.clients", self.clients);
+//console.log("channel state", channel);
+//console.log("self.clients", self.clients);
 
 
 self.addEventListener('install', function (event) {
@@ -16,18 +16,17 @@ self.addEventListener('push', function (event) {
   event.waitUntil(
     // Retrieve a list of the clients of this service worker.
     self.clients.matchAll().then(function (clientList) {
-      console.log(clientList, event);
+      //console.log(clientList, event);
 
       const payload = event.data.json();
-
       channel.postMessage(payload);
 
       var tab = clientList.some(function (client) {
         let u = new URL(client.url);
-        console.log("push return info", u.searchParams.get('extension_uuid') == payload.to && u.searchParams.get('number') == payload.from)
+        //console.log("push return info", u.searchParams.get('extension_uuid') == payload.to && u.searchParams.get('number') == payload.from)
         return u.searchParams.get('extension_uuid') == payload.to && u.searchParams.get('number') == payload.from;
       });
-      console.log("tab", tab)
+      //console.log("tab", tab)
       if(tab) {
         console.log("tab with conversation exists");
         if(tab.focused) {

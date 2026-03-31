@@ -186,31 +186,30 @@ export default {
         //console.log("conversation fully backfilled, refusing to attempt to backfill more");
         return;
       } else if (this.topVisible && this.bottomVisible) {
-        //console.log("top and bottom of conversation visible, attempting to backfill immediately");
+        console.log("top and bottom of conversation visible, attempting to backfill immediately");
         emitter.emit("backfill-requested", this.conversationKey);
         return;
       }
-
-      //console.log('will backfill if top is still visible in 1 second');
       setTimeout(() => {
         if (this.topVisible) {
-          //console.log("top still visible backfill");
+          console.log("top still visible backfill");
           emitter.emit("backfill-requested", this.conversationKey);
         }
       }, 5000);
     });
 
     emitter.on("conversation-fully-backfilled", () => {
-      //console.log("preventing future backfilling attempts, this conversation has been fully backfilled");
       this.backfillAvailable = false;
     });
     emitter.on("new-message-ingested", () =>{
-      //this.backfillAvailable = true;
+      console.log("new message ingested, attempting to backfill conversation ", this.conversationKey);
+      emitter.emit("backfill-requested", this.conversationKey);
+      this.backfillAvailable = true;
     });
     emitter.on("document-unhidden", () => {
-      //console.log("document unhidden, attempting to backfill conversation");
-      //this.backfillAvailable = true;
-      //emitter.emit("backfill-requested", this.conversationKey);
+      console.log("document unhidden, attempting to backfill conversation ", this.conversationKey);
+      this.backfillAvailable = true;
+      emitter.emit("backfill-requested", this.conversationKey);
     });
 
     emitter.on("thread-changed", (newDisplayName: String) => {
@@ -233,7 +232,6 @@ export default {
       }
     });
     refreshElement.addEventListener("touchend", (touchend:TouchEvent) => {
-      //console.log("touch end");
       let pullToRefresh = document.querySelector(".pull-to-refresh");
 
       if (pullToRefresh && pullToRefresh.classList.contains("visible")) {
@@ -241,11 +239,8 @@ export default {
         location.reload();
       }
     });
-    //console.log(this.state.messages);
-    //console.log("Conversation.vue mounted with props:\nremoteNumber:", this.remoteNumber, "\ngroupUUID:", this.groupUUID, "\ndisplayName:", this.displayName, "\nownNumber:", this.ownNumber);
   },
   beforeUpdate() {
-    //console.log("changing active component");
     if (this.$route.query.group) {
       const groupTag:any = document.getElementsByName("group");
       groupTag[0].value = this.$route.query.group;
@@ -255,35 +250,30 @@ export default {
     remoteNumber: async function (rN) {
       this.messages = [];
       this.backfillAvailable = true;
-      //console.log("remote number changed changing this.messages")
-      if (this.remoteNumber) {
+      if (this.$route.query.number || this.remoteNumber) {
         if (this.state.conversations[rN]) {
           //conversation found
-          //console.log("conversation found skipping fetch")
           this.messages = this.state.conversations[rN];
         } else {
           this.messages = this.state.conversations[rN];
         }
         this.conversationKey = rN;
         emitter.emit("backfill-requested", rN);
-        //console.log("changed Rn " + rN);
       }
     },
     groupUUID: function (gUUID) {
       this.messages = [];
       if (this.$route.query.group) {
-        //console.log(observedChangeQueryParams)
         this.messages = this.state.conversations[this.$route.query.group];
-        //this.title = this.$route.query.group;
+        this.conversationKey = this.$route.query.group;
+        this.backfillAvailable = true;
+        emitter.emit("backfill-requested", this.$route.query.group);
       }
-      this.conversationKey = this.$route.query.group;
-      this.backfillAvailable = true;
-      emitter.emit("backfill-requested", this.$route.query.group);
+      
     },
   },
   methods: {
     scrollToBottom() {
-      //console.log('scrolling conversation to bottom');
       const messageContainer = this.$refs.message_container;
       messageContainer.scrollTo(0, messageContainer.scrollHeight);
     },
@@ -294,31 +284,25 @@ export default {
             this.bottomVisible = e.isIntersecting;
             if (e.isIntersecting) {
               this.atBottom = true;
-              //console.log(this.atBottom ? "enabling" : "disabling", "scrolling to bottom for new messages");
             }
-            //console.log("bottom is", e.isIntersecting ? "visible" : "hidden");
             break;
           case this.$refs.top:
             this.topVisible = e.isIntersecting;
             if (e.isIntersecting && this.backfillAvailable) {
-              //console.log("isIntersecting and backfillavailable");
+              console.log("onObserve", this.conversationKey);
               emitter.emit("backfill-requested", this.conversationKey);
             }
-            //console.log("top is", e.isIntersecting ? "visible" : "hidden");
             break;
           default:
-          //console.log("observed event on unknown target:", e);
         }
       });
     },
     onScroll() {
       if (this.atBottom != this.bottomVisible) {
         this.atBottom = this.bottomVisible;
-        //console.log(this.atBottom ? "enabling" : "disabling", "scrolling to bottom for new messages");
       }
     },
     toBottom() {
-      //console.log("new message added to bottom. scrolling?", this.atBottom);
       if (this.atBottom) {
         const messageContainer = this.$refs.message_container;
         if (messageContainer) {

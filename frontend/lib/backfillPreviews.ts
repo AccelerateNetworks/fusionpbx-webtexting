@@ -71,7 +71,7 @@ export async function loadPreviews(extensionUUID: string, older_than?: string) {
         const params = older_than ? `extension_uuid=${extensionUUID}&older_than=${older_than}` : `extension_uuid=${extensionUUID}`;
         const initialResponse: ThreadPreviewResponse[] = await fetch('/app/webtexting/loadpreviews.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         temp = initialResponse;
-        console.log(initialResponse);
+        //console.log(initialResponse);
 
         fetching = false;
         //console.log('backfillPreviews request complete');
@@ -101,8 +101,8 @@ export async function loadPreviews(extensionUUID: string, older_than?: string) {
 // INPUTS: previews = untyped array of objects that contain the data needed to construct a valid ThreadPreview component
 // OUTPUTS: None (the threadPreviews state object is constructed/updated in addPreview ) 
 export const buildPreviews = function buildPreviews(previews: ThreadPreviewResponse[]):void {
-    console.log( previews);
-    //console.log(Object.keys(previews).length);
+    //console.log( previews);
+    ////console.log(Object.keys(previews).length);
     let previewsLength = Object.keys(previews).length;
     if (previews && previewsLength) {
         for (let x = 0; x < previewsLength; x++) {

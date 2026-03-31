@@ -5,7 +5,7 @@ require_once "resources/check_auth.php";
 require_once "resources/header.php";
 require_once "resources/paging.php";
 require_once "src/AccelerateNetworks.php";
-require_once __DIR__."/vendor/autoload.php";
+require_once __DIR__ . "/vendor/autoload.php";
 
 foreach ($_SESSION['user']['extension'] as $ext) {
     if ($ext['extension_uuid'] == $_GET['extension_uuid']) {
@@ -13,7 +13,7 @@ foreach ($_SESSION['user']['extension'] as $ext) {
         break;
     }
 }
-  
+
 if (!$extension) {
     echo "invalid extension, please <a href='index.php'>try again</a>";
     include_once "footer.php";
@@ -33,23 +33,27 @@ if (!$destination) {
     include_once "footer.php";
     die();
 }
- //echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'onclick' => 'toggleNotifications()']);
+//echo button::create(['type'=>'button','icon'=>'bell-slash', 'style' => 'display: none','id'=>'notification-btn', 'onclick' => 'toggleNotifications()']);
 
 ?>
 <form method='get' action="new-message.php" onsubmit="clean_number()">
-<input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
-<div id='modal-new-thread' class='modal-window'>
-    <div>
-        <span title="" class='modal-close' onclick="modal_close(); ">&times</span>
-        <span class='modal-title'>New Message</span>
-        <span class='modal-message'>Enter Number: <input type="text" name="number" id="new-thread-number" placeholder="(206) 555-1212" /></span>
-        <span class='modal-actions'>
-            <button type='button' alt='Cancel' title='Cancel' onclick='modal_close();' class='btn btn-default' ><span class='fas fa-times fa-fw'></span><span class='button-label never pad'>Cancel</span></button>
-            <button type='submit' name='action' value='Ok' id='btn_ok' alt='ok' title='ok' onclick='modal_close();' class='btn btn-default' style='float: right; margin-left: 15px' ><span class='fas fa-check fa-fw'></span><span class='button-label never pad'>Start</span></button>
-        </span>
+    <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
+    <div id='modal-new-thread' class='modal-window'>
+        <div>
+            <span title="" class='modal-close' onclick="modal_close(); ">&times</span>
+            <span class='modal-title'>New Message</span>
+            <span class='modal-message'>Enter Number: <input type="text" name="number" id="new-thread-number"
+                    placeholder="(206) 555-1212" /></span>
+            <span class='modal-actions'>
+                <button type='button' alt='Cancel' title='Cancel' onclick='modal_close();' class='btn btn-default'><span
+                        class='fas fa-times fa-fw'></span><span class='button-label never pad'>Cancel</span></button>
+                <button type='submit' name='action' value='Ok' id='btn_ok' alt='ok' title='ok' onclick='modal_close();'
+                    class='btn btn-default' style='float: right; margin-left: 15px'><span
+                        class='fas fa-check fa-fw'></span><span class='button-label never pad'>Start</span></button>
+            </span>
+        </div>
     </div>
-</div>
-<input type='hidden' name='key_uuid' id='key_uuid'/>
+    <input type='hidden' name='key_uuid' id='key_uuid' />
 </form>
 <?php
 $page = 0;
@@ -57,10 +61,10 @@ $PAGE_SIZE = 25;
 $sql = "SELECT remote_number, group_uuid, last_message, thread_uuid FROM webtexting_threads WHERE local_number = :local_number AND domain_uuid = :domain_uuid ORDER BY last_message DESC LIMIT " . $PAGE_SIZE . ";";
 
 
- if($_GET['page']) {
+if ($_GET['page']) {
     $sql .= " OFFSET :page";
     $page = intval($_GET['page']);
-    $parameters['page'] = $page*$PAGE_SIZE;
+    $parameters['page'] = $page * $PAGE_SIZE;
 }
 
 $parameters['local_number'] = $destination;
@@ -91,7 +95,7 @@ $frontendOpts['ownNumber'] = $ownNumber;
 $frontendOpts['threads'] = $threads;
 echo "<div id='TEST_DIV_FOR_TESTING_WEBTEXTING'></div>";
 //echo $frontendOpts;
-$z=0;
+$z = 0;
 foreach ($threads as $thread) {
     $number = $thread['remote_number'];
     $thread_preview_opts[$z]['remoteNumber'] = $number;
@@ -113,7 +117,7 @@ foreach ($threads as $thread) {
     $parameters['domain_uuid'] = $domain_uuid;
     $last_message = $database->select($sql, $parameters, 'row');
     unset($parameters);
-    $thread_preview_opts[$z]['last_message'] =  $last_message;
+    $thread_preview_opts[$z]['last_message'] = $last_message;
     $thread_preview_opts[$z]['timestamp'] = $last_message['start_stamp'];
     // compute the name to display based on number and a potential contact name
     $display_name = "";
@@ -129,10 +133,10 @@ foreach ($threads as $thread) {
         } else {
             $display_name = $group['members'];
         }
-        $group_members = explode(",",$group['members']);
-        $frontendOpts[$z]['groupMembers'] = explode(",",$group['members']);
-        $member_index =0;
-        foreach( $group_members as $member ){
+        $group_members = explode(",", $group['members']);
+        $frontendOpts[$z]['groupMembers'] = explode(",", $group['members']);
+        $member_index = 0;
+        foreach ($group_members as $member) {
             $sql = "SELECT v_contacts.contact_uuid, v_contacts.contact_organization, v_contacts.contact_name_given, v_contacts.contact_name_middle, v_contacts.contact_name_family, v_contacts.contact_nickname, v_contacts.contact_title, v_contacts.contact_role FROM v_contact_phones, v_contacts WHERE v_contact_phones.phone_number = :number AND v_contact_phones.domain_uuid = :domain_uuid AND v_contacts.contact_uuid = v_contact_phones.contact_uuid LIMIT 1;";
             $parameters['number'] = $member;
             $parameters['domain_uuid'] = $domain_uuid;
@@ -168,14 +172,12 @@ foreach ($threads as $thread) {
                 if (sizeof($name_parts) > 0) {
                     $frontendOpts[$z]['groupMembers'][$member_index] = implode(" ", $name_parts);
                 }
-            }
-            else{
+            } else {
                 $frontendOpts[$z]['groupMembers'][$member_index] = $member;
-            }    
-            $member_index++;        
-        } 
-    }
-    else {
+            }
+            $member_index++;
+        }
+    } else {
         $display_name = $number;
         $thread_preview_opts[$z]['displayName'] = $display_name;
         //the following logic would have to be executed 
@@ -215,12 +217,12 @@ foreach ($threads as $thread) {
                 $frontendOpts['threadName'] = implode(" ", $name_parts);
                 $display_name = $frontendOpts['threadName'];
                 if (permission_exists('contact_phone_edit')) {
-                    $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
-                    $frontendOpts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
+                    $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=" . $contact['contact_uuid'];
+                    $frontendOpts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=" . $contact['contact_uuid'];
                 }
             } elseif (permission_exists('contact_phone_edit')) {
-                $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
-              $frontendOpts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=".$contact['contact_uuid'];
+                $thread_preview_opts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=" . $contact['contact_uuid'];
+                $frontendOpts[$z]['contactEditLink'] = "/app/contacts/contact_edit.php?id=" . $contact['contact_uuid'];
             }
         }
     }
@@ -230,11 +232,11 @@ foreach ($threads as $thread) {
     $frontendOpts["extensionUUID"] = $extension['extension_uuid'];
     $frontendOpts['ownNumber'] = $ownNumber;
 
-    $link = "thread.php?extension_uuid=".$extension['extension_uuid']."&";
+    $link = "thread.php?extension_uuid=" . $extension['extension_uuid'] . "&";
     if ($group_uuid != null) {
-        $link .= "group=".$group_uuid;
+        $link .= "group=" . $group_uuid;
     } else {
-        $link .= "number=".$number;
+        $link .= "number=" . $number;
     }
     $thread_preview_opts[$z]['link'] = $link;
 
@@ -242,57 +244,64 @@ foreach ($threads as $thread) {
     $body_preview = $last_message['content_type'] == "text/plain" ? $last_message['message'] : "MMS message";
     $thread_preview_opts[$z]['bodyPreview'] = $body_preview;
     $thread_preview_opts[$z]['ownNumber'] = $ownNumber;
-    $thread_preview_opts[$z]['displayName']= $display_name;
-    $thread_preview_opts[$z]['contactEditLink'] = $frontendOpts[$z]['contactEditLink'] ;
+    $thread_preview_opts[$z]['displayName'] = $display_name;
+    $thread_preview_opts[$z]['contactEditLink'] = $frontendOpts[$z]['contactEditLink'];
     $thread_preview_opts[$z]['groupMembers'] = $frontendOpts[$z]['groupMembers'];
     $z++;
- }
- //$frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
- if($_SESSION['user']['multiple_wt_extensions']){
-    $frontendOpts['multiple_wt_extensions'] =true;
- }
+}
+//$frontendOpts['$thread_preview_opts'] = $thread_preview_opts;
+if ($_SESSION['user']['multiple_wt_extensions']) {
+    $frontendOpts['multiple_wt_extensions'] = true;
+}
 
 ?>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js"></script>
 <script src="js/webtexting.umd.js"></script>
 <script type="text/javascript">
-    window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
-    function clean_number() { // clean any non-digits out of the phone number box
-        document.querySelector("#new-thread-number").value = document.querySelector("#new-thread-number").value.replace(/[^\d+]/g, "");
-    }
-    </script>
+window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
+
+function clean_number() { // clean any non-digits out of the phone number box
+    document.querySelector("#new-thread-number").value = document.querySelector("#new-thread-number").value.replace(
+        /[^\d+]/g, "");
+}
+</script>
 
 
 <?php
 require_once "footer.php";
 ?>
 <link rel="stylesheet" href="js/style.css" />
-<link rel="stylesheet" href="src/footer.css"/>
+<link rel="stylesheet" href="src/footer.css" />
 <form method='post' action='group-rename.php' value="rename-group">
-    <input type="hidden" name="action" value="group_name_change"/>
-      <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
-      <input type="hidden" name="group" value="<?php echo $_GET['group']; ?>" />
-      <div id='modal-rename-group' class='modal-window'>
+    <input type="hidden" name="action" value="group_name_change" />
+    <input type="hidden" name="extension_uuid" value="<?php echo $extension['extension_uuid']; ?>" />
+    <input type="hidden" name="group" value="<?php echo $_GET['group']; ?>" />
+    <div id='modal-rename-group' class='modal-window'>
         <div>
             <span title="" class='modal-close' onclick="modal_close(); ">&times</span>
-            <span class='modal-message'>New name: <input type="text" name="name" class="form-control" placeholder="My besties" /></span>
+            <span class='modal-message'>New name: <input type="text" name="name" class="form-control"
+                    placeholder="My besties" /></span>
             <span class='modal-actions'>
-                <button type='button' alt='Cancel' title='Cancel' onclick='modal_close();' class='btn btn-default' ><span class='fas fa-times fa-fw'></span><span class='button-label never pad'>Cancel</span></button>
-                <button type='submit' value='Ok' id='btn_ok' alt='ok' title='ok' onclick='modal_close();' class='btn btn-default' style='float: right; margin-left: 15px' ><span class='fas fa-check fa-fw'></span><span class='button-label never pad'>Rename</span></button>
+                <button type='button' alt='Cancel' title='Cancel' onclick='modal_close();' class='btn btn-default'><span
+                        class='fas fa-times fa-fw'></span><span class='button-label never pad'>Cancel</span></button>
+                <button type='submit' value='Ok' id='btn_ok' alt='ok' title='ok' onclick='modal_close();'
+                    class='btn btn-default' style='float: right; margin-left: 15px'><span
+                        class='fas fa-check fa-fw'></span><span class='button-label never pad'>Rename</span></button>
             </span>
         </div>
-      </div>
-      <input type='hidden' name='key_uuid' id='key_uuid'/>
-    </form>
-  
-<script type="text/javascript">    
-window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'], "remote_identifier" => $number)); ?>;
+    </div>
+    <input type='hidden' name='key_uuid' id='key_uuid' />
+</form>
+
+<script type="text/javascript">
+window.notification_data =
+    <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'], "remote_identifier" => $number)); ?>;
 WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); ?>);
 </script>
 
 
 <style type="text/css">
-  /* .container-fluid {
+/* .container-fluid {
     height: calc(100% - 108px);
   }
 
@@ -305,26 +314,19 @@ WebTexting.initializeWebTextingContainer(<?php echo json_encode($frontendOpts); 
   } */
 
 #WEB_TEXT_ROOT {
-    display:grid;
+    display: grid;
     grid-template-columns: 320px auto;
     grid-template-rows: auto;
 }
-@media screen and (width <= 700px) {
-    #WEB_TEXT_ROOT{
-    grid-template-columns:100%;
-    grid-template-rows:80vh;
-    height: 85vh;
+
+@media screen and (width <=700px) {
+    #WEB_TEXT_ROOT {
+        grid-template-columns: 100%;
+        grid-template-rows: 80vh;
+        height: 85vh;
     }
 
 
 
 }
-
-
-
-    
-
-
-
-
 </style>

@@ -122,6 +122,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
 
 export function insertMessageInHistory(key: string, message: MessageData) {
     //check for message in history
+    //console.log("message", message);
     if (state.conversations[key]) {
         for (let i = 0; i < state.conversations[key].length; i++) {
             if (state.conversations[key][i].id == message.id) {

@@ -3,10 +3,10 @@ import Conversation from '../conversation/Conversation.vue';
 import ThreadList from '../ThreadList/ThreadList.vue';
 import moment from 'moment';
 import NewMessage from '../NewMessage.vue';
-import { RouterView } from 'vue-router';
+import { backfillFromTimestamp } from '../../lib/backfillFromTimestamp';
 import { saveTemplate, saveTemplateQuery, } from '../../lib/saveTemplates';
 import { useMatchMedia } from '../../lib/matchMedia';
-import { emitter, MessageData, ThreadChangePayload, state, ThreadPreviewData, updateMessageStatus, MessageSuccessPayload } from '../../lib/global';
+import { emitter, MessageData, ThreadChangePayload, state, ThreadPreviewData, updateMessageStatus, MessageSuccessPayload, updateCurrentSessionStartTime } from '../../lib/global';
 import { searchPreviews, loadPreviews } from '../../lib/backfillPreviews';
 import { loadTemplates, loadTemplateQuery } from '../../lib/loadTemplates';
 import { deleteTemplateQuery, deleteTemplate } from '../../lib/deleteTemplate';
@@ -262,6 +262,16 @@ export default {
             //console.log(payload);
             updateMessageStatus(payload.key, payload.id, true);
         })
+
+        emitter.on("last-checked-timestamp", (timestamp: string) => {
+            updateCurrentSessionStartTime(timestamp);
+        })
+
+        emitter.on('backfill-poll-complete', () => {
+            //state.currentSessionStartTime = new Date(Date.now()).toISOString();
+        });
+        setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
+
     },
 }
 </script>

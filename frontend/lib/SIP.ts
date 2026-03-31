@@ -1,7 +1,7 @@
-import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions, MessagerMessageOptions,  } from 'sip.js';
+import { UserAgentOptions, UserAgent, Registerer, Invitation, Notification, Message, Messager, URI, RegistererState, TransportState, MessagerOptions, MessagerMessageOptions, } from 'sip.js';
 import { CPIM } from './CPIM';
 import { sendMessage } from './sendMessage';
-import { state, emitter,  MessageData, addMessage } from './global';
+import { state, emitter, MessageData, addMessage } from './global';
 import moment from 'moment';
 import { compileScript } from 'vue/compiler-sfc';
 import { AlertData } from '@/components/Alerts/Alert.vue';
@@ -14,7 +14,7 @@ const registrationIntervalSeconds = 270;
 let backoff = 0;
 //stolen from https://www.geeksforgeeks.org/javascript/generate-random-alpha-numeric-string-in-javascript/
 function randomBytes() {
-        return Math.random().toString(36).slice(2);
+    return Math.random().toString(36).slice(2);
 }
 
 
@@ -30,18 +30,18 @@ function calculatePlainThreadID(message: Message, direction: string, originalTo:
     return 'do not add';
 }
 
-function calculateCPIMThreadID(cpim: CPIM, direction: string, originalTo: string, messageFromUser: string) {
-    if (cpim.headers["Group-UUID"] ) {
+export function calculateCPIMThreadID(cpim: CPIM, direction: string, originalTo: string, messageFromUser: string) {
+    if (cpim.headers["Group-UUID"]) {
         return cpim.headers["Group-UUID"];
     }
-    else if (cpim.headers["group-uuid"] ) {
+    else if (cpim.headers["group-uuid"]) {
         return cpim.headers["group-uuid"];
     }
-    else if ((direction =='incoming')) {
+    else if ((direction == 'incoming')) {
         //not group message and inbound so key is whoever sent message
         return messageFromUser;
     }
-    else if (direction =='outgoing') {
+    else if (direction == 'outgoing') {
         //not group and outbound so key is whoever we send message to
         return originalTo;
     }
@@ -67,7 +67,7 @@ function reconnect(userAgent: UserAgent) {
     }
 }
 
-function RunSIPConnection(username: string, password: string, server: string, ownNumber: string,  extension_uuid:string, remote_number?: string, group?: string,) {
+function RunSIPConnection(username: string, password: string, server: string, ownNumber: string, extension_uuid: string, remote_number?: string, group?: string,) {
     const uaOpts: UserAgentOptions = {
         logBuiltinEnabled: false,
         logConfiguration: false,
@@ -85,7 +85,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
             onDisconnect: (err?: Error) => {
                 state.connectivityStatus = "disconnected";
                 if (err) {
-                    //console.log("[SIP.RunSIPConnection] connectivity error:", err)
+                    console.log("[SIP.RunSIPConnection] connectivity error:", err)
                 }
             },
             onMessage: async (message: Message) => {
@@ -95,11 +95,11 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                     direction = 'outgoing';
                 }
                 const messageFromUser = message.request.from.uri.user;
-                //console.log(message.request.getHeader("Content-Type"));
+                console.log(message.request.getHeader("Content-Type"));
                 switch (message.request.getHeader("Content-Type")) {
                     case "text/plain":
                         console.log("onMessage")
-                    console.log(message)
+                        console.log(message)
                         const plainThreadID = calculatePlainThreadID(message, direction, originalTo, messageFromUser);
                         addMessage(plainThreadID, {
                             direction: direction,
@@ -133,17 +133,15 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                         break;
 
                     default:
-                        //console.log("[SIP.RunSIPConnection] dropping message with unknown content type ", message.request.getHeader("Content-Type"))
+                    //console.log("[SIP.RunSIPConnection] dropping message with unknown content type ", message.request.getHeader("Content-Type"))
                 }
             }
         }
     };
-    //console.log("initializing user agent with options:", uaOpts);
     const userAgent = new UserAgent(uaOpts);
-
     userAgent.transport.onDisconnect = (err?: Error) => {
         if (err) {
-            //console.log("connectivity error:", err)
+            console.log("connectivity error:", err)
         }
     }
 
@@ -164,6 +162,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                             break;
                         case RegistererState.Unregistered:
                             let registerRequest = await registerer.register();
+                            console.log("re-register response", registerRequest);
                             break;
                     }
                 });
@@ -203,11 +202,11 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     window.addEventListener("beforeunload", (e: BeforeUnloadEvent) => {
         registerer.unregister();
     });
-
+    console.log("[SIP.RunSIPConnection] Starting user agent...", userAgent);
     userAgent.start();
 
     emitter.on("outbound-message", async (message: MessageData) => {
-        //console.log("[SIP.outbound-message] Outbound message:", message);
+        console.log("[SIP.outbound-message] Outbound message:", message);
         //message.timestamp = moment();
         const m = message;
         // if plain/text use to number as key
@@ -223,34 +222,34 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         sendMessageQuery.extensionUUID = extension_uuid;
         let sendMessageResponse = await sendMessage(sendMessageQuery);
         console.log(sendMessageResponse);
-        if(sendMessageResponse && sendMessageResponse.statusCode && sendMessageResponse.statusCode == 200){
+        if (sendMessageResponse && sendMessageResponse.statusCode && sendMessageResponse.statusCode == 200) {
             sendMessageQuery.id = sendMessageResponse.id;
             sendMessageQuery.key = sendMessageResponse.key;
             sendMessageQuery.delivered = true;
             sendMessageResponse.delivered = true;
-                //add message to state
+            //add message to state
             //probably just add the status codes here lmao
-            if(message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])){
+            if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
                 const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
                 addMessage(cpimThreadID, sendMessageQuery);
             }
-            else{
+            else {
                 addMessage(message.to, sendMessageQuery);
             }
             emitter.emit('message-success', sendMessageQuery);
         }
-        else{
+        else {
             //console.log('message failed to send');
-            if(message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])){
+            if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
                 const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
                 addMessage(cpimThreadID, sendMessageQuery);
             }
-            else{
+            else {
                 addMessage(message.to, sendMessageQuery);
             }
             emitter.emit('message-failed', sendMessageQuery);
         }
-        
+
     });
 }
 

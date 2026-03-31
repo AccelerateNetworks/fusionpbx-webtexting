@@ -120,6 +120,7 @@ export default {
         => 
         */
     async send() {
+      console.log("[Sendbox.send] Send button hit. Validating and sending message...");
       //we need to fail  phone numbers that are not 11 digits long
       if (this.location === "Conversation") {
         const phoneString = this.remoteNumber;
@@ -130,7 +131,7 @@ export default {
               phoneString.length === 6)) ||
           this.groupUUID
         ) {
-          //console.log(this.enteredText);
+          console.log(this.enteredText);
           if (
             this.enteredText.length == 0 &&
             this.pendingAttachments.length == 0
@@ -158,7 +159,7 @@ export default {
 
           if (this.enteredText.length > 0) {
             let message = this.getMessageData();
-            //console.log(message);
+            console.log("the message is ", message);
             if (this.groupUUID) {
               const url = await uploadText(this.enteredText);
               const cpim = new CPIM(url, "text/plain");
@@ -491,7 +492,7 @@ export default {
           class="btn btn-send"
           :disabled="
             (pendingAttachments.length == 0 && enteredText.length == 0) ||
-            !state.connected
+            state.connected
           "
           v-on:click="send"
         >

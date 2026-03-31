@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__."/vendor/autoload.php";
+require_once __DIR__ . "/vendor/autoload.php";
 require_once "root.php";
 require_once "resources/require.php";
 require_once "resources/check_auth.php";
@@ -21,19 +21,22 @@ if (!$extension) {
 
 $database = new database;
 
-$sql = "SELECT content_type, direction, from_number, message, start_stamp, to_number, group_uuid, message_uuid, delivered FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid AND ";
+$sql = "SELECT content_type, direction, from_number, message, start_stamp, to_number, group_uuid, message_uuid, delivered FROM webtexting_messages WHERE extension_uuid = :extension_uuid AND domain_uuid = :domain_uuid ";
 if ($_GET['group']) {
-    $sql .= "group_uuid = :group_uuid";
+    $sql .= " AND group_uuid = :group_uuid ";
     $parameters['group_uuid'] = $_GET['group'];
-} else {
-    $sql .= "(from_number = :number OR to_number = :number) AND group_uuid IS NULL";
+} else if ($_GET['number']) {
+    $sql .= " AND ((from_number = :number OR to_number = :number) AND group_uuid IS NULL) ";
     $parameters['number'] = $_GET['number'];
 }
 if ($_GET['older_than']) {
     $sql .= " AND start_stamp < (SELECT start_stamp FROM webtexting_messages WHERE message_uuid = :older_than)";
     $parameters['older_than'] = $_GET['older_than'];
+} else if ($_GET['younger_than']) {
+    $sql .= " AND (start_stamp between  :younger_than AND NOW())";
+    $parameters['younger_than'] = $_GET['younger_than'];
 }
-$sql .= " ORDER BY start_stamp DESC LIMIT 30";
+$sql .= " ORDER BY start_stamp DESC LIMIT 30;";
 $parameters['extension_uuid'] = $extension['extension_uuid'];
 $parameters['domain_uuid'] = $domain_uuid;
 $messages = $database->select($sql, $parameters, 'all');
