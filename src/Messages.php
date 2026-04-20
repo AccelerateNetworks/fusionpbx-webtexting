@@ -88,9 +88,8 @@ final class Messages
             Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
         }
 
-        // deliver via SSE or SIP or don't deliver
-        //_sendEvent("message", $bodyStr);
-        //Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
+        // deliver via SIP
+        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID, null, true);
     }
 
     public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $messageUUID)
@@ -372,49 +371,64 @@ final class Messages
             unset($parameters);
         }
     }
-
-    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $messageUUID, ?string $groupUUID = null, ?string $originalTo = null)
+    
+    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $dedupeID, ?string $groupUUID=null, ?string $originalTo=null, bool $inbound=false)
     {
-        $SIPProfiles = array("websocket"); // TODO: make this list configurable
-        $toAddress = $extension . "@" . $domainName;
-        $fromAddress = $from . "@" . $domainName;
+        $toAddress = $extension."@".$domainName;
+        $fromAddress = $from."@".$domainName;
 
-        foreach ($SIPProfiles as $SIPProfile) {
-            $eventHeaders = array(
-                "Event-Subclass" => "SMS::SEND_MESSAGE",
-                "proto" => "sip",
-                "dest_proto" => "sip",
-                "from" => "sip:" . $from,
-                "from_user" => $from,
-                "from_host" => $domainName,
-                "from_full" => "sip:" . $fromAddress,
-                "sip_profile" => $SIPProfile,
-                "to" => $toAddress,
-                "to_user" => $extension,
-                "to_host" => $domainName,
-                "subject" => "SIMPLE MESSAGE", // is this required? what is it? fusionpbx's sms app does this
-                "type" => $contentType,
-                "hint" => "the hint", // is this required? what is it? fusionpbx's sms app does this
-                "replying" => "true", // what is this?
-                "DP_MATCH" => $toAddress, // what is this?
-                "sip_h_X-Message-ID" => $messageUUID,
-                "Content-Length" => strlen($body),
+        $baseHeaders = array(
+            "Event-Subclass"     => "SMS::SEND_MESSAGE",
+            "proto"              => "sip",
+            "from"               => "sip:".$from,
+            "from_user"          => $from,
+            "from_host"          => $domainName,
+            "from_full"          => "sip:".$fromAddress,
+            "to"                 => $toAddress,
+            "to_user"            => $extension,
+            "to_host"            => $domainName,
+            "subject"            => "SIMPLE MESSAGE",
+            "type"               => $contentType,
+            "hint"               => "the hint",
+            "DP_MATCH"           => $toAddress,
+            "sip_h_X-Message-ID" => $dedupeID,
+            "Content-Length"     => strlen($body),
+        );
+
+        if ($groupUUID != null) {
+            $baseHeaders['sip_h_X-Group-ID'] = $groupUUID;
+        }
+        if ($originalTo != null) {
+            $baseHeaders['sip_h_X-Original-To'] = $originalTo;
+        }
+
+        $destinations = array(
+            array(
+                "dest_proto"  => "sip",
+                "sip_profile" => "websocket",
+                "replying"    => "true",
+            ),
+        );
+
+        // Only deliver to SIP device for inbound traffic (carrier → local user).
+        // For outbound, the carrier API handles all delivery (including returning
+        // the message if the destination is a local extension).
+        if ($inbound) {
+            $destinations[] = array(
+                "dest_proto" => "GLOBAL_SMS",
+                "context"    => "public",
+                "inbound"    => "true",
             );
+        }
 
-            if ($groupUUID != null) {
-                $eventHeaders['sip_h_X-Group-ID'] = $groupUUID;
-            }
-
-            if ($originalTo != null) {
-                $eventHeaders['sip_h_X-Original-To'] = $originalTo;
-            }
+        foreach ($destinations as $overrides) {
+            $eventHeaders = array_merge($baseHeaders, $overrides);
 
             $cmd = "sendevent CUSTOM\n";
             foreach ($eventHeaders as $k => $v) {
-                $cmd .= "$k: " . $v . "\n";
+                $cmd .= "$k: $v\n";
             }
-
-            $cmd .= "\n" . $body;
+            $cmd .= "\n".$body;
 
             event_socket_request_cmd($cmd);
         }
