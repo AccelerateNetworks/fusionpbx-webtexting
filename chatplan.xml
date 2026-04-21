@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <include>
         <context name="public">
-                <extension name="ten-digit">
-                        <condition field="to" expression="^(\d{10}.*)$">
-                                <action application="set" data="final_delivery=true" />
-                                <action application="lua" data="app.lua webtexting outbound" />
-                        </condition>
-                </extension>
-                <extension name="unreg">
-                        <condition field="${sofia_contact(profile/${to})}"
-                                expression="error\/user_not_registered">
-                                <action application="set" data="final_delivery=true" />
-                        </condition>
-                </extension>
-                <extension name="other">
-                        <condition field="to" expression="^(.*)$">
-                                <action application="set" data="final_delivery=true" />
-                                <!-- <action application="send"/> -->
-                        </condition>
-                </extension>
+        <!-- Inbound delivery from carrier: PHP sets inbound=true (Patch 5) -->
+        <extension name="inbound_messaging">
+                <condition field="inbound" expression="^true$"/>
+                <condition field="to_user" expression="^\d{1,5}$" break="on-true">
+                        <action application="set" data="sip_profile=internal-5065-5066" inline="true"/>
+                        <action application="info" data="DEBUG" inline="true"/>
+                        <action application="send" data="sip" inline="true"/>
+                </condition>
+        </extension>
+
+        <!-- Drop IMDN delivery notifications — Linphone sends these as SIP MESSAGEs
+        to confirm receipt. They should not route to the carrier API. -->
+        <extension name="imdn_filter">
+                <condition field="type" expression="^message/imdn">
+                        <action application="info" data="IMDN notification dropped" inline="true"/>
+                </condition>
+        </extension>
+
+        <!-- All outbound: PSTN, short extensions, short codes -->
+        <extension name="outbound">
+                <condition field="to" expression="^(.+)$">
+                        <action application="set" data="extension_uuid=${user_data(${from_user}@${from_host} var extension_uuid)}" inline="true"/>
+                        <action application="set" data="final_delivery=true" inline="true"/>
+                        <action application="lua" data="app.lua webtexting outbound" inline="true"/>
+                </condition>
+        </extension>
         </context>
 </include>
