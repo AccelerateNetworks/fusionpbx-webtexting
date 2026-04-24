@@ -11,14 +11,6 @@
                 </condition>
         </extension>
 
-        <!-- Drop IMDN delivery notifications — Linphone sends these as SIP MESSAGEs
-        to confirm receipt. They should not route to the carrier API. -->
-        <extension name="imdn_filter">
-                <condition field="type" expression="^message/imdn">
-                        <action application="info" data="IMDN notification dropped" inline="true"/>
-                </condition>
-        </extension>
-
         <!-- All outbound: PSTN, short extensions, short codes -->
         <extension name="outbound">
                 <condition field="to" expression="^(.+)$">

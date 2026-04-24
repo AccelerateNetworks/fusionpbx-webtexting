@@ -73,6 +73,34 @@ $provider = "accelerate-networks"; // TODO: make this customizable
 
 require __DIR__."/providers/".$provider.".php";
 
+$message_uuid = $dedupeID;
+
+// Unwrap CPIM envelope by inner content type. Post-Fix-2f, Linphone wraps ALL
+// outbound messages in CPIM — SMS, IMDN, typing indicators, and MMS alike.
+// Dispatch on the inner type so the existing per-type cases still work.
+if ($contentType === 'message/cpim') {
+    $cpim = CPIM::fromString($body);
+    $innerContentType = $cpim->getHeader('content-type');
+
+    // Drop notifications that have no carrier-side equivalent
+    if ($innerContentType && (
+        stripos($innerContentType, 'message/imdn') !== false ||
+        stripos($innerContentType, 'application/im-iscomposing') !== false
+    )) {
+        error_log("outbound-hook: dropping CPIM-wrapped ".$innerContentType);
+        http_response_code(200);
+        die();
+    }
+
+    // Unwrap text/plain so the existing text/plain case handles carrier SMS dispatch
+    if ($innerContentType && stripos($innerContentType, 'text/plain') !== false) {
+        $body = $cpim->body;
+        $contentType = 'text/plain';
+    }
+
+    // Otherwise (file-transfer XML): fall through to the message/cpim case
+}
+
 switch($contentType) {
 case "text/plain":
     $message_uuid = Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $message_uuid);
