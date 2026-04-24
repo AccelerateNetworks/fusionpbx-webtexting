@@ -146,18 +146,28 @@ final class Messages
 
     public static function _outgoing(LocalNumber $source, string $to, string $from, $body, string $contentType, string $messageUUID, ?string $groupUUID)
     {
+        // Normalize to canonical path-style unsigned URL. Guarantees DB durability
+        // (stored URLs never expire) regardless of URL shape the caller passed in:
+        // path-style or virtual-hosted, signed or unsigned — all collapse to the
+        // canonical form.
+        if ($body instanceof CPIM && $body->fileURL !== null) {
+            $body->fileURL = S3Helper::canonicalize($body->fileURL);
+        }
+
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
+
         if ($groupUUID) {
             $response = Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
         } else {
             $response = Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, null);
+        }
 
-        }
-        // generate a pre-signed download URL before delivering it to things that will download it
-        if ($body instanceof CPIM) {
+        // Re-sign for delivery. Always safe to run — canonicalize() guaranteed the URL
+        // is unsigned path-style, which GetDownloadURL's strip logic handles.
+        if ($body instanceof CPIM && $body->fileURL !== null) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
-            $bodyStr = $body->toString();
         }
+
         return $response;
     }
 
