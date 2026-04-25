@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once "app/webtexting/sse.php";
+// require_once "app/webtexting/sse.php";
 use Minishlink\WebPush\WebPush;
 use Minishlink\WebPush\Subscription;
 
@@ -29,40 +29,53 @@ final class Messages
      * 
      * @return null
      */
-    public static function IncomingMMS(string $from, string $to, array $attachments, array $additionalRecipients)
+    public static function IncomingMMS(string $from, string $to, array $attachments, array $filenames, array $additionalRecipients)
     {
-        $cpim = new CPIM();
-
         $destination = LocalNumber::Get($to);
         if ($destination == null) {
             return false;
         }
 
-        $cpim->headers["From"] = "sip:" . $from . "@" . $destination->domainName;
-        $cpim->headers["To"] = "sip:" . $destination->extension . "@" . $destination->domainName;
+        $sharedHeaders = [];
+        $sharedHeaders['From'] = "<sip:" . $from . "@" . $destination->domainName . ">";
+        $sharedHeaders['To'] = "<sip:" . $destination->extension . "@" . $destination->domainName . ">";
 
         $cc = array();
         foreach ($additionalRecipients as $number) {
             $cc[] = "<" . $number . "@" . $destination->domainName . ">";
         }
-        $cpim->headers["CC"] = implode(", ", $cc);
+        if (!empty($cc)) {
+            $sharedHeaders['CC'] = implode(", ", $cc);
+        }
+        $sharedHeaders['DateTime'] = gmdate("Y-m-d\TH:i:s\Z");
 
         $groupUUID = Messages::_findGroup($destination, $from, $to, $additionalRecipients);
         if ($groupUUID) {
-            $cpim->headers["Group-UUID"] = $groupUUID;
+            $sharedHeaders['Group-UUID'] = $groupUUID;
         }
 
-        foreach ($attachments as $attachment) {
+        foreach ($attachments as $i => $attachment) {
             $info = S3Helper::GetInfo($attachment);
 
             if ($info['ContentType'] == "application/smil") {
                 continue;
             }
 
-            $c = clone $cpim;
-            $c->fileURL = $attachment;
-            $c->fileContentType = $info['ContentType'];
-            $c->fileSize = $info['ContentLength'];
+            if (stripos($info['ContentType'], 'text/plain') === 0) {
+                $textContent = S3Helper::Download($attachment);
+                $c = CPIM::forText($textContent);
+            } else {
+                $filename = $filenames[$i] ?? basename(parse_url($attachment, PHP_URL_PATH));
+                $c = CPIM::forFileTransfer(
+                    $filename,
+                    (int)$info['ContentLength'],
+                    $info['ContentType'],
+                    $attachment
+                );
+            }
+
+            $c->headers = array_merge($sharedHeaders, $c->headers);
+
             Messages::_incoming($destination, $from, $to, $c, "message/cpim", $groupUUID);
         }
 
@@ -77,14 +90,17 @@ final class Messages
         $messageUUID = Messages::Save('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType, $message_uuid, $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
-        if ($body instanceof CPIM) {
+        if ($body instanceof CPIM && isset($body->fileURL)) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
             $bodyStr = $body->toString();
             // deliver the webpush notification with "MMS Message" instead of an xml
-            //todo figure out how to add groupuuid to the payload 
+            //todo figure out how to add groupuuid to the payload
             Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, "MMS Message", $groupUUID);
+        } else if ($body instanceof CPIM) {
+            // text-body CPIM (inline text caption): no URL to presign
+            Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $body->body, $groupUUID);
         } else {
-            // deliver the webpush notification 
+            // deliver the webpush notification
             Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
         }
 
@@ -130,18 +146,28 @@ final class Messages
 
     public static function _outgoing(LocalNumber $source, string $to, string $from, $body, string $contentType, string $messageUUID, ?string $groupUUID)
     {
+        // Normalize to canonical path-style unsigned URL. Guarantees DB durability
+        // (stored URLs never expire) regardless of URL shape the caller passed in:
+        // path-style or virtual-hosted, signed or unsigned — all collapse to the
+        // canonical form.
+        if ($body instanceof CPIM && $body->fileURL !== null) {
+            $body->fileURL = S3Helper::canonicalize($body->fileURL);
+        }
+
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
+
         if ($groupUUID) {
             $response = Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
         } else {
             $response = Messages::Save('outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, null);
+        }
 
-        }
-        // generate a pre-signed download URL before delivering it to things that will download it
-        if ($body instanceof CPIM) {
+        // Re-sign for delivery. Always safe to run — canonicalize() guaranteed the URL
+        // is unsigned path-style, which GetDownloadURL's strip logic handles.
+        if ($body instanceof CPIM && $body->fileURL !== null) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
-            $bodyStr = $body->toString();
         }
+
         return $response;
     }
 

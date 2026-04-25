@@ -9,6 +9,7 @@ declare(strict_types=1);
 final class CPIM
 {
     public array $headers;
+    public string $body = '';
     public string $filename;
     public int $fileSize;
     public $fileContentType;
@@ -20,6 +21,45 @@ final class CPIM
     public function __construct()
     {
         $this->headers = array();
+    }
+
+    /**
+     * Build a CPIM carrying an RCS file-transfer reference.
+     *
+     * @param string $filename         display name of the attachment
+     * @param int    $fileSize         size of the attachment in bytes
+     * @param string $fileContentType  MIME type of the attachment
+     * @param string $fileURL          URL the receiving client will download from
+     *
+     * @return CPIM configured in file-transfer mode
+     */
+    public static function forFileTransfer(
+        string $filename,
+        int $fileSize,
+        string $fileContentType,
+        string $fileURL
+    ): self {
+        $cpim = new self();
+        $cpim->filename = $filename;
+        $cpim->fileSize = $fileSize;
+        $cpim->fileContentType = $fileContentType;
+        $cpim->fileURL = $fileURL;
+        return $cpim;
+    }
+
+    /**
+     * Build a CPIM carrying an inline text body.
+     *
+     * @param string $body plain text content
+     *
+     * @return CPIM configured in text-body mode
+     */
+    public static function forText(string $body): self
+    {
+        $cpim = new self();
+        $cpim->body = $body;
+        $cpim->headers['Content-Type'] = 'text/plain';
+        return $cpim;
     }
 
     /**
@@ -55,12 +95,22 @@ final class CPIM
     {
         $message = new self();
 
-        $parts = explode("\n\n", $raw);
-        for($i = 0; $i < sizeof($parts)-2; $i++) {
+        $parts = explode("\n\n", str_replace("\r\n", "\n", $raw));
+        for($i = 0; $i < sizeof($parts)-1; $i++) {
             $message->_addHeaders($parts[$i]);
         }
         $rawBody = $parts[sizeof($parts)-1];
-    
+        $message->body = $rawBody;
+
+        // Linphone emits bare `&` in URL attribute values (technically-invalid XML).
+        // Pre-escape so xml_parse_into_struct can handle file-transfer payloads.
+        // Negative lookahead skips already-escaped entities to avoid double-encoding.
+        $rawBody = preg_replace(
+            '/&(?![a-zA-Z][a-zA-Z0-9]*;|#\d+;|#x[0-9a-fA-F]+;)/',
+            '&amp;',
+            $rawBody
+        );
+
         $parser = xml_parser_create();
         xml_parse_into_struct($parser, $rawBody, $body);
 
@@ -70,7 +120,7 @@ final class CPIM
             switch($tag['tag']) {
             case "FILE-SIZE":
                 $message->fileSize = (int)$tag['value'];
-                fileContentType;
+                break;
             case "FILE-NAME":
                 $message->filename = $tag['value'];
                 break;
@@ -93,66 +143,80 @@ final class CPIM
      */
     public function toString(): string
     {
-        $xw = xmlwriter_open_memory();
-        xmlwriter_set_indent($xw, true);
-
-        xmlwriter_start_document($xw, '1.0', 'UTF-8');
-
-        xmlwriter_start_element($xw, 'file');
-
-        xmlwriter_start_attribute($xw, 'xmlns');
-        xmlwriter_text($xw, 'urn:gsma:params:xml:ns:rcs:rcs:fthttp');
-        xmlwriter_end_attribute($xw);
-
-        xmlwriter_start_attribute($xw, 'xmlns:am');
-        xmlwriter_text($xw, 'urn:gsma:params:xml:ns:rcs:rcs:rram');
-        xmlwriter_end_attribute($xw);
-
-        xmlwriter_start_element($xw, 'file-info');
-        xmlwriter_start_attribute($xw, 'type');
-        xmlwriter_text($xw, 'file');
-
-        if (isset($this->fileSize)) {
-            xmlwriter_start_attribute($xw, 'file-size');
-            xmlwriter_text($xw, (string)$this->fileSize);
-            xmlwriter_end_element($xw);
-        }
-
-        if (isset($this->filename)) {
-            xmlwriter_start_element($xw, 'file-name');
-            xmlwriter_text($xw, $this->filename);
-            xmlwriter_end_element($xw);
-        }
-
-        if (isset($this->fileContentType)) {
-            xmlwriter_start_element($xw, 'content-type');
-            xmlwriter_text($xw, $this->fileContentType);
-            xmlwriter_end_element($xw);
-        }
-
         if (isset($this->fileURL)) {
+            $xw = xmlwriter_open_memory();
+            xmlwriter_set_indent($xw, true);
+
+            xmlwriter_start_document($xw, '1.0', 'UTF-8');
+
+            xmlwriter_start_element($xw, 'file');
+
+            xmlwriter_start_attribute($xw, 'xmlns');
+            xmlwriter_text($xw, 'urn:gsma:params:xml:ns:rcs:rcs:fthttp');
+            xmlwriter_end_attribute($xw);
+
+            xmlwriter_start_attribute($xw, 'xmlns:am');
+            xmlwriter_text($xw, 'urn:gsma:params:xml:ns:rcs:rcs:rram');
+            xmlwriter_end_attribute($xw);
+
+            xmlwriter_start_element($xw, 'file-info');
+            xmlwriter_write_attribute($xw, 'type', 'file');
+
+            if (isset($this->fileSize)) {
+                xmlwriter_start_element($xw, 'file-size');
+                xmlwriter_text($xw, (string)$this->fileSize);
+                xmlwriter_end_element($xw);
+            }
+
+            if (isset($this->filename)) {
+                xmlwriter_start_element($xw, 'file-name');
+                xmlwriter_text($xw, $this->filename);
+                xmlwriter_end_element($xw);
+            }
+
+            if (isset($this->fileContentType)) {
+                xmlwriter_start_element($xw, 'content-type');
+                xmlwriter_text($xw, $this->fileContentType);
+                xmlwriter_end_element($xw);
+            }
+
             xmlwriter_start_element($xw, 'data');
-            xmlwriter_start_attribute($xw, 'url');
-            xmlwriter_text($xw, $this->fileURL);
+            xmlwriter_write_attribute($xw, 'url', $this->fileURL);
             xmlwriter_end_element($xw);
+
+            xmlwriter_end_element($xw);  // close file-info
+
+            xmlwriter_end_element($xw);  // close file
+
+            $body = xmlwriter_output_memory($xw);
+            $defaultContentType = 'application/vnd.gsma.rcs-ft-http+xml';
+        } else {
+            $body = $this->body;
+            $defaultContentType = 'text/plain';
         }
 
-        xmlwriter_end_element($xw);
 
-        xmlwriter_end_element($xw);
-
-        $body = xmlwriter_output_memory($xw);
-
-
-        if (!array_key_exists('content-length', $this->headers)) {
-            $this->headers['content-length'] = strlen($body);
+        // Normalize content header keys to Linphone-compatible case (uppercase T/L).
+        // Linphone's CPIM parser uses case-sensitive exact match for "Content-Type"
+        // and "Content-Length" (see cpim-message.cpp getContentHeader lookup).
+        foreach (['content-type' => 'Content-Type', 'content-length' => 'Content-Length', 'Content-type' => 'Content-Type', 'Content-length' => 'Content-Length'] as $variant => $proper) {
+            if (array_key_exists($variant, $this->headers)) {
+                $this->headers[$proper] = $this->headers[$variant];
+                if ($variant !== $proper) {
+                    unset($this->headers[$variant]);
+                }
+            }
         }
 
-        if (!array_key_exists('content-type', $this->headers)) {
-            $this->headers['content-type'] = "application/vnd.gsma.rcs-ft-http+xml";
+        if (!array_key_exists('Content-Length', $this->headers)) {
+            $this->headers['Content-Length'] = strlen($body);
         }
 
-        $contentHeaders = array("content-type", "content-length");
+        if (!array_key_exists('Content-Type', $this->headers)) {
+            $this->headers['Content-Type'] = $defaultContentType;
+        }
+
+        $contentHeaders = array("Content-Type", "Content-Length");
 
         $firstHeaderBlock = array();
         foreach ($this->headers as $key=>$value) {
@@ -172,7 +236,7 @@ final class CPIM
             $secondHeaderBlock[] = $key.": ".$this->headers[$key];
         }
 
-        $out = implode("\n", $firstHeaderBlock)."\n\n".implode("\n", $secondHeaderBlock)."\n\n".$body;
+        $out = implode("\r\n", $firstHeaderBlock)."\r\n\r\n".implode("\r\n", $secondHeaderBlock)."\r\n\r\n".$body;
 
         return $out;
     }
