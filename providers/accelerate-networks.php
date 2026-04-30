@@ -44,7 +44,13 @@ function incoming()
     if ($body->{'MessageType'} == "0") {
         $success = Messages::IncomingSMS($body->{'From'}, $body->{'To'}, $body->{'Content'});
     } else {
-        $success = Messages::IncomingMMS($body->{'From'}, $body->{'To'}, $body->{'MediaURLs'}, $body->{'AdditionalRecipients'});
+        // `Content` is a comma-separated filename list aligned with `MediaURLs` by index
+        // (e.g. "part-003.txt,part-002.mp4,part-001.SMIL,"). Usually has a trailing comma.
+        $filenames = array_values(array_filter(
+            array_map('trim', explode(',', $body->{'Content'} ?? '')),
+            fn($f) => $f !== ''
+        ));
+        $success = Messages::IncomingMMS($body->{'From'}, $body->{'To'}, $body->{'MediaURLs'}, $filenames, $body->{'AdditionalRecipients'});
     }
 
     if ($success) {

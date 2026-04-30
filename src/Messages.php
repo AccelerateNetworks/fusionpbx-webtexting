@@ -29,40 +29,53 @@ final class Messages
      * 
      * @return null
      */
-    public static function IncomingMMS(string $from, string $to, array $attachments, array $additionalRecipients)
+    public static function IncomingMMS(string $from, string $to, array $attachments, array $filenames, array $additionalRecipients)
     {
-        $cpim = new CPIM();
-
         $destination = LocalNumber::Get($to);
         if ($destination == null) {
             return false;
         }
 
-        $cpim->headers["From"] = "sip:".$from."@".$destination->domainName;
-        $cpim->headers["To"] = "sip:".$destination->extension."@".$destination->domainName;
+        $sharedHeaders = [];
+        $sharedHeaders['From'] = "<sip:".$from."@".$destination->domainName.">";
+        $sharedHeaders['To'] = "<sip:".$destination->extension."@".$destination->domainName.">";
 
         $cc = array();
         foreach ($additionalRecipients as $number) {
             $cc[] = "<".$number."@".$destination->domainName.">";
         }
-        $cpim->headers["CC"] = implode(", ", $cc);
+        if (!empty($cc)) {
+            $sharedHeaders['CC'] = implode(", ", $cc);
+        }
+        $sharedHeaders['DateTime'] = gmdate("Y-m-d\TH:i:s\Z");
 
         $groupUUID = Messages::_findGroup($destination, $from, $to, $additionalRecipients);
         if ($groupUUID) {
-            $cpim->headers["Group-UUID"] = $groupUUID;
+            $sharedHeaders['Group-UUID'] = $groupUUID;
         }
 
-        foreach ($attachments as $attachment) {
+        foreach ($attachments as $i => $attachment) {
             $info = S3Helper::GetInfo($attachment);
 
             if ($info['ContentType'] == "application/smil") {
                 continue;
             }
 
-            $c = clone $cpim;
-            $c->fileURL = $attachment;
-            $c->fileContentType = $info['ContentType'];
-            $c->fileSize = $info['ContentLength'];
+            if (stripos($info['ContentType'], 'text/plain') === 0) {
+                $textContent = S3Helper::Download($attachment);
+                $c = CPIM::forText($textContent);
+            } else {
+                $filename = $filenames[$i] ?? basename(parse_url($attachment, PHP_URL_PATH));
+                $c = CPIM::forFileTransfer(
+                    $filename,
+                    (int)$info['ContentLength'],
+                    $info['ContentType'],
+                    $attachment
+                );
+            }
+
+            $c->headers = array_merge($sharedHeaders, $c->headers);
+
             Messages::_incoming($destination, $from, $to, $c, "message/cpim",  $groupUUID);
         }
 
@@ -77,19 +90,23 @@ final class Messages
          $messageUUID = Messages::Save('incoming', $destination->extensionUUID, $destination->domainUUID, $from, $to, $bodyStr, $contentType,  $message_uuid,  $groupUUID);
 
         // generate a pre-signed download URL before delivering it to things that will download it
-        if ($body instanceof CPIM) {
+        if ($body instanceof CPIM && isset($body->fileURL)) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
             $bodyStr = $body->toString();
             // deliver the webpush notification with "MMS Message" instead of an xml
             Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, "MMS Message", $groupUUID);
         }
+        else if ($body instanceof CPIM) {
+            // text-body CPIM (inline text caption): no URL to presign
+            Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $body->body, $groupUUID);
+        }
         else{
-            // deliver the webpush notification 
+            // deliver the webpush notification
             Messages::_sendWebPush($destination->domainUUID, $destination->extensionUUID, $from, $to, $bodyStr, $groupUUID);
         }
 
         // deliver via SIP
-        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
+        Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID, null, true);
     }
 
     public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $messageUUID)
@@ -131,6 +148,14 @@ final class Messages
 
     public static function _outgoing(LocalNumber $source, string $to, string $from, $body, string $contentType, string $messageUUID, ?string $groupUUID)
     {
+        // Normalize to canonical path-style unsigned URL. Guarantees DB durability
+        // (stored URLs never expire) regardless of URL shape the caller passed in:
+        // path-style or virtual-hosted, signed or unsigned — all collapse to the
+        // canonical form.
+        if ($body instanceof CPIM && $body->fileURL !== null) {
+            $body->fileURL = S3Helper::canonicalize($body->fileURL);
+        }
+
         $bodyStr = ($body instanceof CPIM) ? $body->toString() : $body;
         if($groupUUID){
             $response = Messages::Save( 'outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID);
@@ -139,11 +164,13 @@ final class Messages
             $response = Messages::Save( 'outgoing', $source->extensionUUID, $source->domainUUID, $from, $to, $bodyStr, $contentType, $messageUUID, null);
 
         }
-        // generate a pre-signed download URL before delivering it to things that will download it
-        if ($body instanceof CPIM) {
+
+        // Re-sign for delivery. Always safe to run — canonicalize() guaranteed the URL
+        // is unsigned path-style, which GetDownloadURL's strip logic handles.
+        if ($body instanceof CPIM && $body->fileURL !== null) {
             $body->fileURL = S3Helper::GetDownloadURL($body->fileURL);
-            $bodyStr = $body->toString();
         }
+
         return $response;
         //Messages::_sendSIP($source->domainName, $source->extension, $from, $source->extension, $bodyStr, $contentType, $messageUUID, $groupUUID, $to);
     }
@@ -375,47 +402,63 @@ final class Messages
         }
     }
     
-    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $messageUUID, ?string $groupUUID=null, ?string $originalTo=null)
+    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $dedupeID, ?string $groupUUID=null, ?string $originalTo=null, bool $inbound=false)
     {
-        $SIPProfiles = array("websocket"); // TODO: make this list configurable
         $toAddress = $extension."@".$domainName;
         $fromAddress = $from."@".$domainName;
-    
-        foreach ($SIPProfiles as $SIPProfile) {
-            $eventHeaders = array(
-                "Event-Subclass" => "SMS::SEND_MESSAGE",
-                "proto" => "sip",
+
+        $baseHeaders = array(
+            "Event-Subclass" => "SMS::SEND_MESSAGE",
+            "proto" => "sip",
+            "from" => "sip:".$from,
+            "from_user" => $from,
+            "from_host" => $domainName,
+            "from_full" => "sip:".$fromAddress,
+            "to" => $toAddress,
+            "to_user" => $extension,
+            "to_host" => $domainName,
+            "subject" => "SIMPLE MESSAGE",
+            "type" => $contentType,
+            "hint" => "the hint",
+            "DP_MATCH" => $toAddress,
+            "sip_h_X-Message-ID" => $dedupeID,
+            "Content-Length" => strlen($body),
+        );
+
+        if ($groupUUID != null) {
+            $baseHeaders['sip_h_X-Group-ID'] = $groupUUID;
+        }
+        if ($originalTo != null) {
+            $baseHeaders['sip_h_X-Original-To'] = $originalTo;
+        }
+
+        $destinations = array(
+            array(
                 "dest_proto" => "sip",
-                "from" => "sip:".$from,
-                "from_user" => $from,
-                "from_host" => $domainName,
-                "from_full" => "sip:".$fromAddress,
-                "sip_profile" => $SIPProfile,
-                "to" => $toAddress,
-                "to_user" => $extension,
-                "to_host" => $domainName,
-                "subject" => "SIMPLE MESSAGE", // is this required? what is it? fusionpbx's sms app does this
-                "type" => $contentType,
-                "hint" => "the hint", // is this required? what is it? fusionpbx's sms app does this
-                "replying" => "true", // what is this?
-                "DP_MATCH" => $toAddress, // what is this?
-                "sip_h_X-Message-ID" => $messageUUID,
-                "Content-Length" => strlen($body),
+                "sip_profile" => "websocket",
+                "replying" => "true",
+            ),
+        );
+
+        // Only deliver to SIP device for inbound traffic (carrier → local user).
+        // For outbound, the carrier API handles all delivery (including returning
+        // the message if the destination is a local extension).
+        if ($inbound) {
+            $destinations[] = array(
+                "dest_proto" => "GLOBAL_SMS",
+                "context" => "public",
+                "inbound" => "true",
             );
+        }
 
-            if ($groupUUID != null) {
-                $eventHeaders['sip_h_X-Group-ID'] = $groupUUID;
-            }
-
-            if ($originalTo != null) {
-                $eventHeaders['sip_h_X-Original-To'] = $originalTo;
-            }
+        foreach ($destinations as $overrides) {
+            $eventHeaders = array_merge($baseHeaders, $overrides);
 
             $cmd = "sendevent CUSTOM\n";
             foreach ($eventHeaders as $k=>$v) {
                 $cmd .= "$k: ".$v."\n";
             }
-    
+
             $cmd .= "\n".$body;
 
             event_socket_request_cmd($cmd);

@@ -34,35 +34,41 @@ class S3Helper
         );
     }
 
-    public static function GetDownloadURL(string $unsigned): string
+    public static function GetDownloadURL(string $url): string
     {
-        $prefix = $_SESSION['webtexting']['mms_bucket_endpoint']['text']."/".$_SESSION['webtexting']['mms_bucket']['text']."/";
-        $objectKey = substr($unsigned, strlen($prefix));
-
         $s3 = S3Helper::_getS3Client();
         $cmd = $s3->getCommand(
             'GetObject', [
                 'Bucket' => $_SESSION['webtexting']['mms_bucket']['text'],
-                'Key' => $objectKey,
+                'Key' => S3Helper::_extractKey($url),
             ]
         );
 
         $request = $s3->createPresignedRequest($cmd, '+1 day');
-        
+
         return $request->getUri();
     }
 
     public static function GetInfo(string $url)
     {
-        $prefix = $_SESSION['webtexting']['mms_bucket_endpoint']['text']."/".$_SESSION['webtexting']['mms_bucket']['text']."/";
-        $objectKey = substr($url, strlen($prefix));
-
         return S3Helper::_getS3Client()->HeadObject(
             [
                 'Bucket' => $_SESSION['webtexting']['mms_bucket']['text'],
-                'Key' => $objectKey,
+                'Key' => S3Helper::_extractKey($url),
             ]
         );
+    }
+
+    public static function Download(string $url): string
+    {
+        $result = S3Helper::_getS3Client()->getObject(
+            [
+                'Bucket' => $_SESSION['webtexting']['mms_bucket']['text'],
+                'Key' => S3Helper::_extractKey($url),
+            ]
+        );
+
+        return (string)$result['Body'];
     }
 
     public static function GetUploadURL(string $uploadPath): string
@@ -77,5 +83,65 @@ class S3Helper
         $request = $s3->createPresignedRequest($cmd, '+1 hour');
 
         return $request->getUri();
+    }
+
+    public static function UploadFile(string $key, string $filePath, string $contentType): string
+    {
+        $s3 = S3Helper::_getS3Client();
+        $s3->putObject([
+            'Bucket'      => $_SESSION['webtexting']['mms_bucket']['text'],
+            'Key'         => $key,
+            'SourceFile'  => $filePath,
+            'ContentType' => $contentType,
+        ]);
+        return $_SESSION['webtexting']['mms_bucket_endpoint']['text']
+            . "/" . $_SESSION['webtexting']['mms_bucket']['text']
+            . "/" . $key;
+    }
+
+    /**
+     * Return the canonical path-style unsigned URL for the object referenced by $url.
+     * Idempotent — already-canonical URLs pass through unchanged.
+     */
+    public static function canonicalize(string $url): string
+    {
+        $key = S3Helper::_extractKey($url);
+        return $_SESSION['webtexting']['mms_bucket_endpoint']['text']
+            . '/' . $_SESSION['webtexting']['mms_bucket']['text']
+            . '/' . $key;
+    }
+
+    /**
+     * Extract an S3 object key from any URL shape we might encounter.
+     * Handles:
+     *   - path-style:          https://<endpoint-host>/<bucket>/<key>[?query]
+     *   - virtual-hosted-style: https://<bucket>.<endpoint-host>/<key>[?query]
+     * Signed URLs (with X-Amz-... query params) are accepted — the query string
+     * is stripped before extraction.
+     */
+    private static function _extractKey(string $url): string
+    {
+        $endpoint = $_SESSION['webtexting']['mms_bucket_endpoint']['text'];
+        $bucket   = $_SESSION['webtexting']['mms_bucket']['text'];
+
+        $pathOnly = explode('?', $url, 2)[0];
+
+        $pathPrefix = $endpoint . '/' . $bucket . '/';
+        if (strncmp($pathOnly, $pathPrefix, strlen($pathPrefix)) === 0) {
+            return substr($pathOnly, strlen($pathPrefix));
+        }
+
+        $parts = parse_url($endpoint);
+        if (!$parts || empty($parts['scheme']) || empty($parts['host'])) {
+            throw new \InvalidArgumentException("mms_bucket_endpoint is not a valid URL: {$endpoint}");
+        }
+        $vhPrefix = $parts['scheme'] . '://' . $bucket . '.' . $parts['host'] . '/';
+        if (strncmp($pathOnly, $vhPrefix, strlen($vhPrefix)) === 0) {
+            return substr($pathOnly, strlen($vhPrefix));
+        }
+
+        throw new \InvalidArgumentException(
+            "URL doesn't match path-style or virtual-hosted for bucket '{$bucket}': {$url}"
+        );
     }
 }

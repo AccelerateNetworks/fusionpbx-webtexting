@@ -14,31 +14,45 @@ $status_of_session = session_status();
 // }
 
 $event = json_decode(file_get_contents('php://input'));
-// if (!$event) {
-//     error_log("failed to parse request body: ".$postbody);
-//     http_response_code(400);
-//     die();
-// }
+if (!$event) {
+    error_log("outbound-hook: failed to parse request body");
+    http_response_code(400);
+    die();
+}
 
-$domain_name = $event->{'from_host'};
-$from = $event->from; 
-$to = $event->to;
-$contentType = $event->contentType;
-$body = urldecode($event->body);
-$dedupeID = random_bytes(16);
-$message_uuid = urldecode($event->id);
+// ── Shared: domain is always from_host ──
+$domain_name = $event->from_host;
 
+// ── Normalize fields based on payload source ──
+// Web UI sends extensionUUID (camelCase); FS event has extension_uuid (set by chatplan user_data)
+if (isset($event->extensionUUID)) {
+    // Web UI payload (Ian's webtexting)
+    $to = $event->to;
+    $contentType = $event->contentType;
+    $body = urldecode($event->body);
+    $dedupeID = urldecode($event->id);
     $extensionUUID = $event->extensionUUID;
-    $sql = "SELECT webtexting_destinations.phone_number, v_domains.domain_uuid FROM webtexting_destinations, v_domains, v_extensions WHERE v_domains.domain_name = :domain_name AND v_domains.domain_uuid = v_extensions.domain_uuid AND v_extensions.extension_uuid = :extensionUUID AND webtexting_destinations.extension_uuid = v_extensions.extension_uuid";
-    $parameters['domain_name'] = $domain_name;
-    $parameters['extensionUUID'] = $extensionUUID;
-    $db = new database;
-    $destination = $db->select($sql, $parameters, 'row');
-    if (!$destination) {
-        error_log("dropping outbound message from user with no configured destination: ".$extension."@".$domain_name);
-        die();
-    }
+} else {
+    // FreeSWITCH event payload (from chatplan Lua via mod_curl)
+    // extension_uuid set by chatplan: ${user_data(${from_user}@${from_host} var extension_uuid)}
+    $to = $event->to_user;
+    $contentType = isset($event->type) ? $event->type : 'text/plain';
+    $body = isset($event->_body) ? urldecode($event->_body) : '';
+    $dedupeID = isset($event->{'sip_h_X-Message-ID'}) ? $event->{'sip_h_X-Message-ID'} : uuid();
+    $extensionUUID = $event->extension_uuid;
+}
 
+// ── Shared: look up phone number + domain UUID from extensionUUID (original query) ──
+$sql = "SELECT webtexting_destinations.phone_number, v_domains.domain_uuid FROM webtexting_destinations, v_domains, v_extensions WHERE v_domains.domain_name = :domain_name AND v_domains.domain_uuid = v_extensions.domain_uuid AND v_extensions.extension_uuid = :extensionUUID AND webtexting_destinations.extension_uuid = v_extensions.extension_uuid";
+$parameters['domain_name'] = $domain_name;
+$parameters['extensionUUID'] = $extensionUUID;
+$db = new database;
+$destination = $db->select($sql, $parameters, 'row');
+if (!$destination) {
+    error_log("outbound-hook: no configured destination for ".$extensionUUID."@".$domain_name);
+    http_response_code(404);
+    die();
+}
 unset($parameters);
 $from = $destination['phone_number'];
 $domainUUID = $destination['domain_uuid'];
@@ -58,6 +72,34 @@ if($creds){
 $provider = "accelerate-networks"; // TODO: make this customizable
 
 require __DIR__."/providers/".$provider.".php";
+
+$message_uuid = $dedupeID;
+
+// Unwrap CPIM envelope by inner content type. Post-Fix-2f, Linphone wraps ALL
+// outbound messages in CPIM — SMS, IMDN, typing indicators, and MMS alike.
+// Dispatch on the inner type so the existing per-type cases still work.
+if ($contentType === 'message/cpim') {
+    $cpim = CPIM::fromString($body);
+    $innerContentType = $cpim->getHeader('content-type');
+
+    // Drop notifications that have no carrier-side equivalent
+    if ($innerContentType && (
+        stripos($innerContentType, 'message/imdn') !== false ||
+        stripos($innerContentType, 'application/im-iscomposing') !== false
+    )) {
+        error_log("outbound-hook: dropping CPIM-wrapped ".$innerContentType);
+        http_response_code(200);
+        die();
+    }
+
+    // Unwrap text/plain so the existing text/plain case handles carrier SMS dispatch
+    if ($innerContentType && stripos($innerContentType, 'text/plain') !== false) {
+        $body = $cpim->body;
+        $contentType = 'text/plain';
+    }
+
+    // Otherwise (file-transfer XML): fall through to the message/cpim case
+}
 
 switch($contentType) {
 case "text/plain":
