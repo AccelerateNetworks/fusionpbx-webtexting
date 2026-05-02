@@ -25,19 +25,35 @@ $domain_name = $event->from_host;
 
 // ── Normalize fields based on payload source ──
 // Web UI sends extensionUUID (camelCase); FS event has extension_uuid (set by chatplan user_data)
+//
+// rawurldecode (RFC 3986) used on both branches:
+//
+// - FS-event branch: paired with lua/index.lua's `uriescape`, which encodes literal `+` as
+//   `%2B` (step 1) and whitespace as `%20` (step 2 — see Lua comment there). mod_curl
+//   decodes `%XX` in transit but leaves `+` literal. rawurldecode here is the matching
+//   decoder; effectively a no-op for properly-encoded bodies, defensive against residue.
+//   IMPORTANT: do NOT switch to urldecode without also reverting the Lua line-12 fix —
+//   the encoder and decoder must be consistent (RFC 3986 throughout). Mismatched
+//   urldecode form-urlencoded behavior would mangle literal `+` to space.
+//
+// - Web UI branch: frontend sends raw JSON (no `encodeURIComponent`/`encodeURI`), so
+//   $event->body and $event->id arrive as raw values from json_decode. rawurldecode is
+//   a no-op for these; chosen for consistency and to incidentally fix a latent
+//   `+`-corruption bug where urldecode would have mangled user-entered literal `+`.
+
 if (isset($event->extensionUUID)) {
     // Web UI payload (Ian's webtexting)
     $to = $event->to;
     $contentType = $event->contentType;
-    $body = urldecode($event->body);
-    $dedupeID = urldecode($event->id);
+    $body = rawurldecode($event->body);
+    $dedupeID = rawurldecode($event->id);
     $extensionUUID = $event->extensionUUID;
 } else {
     // FreeSWITCH event payload (from chatplan Lua via mod_curl)
     // extension_uuid set by chatplan: ${user_data(${from_user}@${from_host} var extension_uuid)}
     $to = $event->to_user;
     $contentType = isset($event->type) ? $event->type : 'text/plain';
-    $body = isset($event->_body) ? urldecode($event->_body) : '';
+    $body = isset($event->_body) ? rawurldecode($event->_body) : '';
     $dedupeID = isset($event->{'sip_h_X-Message-ID'}) ? $event->{'sip_h_X-Message-ID'} : uuid();
     $extensionUUID = $event->extension_uuid;
 }
