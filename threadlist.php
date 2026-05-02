@@ -254,7 +254,7 @@ foreach ($threads as $thread) {
 
 ?>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js"></script>
-<script src="js/webtexting.umd.js"></script>
+<script src="js/webtexting.umd.js?v=<?php echo filemtime(__DIR__ . '/js/webtexting.umd.js'); ?>"></script>
 <script type="text/javascript">
     window.notification_data = <?php echo json_encode(array("extension_uuid" => $extension['extension_uuid'])); ?>;
     function clean_number() { // clean any non-digits out of the phone number box
