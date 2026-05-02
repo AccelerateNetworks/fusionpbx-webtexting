@@ -21,7 +21,8 @@ export class CPIM {
     static fromString(raw: string): CPIM {
         let cpim = new CPIM();
 
-        let parts = raw.split("\n\n");
+        // CRLF normalization — Linphone-emitted CPIM uses CRLF per RFC 3862; mirrors PHP-side fix in src/CPIM.php
+        let parts = raw.replace(/\r\n/g, "\n").split("\n\n");
         cpim.addHeaders(parts[0]);
         cpim.addHeaders(parts[1]);
 
