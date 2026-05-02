@@ -9,7 +9,12 @@ function uriescape (s)
             return '%'..string.format("%02X", string.byte(c));
         end
     );
-    s = string.gsub(s, "%s", "+");
+    -- Encode whitespace as %20 (RFC 3986), not "+" (form-urlencoded). Together with the
+    -- first gsub above (which escapes literal "+" to %2B), this gives a fully RFC 3986–
+    -- consistent encoding. mod_curl decodes %XX in transit but leaves "+" literal, so the
+    -- receiving side (outbound-hook.php) must use rawurldecode (RFC 3986) to match.
+    -- Do NOT change to "+" without coordinating the decoder change in outbound-hook.php.
+    s = string.gsub(s, "%s", "%%20");
     return s;
 end
 
