@@ -29,15 +29,17 @@ if (isset($event->extensionUUID)) {
     // Web UI payload (Ian's webtexting)
     $to = $event->to;
     $contentType = $event->contentType;
-    $body = urldecode($event->body);
-    $dedupeID = urldecode($event->id);
+    $body = rawurldecode($event->body);
+    $dedupeID = rawurldecode($event->id);
     $extensionUUID = $event->extensionUUID;
 } else {
     // FreeSWITCH event payload (from chatplan Lua via mod_curl)
     // extension_uuid set by chatplan: ${user_data(${from_user}@${from_host} var extension_uuid)}
+    // Note: rawurldecode (RFC 3986) preserves literal `+` in CPIM Content-Type
+    // (e.g., application/vnd.gsma.rcs-ft-http+xml). urldecode would mangle to space.
     $to = $event->to_user;
     $contentType = isset($event->type) ? $event->type : 'text/plain';
-    $body = isset($event->_body) ? urldecode($event->_body) : '';
+    $body = isset($event->_body) ? rawurldecode($event->_body) : '';
     $dedupeID = isset($event->{'sip_h_X-Message-ID'}) ? $event->{'sip_h_X-Message-ID'} : uuid();
     $extensionUUID = $event->extension_uuid;
 }
