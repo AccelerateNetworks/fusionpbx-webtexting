@@ -49,6 +49,12 @@ export class CPIM {
             cpim.fileURL = data.getAttribute("url");
         }
 
+        // text/plain bodyText extraction — must match behavior of the equivalent PHP CPIM parser
+        const innerType = (cpim.getHeader('content-type') || '').toLowerCase();
+        if (innerType.startsWith('text/plain')) {
+            cpim.bodyText = parts[2];
+        }
+
         return cpim;
     }
 
