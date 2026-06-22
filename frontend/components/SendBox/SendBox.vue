@@ -86,11 +86,7 @@ export default {
     keypress(e: KeyboardEvent) {
       if (e.key == "Enter" && !e.shiftKey) {
         e.preventDefault();
-        if (state.connected) {
-          this.send();
-        } else {
-          //console.log("[Sendbox] Not connected, can't send message");
-        }
+        this.send();
         return false;
       }
     },
@@ -113,7 +109,7 @@ export default {
     },
     /* 
         Hit the send button on this Sendbox component 
-        => Sendboc.send (below) 
+        => Sendbox.send (below) 
         => SIP.ts outbound-message 
         => SIP.ts RunSIPConnection 
         => ?magic? 
@@ -175,7 +171,7 @@ export default {
               message.contentType = "text/plain";
               message.body = this.enteredText;
             }
-            //console.log('emitting message', message);
+            console.log('emitting message', message);
             emitter.emit("outbound-message", message);
 
             this.enteredText = "";
@@ -228,13 +224,7 @@ export default {
             const url = await uploadText(this.enteredText);
             const cpim = new CPIM(url, "text/plain");
             cpim.bodyText = this.enteredText;
-
-            if (this.groupUUID) {
-              cpim.headers["Group-UUID"] = this.groupUUID;
-            }
-
-            //console.log("[Sendbox.sendnewMessage] Outgoing CPIM", cpim);
-
+            cpim.headers["Group-UUID"] = this.groupUUID;   
             message.contentType = "message/cpim";
             message.cpim = cpim;
             message.body = cpim.serialize();
@@ -490,10 +480,7 @@ export default {
         />
         <button
           class="btn btn-send"
-          :disabled="
-            (pendingAttachments.length == 0 && enteredText.length == 0) ||
-            state.connected
-          "
+          :disabled="(pendingAttachments.length == 0 && enteredText.length == 0)"    
           v-on:click="send"
         >
           <span class="fas fa-paper-plane fa-fw"></span>

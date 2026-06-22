@@ -1,5 +1,5 @@
-import {createWebHistory, createRouter, RouterView, RouterViewProps, createWebHashHistory} from 'vue-router';
-import WebTextingContainer  from '../components/WebTextingContainer/WebTextingContainer.vue';
+import { createWebHistory, createRouter, RouterView, RouterViewProps, createWebHashHistory } from 'vue-router';
+import WebTextingContainer from '../components/WebTextingContainer/WebTextingContainer.vue';
 import ThreadList from '@/components/ThreadList/ThreadList.vue';
 import NewMessage from '@/components/NewMessage.vue';
 import ConversationVue from '@/components/conversation/Conversation.vue';
@@ -10,66 +10,74 @@ import TemplatesMenu from '@/components/TemplatesMenu/TemplatesMenu.vue';
 import TemplatesForm from '@/components/TemplatesForm/TemplatesForm.vue';
 import EmailForwardMenu from '@/components/EmailForwardMenu/EmailForwardMenu.vue';
 import AlertFactory from '@/components/Alerts/AlertFactory.vue';
+import DeveloperTestMenu from '@/components/DevTestMenu/DevTestMenu.vue'
 export const router = createRouter({
     history: createWebHistory("/app/webtexting/"),
-    routes:[
+    routes: [
         {
-            path:"/",
-            component:WebTextingContainer,
-            children:[
+            path: "/",
+            component: WebTextingContainer,
+            children: [
                 {
-                path:"/threadlist.php",
-                components:{
-                    leftSide: ThreadList,
-                    rightSide: ConvoPlaceholderVue,
+                    path: "/threadlist.php",
+                    components: {
+                        leftSide: ThreadList,
+                        rightSide: ConvoPlaceholderVue,
+                    },
                 },
-            },
-            {
-                path:'/thread.php',
-                
-                components:{
-                    leftSide: ThreadList,
-                    rightSide: ConversationVue
-                }
-            },
-            {
-                path:'/createthread.php',
-                components:{
-                    leftSide: ThreadList,
-                    rightSide: NewMessage,
-                }
-                    
-            },
-            {
-                path:'/menu.php',
-                components:{
-                    leftSide: MenuList,
-                    rightSide: MenuPlaceHolder,
-                }
-            },
-            {
-                path:"/templates.php",
-                components:{
-                    leftSide:MenuList,
-                    rightSide: TemplatesMenu,
-                }
-            },
-            {
-                path:"/manage_templates.php",
-                components:{
-                    leftSide:MenuList,
-                    rightSide: TemplatesForm,
-                }
-            },
-            {
-                path:"/email_forwarding.php",
-                components:{
-                    leftSide:MenuList,
-                    rightSide:EmailForwardMenu
-                }
-            },
-            
-        ]
+                {
+                    path: '/thread.php',
+
+                    components: {
+                        leftSide: ThreadList,
+                        rightSide: ConversationVue
+                    }
+                },
+                {
+                    path: '/createthread.php',
+                    components: {
+                        leftSide: ThreadList,
+                        rightSide: NewMessage,
+                    }
+
+                },
+                {
+                    path: '/menu.php',
+                    components: {
+                        leftSide: MenuList,
+                        rightSide: MenuPlaceHolder,
+                    }
+                },
+                {
+                    path: "/templates.php",
+                    components: {
+                        leftSide: MenuList,
+                        rightSide: TemplatesMenu,
+                    }
+                },
+                {
+                    path: "/manage_templates.php",
+                    components: {
+                        leftSide: MenuList,
+                        rightSide: TemplatesForm,
+                    }
+                },
+                {
+                    path: "/email_forwarding.php",
+                    components: {
+                        leftSide: MenuList,
+                        rightSide: EmailForwardMenu
+                    }
+                },
+                {
+                    path: "/test.php",
+                    components: {
+                        leftSide: MenuList,
+                        rightSide: DeveloperTestMenu
+                    }
+                },
+
+            ]
         }
     ]
 })

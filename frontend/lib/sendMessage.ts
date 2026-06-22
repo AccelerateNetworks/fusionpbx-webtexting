@@ -6,13 +6,15 @@ export async function sendMessage(message: MessageData) {
         sending = true;
         //what happens if urlsearchparams has nothing to serialize?
         response = await fetch('/app/webtexting/outbound-hook.php?' + new URLSearchParams(JSON.stringify(message)).toString(),
-                            {   method:'POST',
-                                body:JSON.stringify(message)
-                            })
-            .then(async response =>  {
-                if(response.ok){
-                    let testResponse =  response.json();
-                    return   testResponse;
+            {
+                method: 'POST',
+                body: JSON.stringify(message)
+            })
+            .then(async response => {
+                if (response.ok) {
+                    let testResponse = response.json();
+                    console.log('sendMessage response', testResponse);
+                    return testResponse;
                 }
                 const responseJSON = await response.text();
                 return JSON.parse(responseJSON);

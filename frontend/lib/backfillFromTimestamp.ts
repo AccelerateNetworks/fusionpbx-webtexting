@@ -85,21 +85,26 @@ export async function backfillFromTimestamp(extensionUUID: string, timestamp: st
                             key = group;
                         }
                         else if (remoteNumber) {
-                            //key = remoteNumber;
-                            console.log(remoteNumber);
+                            if (remoteNumber === m.from_number) {
+                                key = remoteNumber;
+                            }
+                            else {
+                                key = m.to_number;
+                            }
+                            console.log(key, ' = key for conversation')
                         }
                         console.log(`cpim ${m.message}`);
-                        // insertMessageInHistory(key, {
-                        //     direction: m.direction,
-                        //     contentType: m.content_type,
-                        //     timestamp: moment.utc(m.start_stamp),
-                        //     id: m.message_uuid,
-                        //     from: m.from_number,
-                        //     to: m.to_number,
-                        //     cpim: CPIM.fromString(m.message),
-                        //     delivered: m.delivered,
+                        insertMessageInHistory(key, {
+                            direction: m.direction,
+                            contentType: m.content_type,
+                            timestamp: moment.utc(m.start_stamp),
+                            id: m.message_uuid,
+                            from: m.from_number,
+                            to: m.to_number,
+                            cpim: CPIM.fromString(m.message),
+                            delivered: m.delivered,
 
-                        // });
+                        });
                         break;
                 }
             }

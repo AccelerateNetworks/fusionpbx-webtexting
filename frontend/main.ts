@@ -101,15 +101,15 @@ export const initializeWebTextingContainer =
       }
     });
 
-    // RunSIPConnection(
-    //   opts.username,
-    //   opts.password,
-    //   opts.server,
-    //   opts.ownNumber,
-    //   opts.extensionUUID,
-    //   opts.remoteNumber,
-    //   opts.groupUUID
-    // );
+    RunSIPConnection(
+      opts.username,
+      opts.password,
+      opts.server,
+      opts.ownNumber,
+      opts.extensionUUID,
+      opts.remoteNumber,
+      opts.groupUUID
+    );
     // any event that needs absolute global scope should be listened for here
     emitter.on("backfill-requested", (key: string) => {
       console.log(`main.ts backfill key ${key}`);
@@ -143,20 +143,18 @@ export const initializeWebTextingContainer =
         message.body = message.cpim.serialize();
         message.contentType = 'message/cpim';
       }
-      //send message to lua hell
-      //or skip lua hell and go straight to outbound-hook.php
+      //send message via outbound-hook.php
       let sendMessageQuery: MessageData = message;
       sendMessageQuery.from_host = opts.server;
       sendMessageQuery.extensionUUID = opts.extensionUUID;
       let sendMessageResponse = await sendMessage(sendMessageQuery);
-      console.log(sendMessageResponse);
+      //console.log(sendMessageResponse);
       if (sendMessageResponse && sendMessageResponse.statusCode && sendMessageResponse.statusCode == 200) {
         sendMessageQuery.id = sendMessageResponse.id;
         sendMessageQuery.key = sendMessageResponse.key;
         sendMessageQuery.delivered = true;
         sendMessageResponse.delivered = true;
         //add message to state
-        //probably just add the status codes here lmao
         if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
           const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
           addMessage(cpimThreadID, sendMessageQuery);

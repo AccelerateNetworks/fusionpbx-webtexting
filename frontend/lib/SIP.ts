@@ -205,52 +205,52 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     console.log("[SIP.RunSIPConnection] Starting user agent...", userAgent);
     userAgent.start();
 
-    emitter.on("outbound-message", async (message: MessageData) => {
-        console.log("[SIP.outbound-message] Outbound message:", message);
-        //message.timestamp = moment();
-        const m = message;
-        // if plain/text use to number as key
-        // if it's cpim 
-        if (message.cpim) {
-            message.body = message.cpim.serialize();
-            message.contentType = 'message/cpim';
-        }
-        //send message to lua hell
-        //or skip lua hell and go straight to outbound-hook.php
-        let sendMessageQuery: MessageData = message;
-        sendMessageQuery.from_host = server;
-        sendMessageQuery.extensionUUID = extension_uuid;
-        let sendMessageResponse = await sendMessage(sendMessageQuery);
-        console.log(sendMessageResponse);
-        if (sendMessageResponse && sendMessageResponse.statusCode && sendMessageResponse.statusCode == 200) {
-            sendMessageQuery.id = sendMessageResponse.id;
-            sendMessageQuery.key = sendMessageResponse.key;
-            sendMessageQuery.delivered = true;
-            sendMessageResponse.delivered = true;
-            //add message to state
-            //probably just add the status codes here lmao
-            if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
-                const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
-                addMessage(cpimThreadID, sendMessageQuery);
-            }
-            else {
-                addMessage(message.to, sendMessageQuery);
-            }
-            emitter.emit('message-success', sendMessageQuery);
-        }
-        else {
-            //console.log('message failed to send');
-            if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
-                const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
-                addMessage(cpimThreadID, sendMessageQuery);
-            }
-            else {
-                addMessage(message.to, sendMessageQuery);
-            }
-            emitter.emit('message-failed', sendMessageQuery);
-        }
+    // emitter.on("outbound-message", async (message: MessageData) => {
+    //     console.log("[SIP.outbound-message] Outbound message:", message);
+    //     //message.timestamp = moment();
+    //     const m = message;
+    //     // if plain/text use to number as key
+    //     // if it's cpim 
+    //     if (message.cpim) {
+    //         message.body = message.cpim.serialize();
+    //         message.contentType = 'message/cpim';
+    //     }
+    //     //send message to lua hell
+    //     //or skip lua hell and go straight to outbound-hook.php
+    //     let sendMessageQuery: MessageData = message;
+    //     sendMessageQuery.from_host = server;
+    //     sendMessageQuery.extensionUUID = extension_uuid;
+    //     let sendMessageResponse = await sendMessage(sendMessageQuery);
+    //     console.log(sendMessageResponse);
+    //     if (sendMessageResponse && sendMessageResponse.statusCode && sendMessageResponse.statusCode == 200) {
+    //         sendMessageQuery.id = sendMessageResponse.id;
+    //         sendMessageQuery.key = sendMessageResponse.key;
+    //         sendMessageQuery.delivered = true;
+    //         sendMessageResponse.delivered = true;
+    //         //add message to state
+    //         //probably just add the status codes here lmao
+    //         if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
+    //             const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
+    //             addMessage(cpimThreadID, sendMessageQuery);
+    //         }
+    //         else {
+    //             addMessage(message.to, sendMessageQuery);
+    //         }
+    //         emitter.emit('message-success', sendMessageQuery);
+    //     }
+    //     else {
+    //         //console.log('message failed to send');
+    //         if (message.cpim && (message.cpim.headers['Group-UUID'] || message.cpim.headers['group-uuid'])) {
+    //             const cpimThreadID = calculateCPIMThreadID(message.cpim, message.direction, message.to, message.from);
+    //             addMessage(cpimThreadID, sendMessageQuery);
+    //         }
+    //         else {
+    //             addMessage(message.to, sendMessageQuery);
+    //         }
+    //         emitter.emit('message-failed', sendMessageQuery);
+    //     }
 
-    });
+    // });
 }
 
 export { RunSIPConnection };

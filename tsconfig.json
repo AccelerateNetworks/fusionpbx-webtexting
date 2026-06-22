@@ -5,11 +5,16 @@
     "node_modules/sip.js/src/**/*"
   ],
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./frontend/*"
-      ]
+      ],
+      // A new catch-all that replaces the baseUrl:
+      "*": ["./frontend/*"],
+
+      // Every other path now has an explicit common prefix:
+      "@app/*": ["./src/app/*"],
+      "@lib/*": ["./src/lib/*"],
     },
     "lib": [
       "es2017",
