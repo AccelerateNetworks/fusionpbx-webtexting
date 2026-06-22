@@ -81,18 +81,28 @@ export async function backfillFromTimestamp(extensionUUID: string, timestamp: st
                         }
                         break;
                     case "message/cpim":
-                        if (group) {
-                            key = group;
+                        if (m.group_uuid) {
+                            key = m.group_uuid;
                         }
-                        else if (remoteNumber) {
-                            if (remoteNumber === m.from_number) {
-                                key = remoteNumber;
+                        else if (m.direction === 'incoming') {
+                            console.log(m.from_number, ' = m.from_number');
+                            if (m.from_number) {
+                                key = m.from_number;
+                                console.log(key, ' = key for conversation (remoteNumber)');
+
                             }
                             else {
                                 key = m.to_number;
+                                console.log(key, ' = key for conversation (to_number)');
+
                             }
-                            console.log(key, ' = key for conversation')
+                            console.log(key, ' = key for conversation');
                         }
+                        else {
+                            console.log("no key found for message", m);
+                            key = 'unknown';
+                        }
+
                         console.log(`cpim ${m.message}`);
                         insertMessageInHistory(key, {
                             direction: m.direction,

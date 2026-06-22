@@ -269,6 +269,7 @@ export default {
 
         emitter.on('backfill-poll-complete', () => {
             //state.currentSessionStartTime = new Date(Date.now()).toISOString();
+            //this.$forceUpdate();
         });
         setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
 
