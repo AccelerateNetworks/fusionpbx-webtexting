@@ -1,7 +1,7 @@
 <script lang="ts">
 import { emitter, MessageData } from '../../lib/global'
 import moment from "moment";
-import PendingAttachment, { attachPendingAttachment }   from '../Sendbox/Sendbox.vue';
+import PendingAttachment, { attachPendingAttachment,uploadAttachment, }   from '../Sendbox/Sendbox.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { CPIM } from "../../lib/CPIM";
 
@@ -58,7 +58,6 @@ export default {
             const message = this.getTestSMSData();
             if (this.$data.includeAttachment) {
                 //do attachment
-                
                 while (this.pendingAttachments.length > 0) {
                     const attachment = this.pendingAttachments.shift();
                     await attachment.upload;
