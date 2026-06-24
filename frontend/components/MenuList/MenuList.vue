@@ -9,7 +9,8 @@ export default {
     },
     data(){
         return {selectedMenu:false,
-        backLink:'/threadlist.php?extension_uuid='+ this.extensionUUID}
+            backLink: '/threadlist.php?extension_uuid=' + this.extensionUUID,
+        devModeLink: '/test.php?extension_uuid=' + this.extensionUUID,}
     },
     //mounted emitter.on for menuPreview click emits
     mounted(){
@@ -40,7 +41,7 @@ export default {
         <MenuPreview name="Templates" link='templates.php' descriptions="Manage Message Templates" ></MenuPreview>
         <MenuPreview name="Email Forwarding" link='email_forwarding.php' descriptions="Manage Email Forwarding"></MenuPreview>
         <MenuPreview name="Help" link='https://acceleratenetworks.com/Phones/WebTexting' descriptions="How to use WebTexting"></MenuPreview>
-        <MenuPreview name="Developer Mode" link='test.php' descriptions="Run Developer Tests and more." ></MenuPreview>
+        <MenuPreview name="Developer Mode" :link='devModeLink' descriptions="Run Developer Tests and more." ></MenuPreview>
 
         <div class="threadlist-table">
             <div class="preview_list_container">
