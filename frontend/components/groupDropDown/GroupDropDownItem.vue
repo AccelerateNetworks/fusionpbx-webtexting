@@ -37,3 +37,6 @@ export default {
 <template>
     <a class="dropdown-content-item" href="#" :onClick="emitUUID" :title="this.members">{{this.name||this.members}}</a>
 </template>
+<style lang="css">
+
+</style>

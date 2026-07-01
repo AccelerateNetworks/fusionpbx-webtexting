@@ -90,7 +90,7 @@ export default {
             console.log("mounted dev test menu");
             emitter.on('group-dropup-selection-recieved', (uuid:string) => {
                 console.log("group-dropup-selection-recieved event received in dev test menu", uuid);
-            });             
+            });            
         },
         async fetchGroups() {
             document.getElementById("groupsdropdownmenu").classList.toggle("show");
@@ -99,7 +99,18 @@ export default {
             };
             const fetchedGroups = await getGroups(query);
             console.log("Fetched group:", fetchedGroups);
-            this.groups = fetchedGroups;            
+            this.groups = fetchedGroups;  
+            var dropdowns = document.getElementsByClassName(
+          "dropdown-content-menu"
+        );
+        var i;
+        for (i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          console.log("openDropdown", openDropdown);
+          if (openDropdown.classList.contains("show")) {
+            openDropdown.classList.remove("show");
+          }
+        }          
         }
     }
 }
@@ -130,33 +141,35 @@ export default {
                 <div class="form-group pt-1">
                     <h3 class="mms-test-input">MMS Test</h3>
                     <div>In Development!</div>
-                    <button
-                        class="btn dropdown-toggle dropbtn"
-                        data-toggle="group-dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                        @click="fetchGroups"
-                    >
-                        <span class="dropbtn fas fa-comment-dots" aria-hidden="true"></span>
-                    </button>
-                    <div class="group-dropdown dropdown" aria-labelledby="group-dropdown">
-                        <div id="groupsdropdownmenu" class="dropdown-group-select-menu">
-                            <GroupDropDownItem
-                            v-for="group in this.groups"
-                                :name="group.name"
-                                :members="group.members"
-                                :group_uuid="group.group_uuid"
-                                :key="group.group_uuid"
-                            />
+                        <div class="btn-group align-middle dropup p-2">
+                            <button
+                                class="btn dropdown-toggle dropbtn"
+                                data-toggle="group-dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                                @click="fetchGroups"
+                            >
+                                <span class="dropbtn fas fa-comment-dots" aria-hidden="true"></span>
+                            </button>
+                            <div class="group-dropdown dropdown" >
+                                <div id="groupsdropdownmenu" class="dropdown-group-select-menu" aria-label="Group Selection Menu" role="menu">
+                                    <GroupDropDownItem
+                                    v-for="group in this.groups"
+                                        :name="group.name"
+                                        :members="group.members"
+                                        :group_uuid="group.group_uuid"
+                                        :key="group.group_uuid"
+                                    />
+                                </div>
+                            </div>
                         </div>
-                    </div>
                 </div>
                 <div class="dev-test-menu">
                         <button class="btn btn-danger mb-1" @click="runTests">Run Tests</button>
                 </div>
     </div>
 </template>
-<style scoped>
+<style lang="css">
 /* DROPDOWN MENU */
 
 .dropbtn {
@@ -176,7 +189,7 @@ export default {
 .dropdown-group-select-menu {
   display: none;
   position: absolute;
-  background-color: #f1f1f1;
+  background-color: #f1f1f1cc;
   min-width: 160px;
   overflow: auto;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
