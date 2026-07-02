@@ -10,9 +10,9 @@ type PendingAttachment = typeof PendingAttachment;
 
 export default {
     name: "DeveloperTestMenu",
-    components: {GroupDropDownItem},
+    components: { GroupDropDownItem },
     props: {
-        ownNumber:String,
+        ownNumber: String,
         extension_uuid: String
     },
 
@@ -22,8 +22,7 @@ export default {
         pendingAttachments: PendingAttachment[];
         groups: GroupDropDownItemProps[];
         groupUUID: string;
-    }
-    {
+    } {
         return {
             testNumber: '',
             includeAttachment: false,
@@ -36,27 +35,27 @@ export default {
         getTestSMSData(): (MessageData) {
             if (this.$props.ownNumber) {
                 return {
-                    body:moment(new Date()).toDate() + " Test Message from " + this.$props.ownNumber , 
+                    body: moment(new Date()).toDate() + " Test Message from " + this.$props.ownNumber,
                     direction: "outgoing",
                     contentType: "text/plain",
                     timestamp: moment(new Date()),
                     id: uuidv4(),
                     from: this.$props.ownNumber,
-                    to: this.$data.testNumber 
+                    to: this.$data.testNumber
                 }
             }
             if (this.$props.ownNumber === '') {
                 console.log("Own number prop is empty string, cannot send test message")
-                return ;
+                return;
             }
-            if(this.$data.testNumber.length<=10){
+            if (this.$data.testNumber.length <= 10) {
                 console.log("Test number is too short, cannot send test message")
-                return ;
+                return;
             }
             else {
                 console.log("No activated number to send from")
-                return ;
-            };           
+                return;
+            };
         },
         backArrowClickHandler() {
             emitter.emit('menu-change');
@@ -78,7 +77,7 @@ export default {
                     message.cpim = cpim;
                 }
             }
-            emitter.emit("outbound-message",message)
+            emitter.emit("outbound-message", message)
         },
         numberPaste(e: ClipboardEvent) {
             //console.log(e);
@@ -88,29 +87,19 @@ export default {
         },
         async mounted() {
             console.log("mounted dev test menu");
-            emitter.on('group-dropup-selection-recieved', (uuid:string) => {
+            emitter.on('group-dropup-selection-recieved', (uuid: string) => {
                 console.log("group-dropup-selection-recieved event received in dev test menu", uuid);
-            });            
+            });
         },
-        async fetchGroups() {
-            document.getElementById("groupsdropdownmenu").classList.toggle("show");
-            const query: checkGroupsRequest = {
-                extension_uuid: this.$props.extension_uuid,
-            };
-            const fetchedGroups = await getGroups(query);
-            console.log("Fetched group:", fetchedGroups);
-            this.groups = fetchedGroups;  
-            var dropdowns = document.getElementsByClassName(
-          "dropdown-content-menu"
-        );
-        var i;
-        for (i = 0; i < dropdowns.length; i++) {
-          var openDropdown = dropdowns[i];
-          console.log("openDropdown", openDropdown);
-          if (openDropdown.classList.contains("show")) {
-            openDropdown.classList.remove("show");
-          }
-        }          
+        async fetchGroups() {            
+            if (this.groups.length == 0) {
+                const query: checkGroupsRequest = {
+                    extension_uuid: this.$props.extension_uuid,
+                };
+                const fetchedGroups = await getGroups(query);
+                console.log("Fetched group:", fetchedGroups);
+                this.groups = fetchedGroups;
+            }
         }
     }
 }
@@ -141,7 +130,7 @@ export default {
                 <div class="form-group pt-1">
                     <h3 class="mms-test-input">MMS Test</h3>
                     <div>In Development!</div>
-                        <div class="btn-group align-middle dropup p-2">
+                        <div class="btn-group align-middle dropdown p-2">
                             <button
                                 class="btn dropdown-toggle dropbtn"
                                 data-toggle="group-dropdown"
@@ -149,23 +138,29 @@ export default {
                                 aria-expanded="false"
                                 @click="fetchGroups"
                             >
-                                <span class="dropbtn fas fa-comment-dots" aria-hidden="true"></span>
+                                <span class="dropbtn btn btn-primary" aria-hidden="true">Select a Group</span>
                             </button>
                             <div class="group-dropdown dropdown" >
                                 <div id="groupsdropdownmenu" class="dropdown-group-select-menu" aria-label="Group Selection Menu" role="menu">
                                     <GroupDropDownItem
-                                    v-for="group in this.groups"
-                                        :name="group.name"
-                                        :members="group.members"
-                                        :group_uuid="group.group_uuid"
-                                        :key="group.group_uuid"
+                                        v-for="group in this.groups"
+                                            :name="group.name"
+                                            :members="group.members"
+                                            :group_uuid="group.group_uuid"
+                                            :key="group.group_uuid"
                                     />
+                                    <GroupDropDownItem
+                                        v-if="this.groups.length === 0"
+                                        name="No Groups Found"
+                                        members=""
+                                        group_uuid=""
+                                        :key="0" />
                                 </div>
                             </div>
                         </div>
                 </div>
                 <div class="dev-test-menu">
-                        <button class="btn btn-danger mb-1" @click="runTests">Run Tests</button>
+                    <button class="btn btn-danger mb-1" @click="runTests">Run Tests</button>
                 </div>
     </div>
 </template>
@@ -173,19 +168,9 @@ export default {
 /* DROPDOWN MENU */
 
 .dropbtn {
-  /*
-    background-color: #3498DB;
-    color: white;
-    */
   border: none;
   cursor: pointer;
 }
-/*
-.group-dropdown {
-  /*position: relative; 
-    display: inline-block;
-} 
-*/
 .dropdown-group-select-menu {
   display: none;
   position: absolute;
@@ -195,18 +180,30 @@ export default {
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
-
 .dropdown-group-select-menu a {
   color: black;
   padding: 12px 16px;
   text-decoration: none;
   display: block;
 }
-
+.group-dropdown  {
+    display: none;
+}
+.group-dropdown.show {
+    display: block;
+}
+ .dropdown-content-item {
+    display: none;
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;  
+ }
+ .dropdown-content-item.show{
+    display: block;
+ }
 .group-dropdown a:hover {
   background-color: #ddd;
 }
-
 .show {
   display: block;
 }

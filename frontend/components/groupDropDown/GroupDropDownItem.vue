@@ -35,8 +35,19 @@ export default {
 }
 </script>
 <template>
-    <a class="dropdown-content-item" href="#" :onClick="emitUUID" :title="this.members">{{this.name||this.members}}</a>
+    <div class="dropdown-content-item">
+        <a class="dropdown-content-item" href="#" :onClick="emitUUID" :title="this.members">{{this.name||this.members}}</a>
+    </div>
 </template>
 <style lang="css">
-
+.dropdown-content-item {
+    display: block;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #333;
+    cursor: pointer;
+}
+.dropdown-content-item:hover {
+    background-color: #ddd;
+}
 </style>
