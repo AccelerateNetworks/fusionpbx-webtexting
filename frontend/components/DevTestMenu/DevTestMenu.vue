@@ -1,12 +1,14 @@
 <script lang="ts">
-import { emitter, MessageData } from '../../lib/global'
+import { emitter, MessageData, state} from '../../lib/global'
 import moment from "moment";
 import PendingAttachment, { attachPendingAttachment,uploadAttachment, }   from '../Sendbox/Sendbox.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { CPIM } from "../../lib/CPIM";
+import { uploadText } from "../../lib/upload";
 import { getGroups, checkGroupsRequest } from "../../lib/getGroups";
 import GroupDropDownItem, { GroupDropDownItemProps } from '../groupDropDown/GroupDropDownItem.vue';
 type PendingAttachment = typeof PendingAttachment;
+
 
 export default {
     name: "DeveloperTestMenu",
@@ -62,7 +64,9 @@ export default {
         },
         async runTests() {
             console.log('running tests');
-            const message = this.getTestSMSData();
+            let message = this.getTestSMSData();
+            console.log('emitting message', message);
+            emitter.emit("outbound-message", message);
             if (this.$data.includeAttachment) {
                 //do attachment
                 while (this.pendingAttachments.length > 0) {
@@ -77,19 +81,30 @@ export default {
                     message.cpim = cpim;
                 }
             }
-            emitter.emit("outbound-message", message)
+            //group messages are handled differently so we need to modify message before sending
+            if (this.groupUUID) {
+              const url = await uploadText(moment(new Date()).toDate() + " Group Test Message from " + this.$props.ownNumber);
+              const cpim = new CPIM(url, "text/plain");
+              cpim.bodyText = moment(new Date()).toDate() + " Group Test Message from " + this.$props.ownNumber;
+              if (this.groupUUID) {
+                cpim.headers["Group-UUID"] = this.groupUUID;
+              }
+              //console.log("outgoing cpim", cpim);
+              message.contentType = "message/cpim";
+              message.cpim = cpim;
+              message.body = cpim.serialize();
+            } else {
+              message.contentType = "text/plain";
+              message.body = moment(new Date()).toDate() + " Group Test Message from " + this.$props.ownNumber;
+            }
+            console.log('emitting message', message);
+            emitter.emit("outbound-message", message);
         },
         numberPaste(e: ClipboardEvent) {
             //console.log(e);
         },
         getCPIMData(): (void) {
             //make a mock CPIM message data object to test CPIM sending
-        },
-        async mounted() {
-            console.log("mounted dev test menu");
-            emitter.on('group-dropup-selection-recieved', (uuid: string) => {
-                console.log("group-dropup-selection-recieved event received in dev test menu", uuid);
-            });
         },
         async fetchGroups() {            
             if (this.groups.length == 0) {
@@ -99,9 +114,22 @@ export default {
                 const fetchedGroups = await getGroups(query);
                 console.log("Fetched group:", fetchedGroups);
                 this.groups = fetchedGroups;
+                document.getElementById("groupsdropdownmenu").classList.toggle("show");
             }
+            else{
+                document.getElementById("groupsdropdownmenu").classList.remove("show");
+            }
+        },
+  
+    },
+
+        mounted() {
+            console.log("mounted dev test menu");
+            emitter.on('dev-menu-group-selection', (uuid: string) => {
+                console.log("dev test menu real", uuid);
+                this.groupUUID = uuid;
+            });
         }
-    }
 }
 </script>
 <template>
@@ -140,8 +168,7 @@ export default {
                             >
                                 <span class="dropbtn btn btn-primary" aria-hidden="true">Select a Group</span>
                             </button>
-                            <div class="group-dropdown dropdown" >
-                                <div id="groupsdropdownmenu" class="dropdown-group-select-menu" aria-label="Group Selection Menu" role="menu">
+                                <div id="groupsdropdownmenu" class="group-dropdown dropwdown dropdown-group-select-menu" aria-label="Group Selection Menu" role="menu">
                                     <GroupDropDownItem
                                         v-for="group in this.groups"
                                             :name="group.name"
@@ -156,7 +183,7 @@ export default {
                                         group_uuid=""
                                         :key="0" />
                                 </div>
-                            </div>
+                            
                         </div>
                 </div>
                 <div class="dev-test-menu">

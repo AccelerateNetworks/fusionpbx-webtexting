@@ -21,12 +21,15 @@ export default {
         }
     },
     computed: {    },
-    emits: {   'group-dropup-selection-recieved':String },
+    emits: {   'group-dropup-selection-recieved':String,
+              'dev-menu-group-selection':String
+    },
     methods: { 
         emitUUID() {
-            event.preventDefault();
             emitter.emit('group-dropup-selection-recieved', this.group_uuid);
-            console.log("group-dropup-selection-recieved event emitted from GroupDropDownItem", this.group_uuid);
+            console.log(this.group_uuid);
+            emitter.emit('dev-menu-group-selection', this.group_uuid);
+            console.log("emitted to dev test menu");
         },   
     },
     mounted(){

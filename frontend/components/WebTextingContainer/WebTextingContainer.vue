@@ -271,6 +271,10 @@ export default {
             //state.currentSessionStartTime = new Date(Date.now()).toISOString();
             //this.$forceUpdate();
         });
+        emitter.on("group-dropup-selection-recieved", (uuid: string) => {
+            console.log("dev test menu", uuid);
+            emitter.emit("dev-menu-group-selection", uuid);
+        });
         setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
 
     },
