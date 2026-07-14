@@ -30,7 +30,7 @@ function createRandomToken(size: number, base = 32): string {
   }
   return token;
 }
-const MAXFILESIZE = 500000; //<---500KB in bytes
+export const MAXFILESIZE = 500000; //<---500KB in bytes
 function verifyFileSize(file: File) {
   if (file.size < MAXFILESIZE) {
     return true;

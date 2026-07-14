@@ -1,21 +1,29 @@
 <script lang="ts">
 import { emitter, MessageData, state} from '../../lib/global'
 import moment from "moment";
-import PendingAttachment, { attachPendingAttachment,uploadAttachment, }   from '../Sendbox/Sendbox.vue';
+import PendingAttachment,  { attachPendingAttachment,uploadAttachment  }   from '../Sendbox/Sendbox.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { CPIM } from "../../lib/CPIM";
 import { uploadText } from "../../lib/upload";
 import { getGroups, checkGroupsRequest } from "../../lib/getGroups";
 import GroupDropDownItem, { GroupDropDownItemProps } from '../groupDropDown/GroupDropDownItem.vue';
-type PendingAttachment = typeof PendingAttachment;
 
+type PendingAttachment = typeof PendingAttachment;
+const MAXFILESIZE = 500000; //<---500KB in bytes
+function verifyFileSize(file: File) {
+  if (file.size < MAXFILESIZE) {
+    return true;
+  }
+  return false;
+}
 
 export default {
     name: "DeveloperTestMenu",
     components: { GroupDropDownItem },
     props: {
         ownNumber: String,
-        extension_uuid: String
+        extension_uuid: String,
+        location: String
     },
 
     data(): {
@@ -60,15 +68,14 @@ export default {
             };
         },
         backArrowClickHandler() {
-            emitter.emit('menu-change');
+            emitter.emit('menu-change','test-menu');
         },
         async runTests() {
             console.log('running tests');
             let message = this.getTestSMSData();
-            console.log('emitting message', message);
-            emitter.emit("outbound-message", message);
+            
             if (this.$data.includeAttachment) {
-                //do attachment
+                //can use the AN brandmark at this location https://acceleratenetworks.com/images/scaled/accelerate.png
                 while (this.pendingAttachments.length > 0) {
                     const attachment = this.pendingAttachments.shift();
                     await attachment.upload;
@@ -81,6 +88,8 @@ export default {
                     message.cpim = cpim;
                 }
             }
+            console.log('emitting message', message);
+            emitter.emit("outbound-message", message);
             //group messages are handled differently so we need to modify message before sending
             if (this.groupUUID) {
               const url = await uploadText(moment(new Date()).toDate() + " Group Test Message from " + this.$props.ownNumber);
@@ -119,17 +128,85 @@ export default {
             else{
                 document.getElementById("groupsdropdownmenu").classList.remove("show");
             }
+        },        
+        onAttach(e: Event) {
+        //console.log(e.target.files);
+            const target = e.target as HTMLInputElement;
+            //console.log(target);
+            for (const file of target.files) {
+            if (verifyFileSize(file)) {
+                const a: PendingAttachment = {
+                file: file,
+                previewURL: URL.createObjectURL(file),
+                progress: 0,
+                upload: null,
+                uploadedURL: null,
+                };
+                a.upload = this.uploadAttachment(a);
+                this.pendingAttachments.push(a);
+            } else {
+                alert(
+                `The selected file is too large. We cannot send files bigger than ${
+                    MAXFILESIZE / 1000
+                }kB.`
+                );
+            }
+            }
         },
-  
-    },
+        removeAttachment(attachment: PendingAttachment) {
+        let position = this.pendingAttachments.indexOf(attachment);
+        console.log("[Sendbox.removeAttachment] Removing attachment", position, attachment);
+        this.pendingAttachments.splice(position, 1);
+        },
+        async uploadAttachment(attachment: PendingAttachment): Promise<void> {
+        
+            const uploadTarget = await fetch("upload.php", {
+            method: "POST",
+            body: JSON.stringify({ filename: attachment.file.name }),
+            }).then((r) => r.json());
 
-        mounted() {
-            console.log("mounted dev test menu");
-            emitter.on('dev-menu-group-selection', (uuid: string) => {
-                console.log("dev test menu real", uuid);
-                this.groupUUID = uuid;
+            attachment.uploadedURL = uploadTarget.download_url;
+
+            console.log("[Sendbox.uploadAttachment] Uploading ", uploadTarget);
+            const resp = await fetch(uploadTarget.upload_url, {
+            method: "PUT",
+            body: await attachment.file.arrayBuffer(),
             });
-        }
+            attachment.progress = 100;
+
+        },
+        attachPendingAttachment(file: File) {
+            if (verifyFileSize(file)) {
+                const a: PendingAttachment = {
+                file: file,
+                previewURL: URL.createObjectURL(file),
+                progress: 0,
+                upload: null,
+                uploadedURL: null,
+                };
+                a.upload = this.uploadAttachment(a);
+                this.pendingAttachments.push(a);
+            } else {
+                //file size is set in SENDBOX.vue and imported for use here. Yes that's less than ideal
+                alert(
+                `The selected file is too large. We cannot send files bigger than ${
+                    MAXFILESIZE / 1000
+                }kB.`
+                );
+            }
+        },  
+    },
+    async mounted() {
+        console.log("mounted dev test menu");
+        emitter.on('dev-menu-group-selection', (uuid: string) => {
+            console.log("dev test menu real", uuid);
+            this.groupUUID = uuid;
+        });
+        const testPNG:URL = new URL('/../../../anTestPNG.png',window.location.origin)
+        let blob = await fetch(testPNG).then(r => r.blob());
+        console.log(blob);
+
+    }
 }
 </script>
 <template>

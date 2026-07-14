@@ -9,7 +9,6 @@ import MenuList from '../components/MenuList/MenuList.vue';
 import TemplatesMenu from '@/components/TemplatesMenu/TemplatesMenu.vue';
 import TemplatesForm from '@/components/TemplatesForm/TemplatesForm.vue';
 import EmailForwardMenu from '@/components/EmailForwardMenu/EmailForwardMenu.vue';
-import AlertFactory from '@/components/Alerts/AlertFactory.vue';
 import DeveloperTestMenu from '@/components/DevTestMenu/DevTestMenu.vue'
 export const router = createRouter({
     history: createWebHistory("/app/webtexting/"),
