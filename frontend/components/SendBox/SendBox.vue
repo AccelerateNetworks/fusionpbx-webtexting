@@ -333,6 +333,7 @@ export default {
           upload: null,
           uploadedURL: null,
         };
+        console.log(a);
         a.upload = this.uploadAttachment(a);
         this.pendingAttachments.push(a);
       } else {

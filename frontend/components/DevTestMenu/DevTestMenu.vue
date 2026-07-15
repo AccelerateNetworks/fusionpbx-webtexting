@@ -1,12 +1,13 @@
 <script lang="ts">
 import { emitter, MessageData, state} from '../../lib/global'
 import moment from "moment";
-import PendingAttachment,  { attachPendingAttachment,uploadAttachment  }   from '../Sendbox/Sendbox.vue';
+import PendingAttachment    from '../Sendbox/Sendbox.vue';
 import { v4 as uuidv4 } from 'uuid';
 import { CPIM } from "../../lib/CPIM";
 import { uploadText } from "../../lib/upload";
 import { getGroups, checkGroupsRequest } from "../../lib/getGroups";
 import GroupDropDownItem, { GroupDropDownItemProps } from '../groupDropDown/GroupDropDownItem.vue';
+import imgURL from '../../../anTestPNG.png'; 
 
 type PendingAttachment = typeof PendingAttachment;
 const MAXFILESIZE = 500000; //<---500KB in bytes
@@ -168,6 +169,7 @@ export default {
             attachment.uploadedURL = uploadTarget.download_url;
 
             console.log("[Sendbox.uploadAttachment] Uploading ", uploadTarget);
+            console.log(uploadTarget.upload_url);
             const resp = await fetch(uploadTarget.upload_url, {
             method: "PUT",
             body: await attachment.file.arrayBuffer(),
@@ -202,9 +204,12 @@ export default {
             console.log("dev test menu real", uuid);
             this.groupUUID = uuid;
         });
-        const testPNG:URL = new URL('/../../../anTestPNG.png',window.location.origin)
-        let blob = await fetch(testPNG).then(r => r.blob());
-        console.log(blob);
+        const testPNG:URL = new URL(imgURL)
+        let blob = await fetch(testPNG).then(r => {
+            return r.blob();
+        });
+        const file = new File([blob], "test.png", { type: "image/png" });
+        this.attachPendingAttachment(file);
 
     }
 }
