@@ -142,6 +142,8 @@ function RunSIPConnection(username: string, password: string, server: string, ow
     userAgent.transport.onDisconnect = (err?: Error) => {
         if (err) {
             console.log("connectivity error:", err)
+            //this is where we would let the app know it's time to fall back to polling for messages
+            emitter.emit('web-socket-error', err)
         }
     }
 

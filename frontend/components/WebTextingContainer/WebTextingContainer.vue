@@ -275,6 +275,13 @@ export default {
             console.log("dev test menu", uuid);
             emitter.emit("dev-menu-group-selection", uuid);
         });
+        emitter.on('web-socket-error', (err: Error) => {
+            console.log("web socket error received in wtc", err);
+            //if (1st w-s-e) then start the polling interval for backfill from timestamp, else do nothing
+            //setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
+
+        })
+        //used in test enviornment since ws doesn't work there
         setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
 
     },
