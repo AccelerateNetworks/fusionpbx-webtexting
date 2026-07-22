@@ -227,21 +227,22 @@ export default {
                         </div>
                     </div>
                 </div>
-                <div class="form-group pt-1">
+                <div class="form-group p-2 border rounded">
                     <h3 class="sms-test-input">SMS Test</h3>
                     <label for="dev-test-number" class='dev-test-message'>Enter Number:</label>
                         <input class='form-control form-control-lg' type="tel" size="11" min="10000000000" max="19999999999" @paste="numberPaste" v-model="testNumber" id="dev-test-number" name="dev-test-number" placeholder="12065551212" />
                         <label for="dev-test-number">Outbound Number must include Country Code and Area Code.</label>                        
                 </div>             
-                <div class="form-group pt-1">
+                <div class="form-group p-2">
                     <input type="checkbox" class='mr-5' id="attachment_checkbox" name="attachment" v-model="includeAttachment"  />
                     <label for="attachment_checkbox">Include Attachment </label>
                 </div>               
-                <div class="form-group pt-1">
+                <div class="form-group p-2 border rounded">
                     <h3 class="mms-test-input">MMS Test</h3>
-                    <div>In Development!</div>
-                        <div class="btn-group align-middle dropdown p-2">
+                    <div class="btn-group align-middle dropdown p-2">
+                        <div class="button-container">                             
                             <button
+                                id="GROUP_DROPDOWN_BUTTON"
                                 class="btn dropdown-toggle dropbtn"
                                 data-toggle="group-dropdown"
                                 aria-haspopup="true"
@@ -250,25 +251,25 @@ export default {
                             >
                                 <span class="dropbtn btn btn-primary" aria-hidden="true">Select a Group</span>
                             </button>
-                                <div id="groupsdropdownmenu" class="group-dropdown dropwdown dropdown-group-select-menu" aria-label="Group Selection Menu" role="menu">
-                                    <GroupDropDownItem
-                                        v-for="group in this.groups"
-                                            :name="group.name"
-                                            :members="group.members"
-                                            :group_uuid="group.group_uuid"
-                                            :key="group.group_uuid"
-                                    />
-                                    <GroupDropDownItem
-                                        v-if="this.groups.length === 0"
-                                        name="No Groups Found"
-                                        members=""
-                                        group_uuid=""
-                                        :key="0" />
-                                </div>
-                            
+                            </div>
+                            <div id="groupsdropdownmenu" class="group-dropdown dropdown dropdown-menu dropdown-group-select-menu" aria-labeledby="GROUP_DROPDOWN_BUTTON" aria-label="Group Selection Menu" role="menu">
+                                <GroupDropDownItem
+                                    v-for="group in this.groups"
+                                        :name="group.name"
+                                        :members="group.members"
+                                        :group_uuid="group.group_uuid"
+                                        :key="group.group_uuid"
+                                />
+                                <GroupDropDownItem
+                                v-if="this.groups.length === 0"
+                                name="No Groups Found"
+                                members=""
+                                group_uuid=""
+                                :key="0" />
                         </div>
+                    </div>
                 </div>
-                <div class="dev-test-menu">
+                <div class="dev-test-menu d-flex justify-content-end">
                     <button class="btn btn-danger mb-1" @click="runTests">Run Tests</button>
                 </div>
     </div>

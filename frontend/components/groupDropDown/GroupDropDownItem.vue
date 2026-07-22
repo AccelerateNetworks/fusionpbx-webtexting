@@ -38,17 +38,17 @@ export default {
 }
 </script>
 <template>
-    <div class="dropdown-content-item">
         <a class="dropdown-content-item" href="#" :onClick="emitUUID" :title="this.members">{{this.name||this.members}}</a>
-    </div>
+
 </template>
 <style lang="css">
 .dropdown-content-item {
     display: block;
-    padding: 8px 16px;
+    /* padding: 8px 16px; */
     text-decoration: none;
     color: #333;
     cursor: pointer;
+    justify-content: center;
 }
 .dropdown-content-item:hover {
     background-color: #ddd;
