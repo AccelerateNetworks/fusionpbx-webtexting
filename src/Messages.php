@@ -108,13 +108,13 @@ final class Messages
         Messages::_sendSIP($destination->domainName, $destination->extension, $from, $to, $bodyStr, $contentType, $messageUUID, $groupUUID, null, true);
     }
 
-    public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $messageUUID)
+    public static function OutgoingSMS(string $extensionUUID, string $domainUUID, string $from, string $to, string $body, string $messageUUID, ?string $groupUUID = null)
     {
         $source = LocalNumber::Get($from);
         if ($source == null) {
             return false;
         }
-        $responseUUID = Messages::_outgoing($source, $to, $from, $body, "text/plain", $messageUUID, null);
+        $responseUUID = Messages::_outgoing($source, $to, $from, $body, "text/plain", $messageUUID, $groupUUID);
         return $responseUUID;
     }
 
