@@ -281,7 +281,7 @@ export default {
             //setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
 
         })
-        //used in test enviornment since ws doesn't work there
+        //used in test environment since ws doesn't work there
         setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
 
     },
