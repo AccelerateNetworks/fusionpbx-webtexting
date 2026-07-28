@@ -120,26 +120,31 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
     }
 }
 
+//emits: "update-last-message" w/ message for each message added to history
+
 export function insertMessageInHistory(key: string, message: MessageData) {
     //check for message in history
     //console.log("message", message);
     if (state.conversations[key]) {
         for (let i = 0; i < state.conversations[key].length; i++) {
-            if (state.conversations[key][i].id == message.id) {
-                state.conversations[key][i] = message;
-                return;
-            }
+            //in theory we could also do nothing if the message already exists, we'll update it anyway for now
+            state.conversations[key][i] = message;
 
-            if (state.conversations[key][i].timestamp.isAfter(message.timestamp)) {
-                state.conversations[key].splice(i, 0, message);
-                return;
-            }
+            return;
+        }
+        //insert the message where it belongs in the history based on timestamp
+        if (state.conversations[key][i].timestamp.isAfter(message.timestamp)) {
+            state.conversations[key].splice(i, 0, message);
+
+            return;
         }
     }
     //add a new history if no history is found
     else {
         state.conversations[key] = new Array<MessageData>();
     }
-    // no existing message matched, append to end    
+    // message not found in loaded history, append to end    
     state.conversations[key].push(message);
+    emitter.emit("update-last-message", message)
+
 }
