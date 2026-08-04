@@ -81,11 +81,13 @@ function RunSIPConnection(username: string, password: string, server: string, ow
         delegate: {
             onConnect: () => {
                 state.connectivityStatus = "connected";
+                emitter.emit('web-socket-connected');
             },
             onDisconnect: (err?: Error) => {
                 state.connectivityStatus = "disconnected";
                 if (err) {
                     console.log("[SIP.RunSIPConnection] connectivity error:", err)
+                    emitter.emit('web-socket-error', err)
                 }
             },
             onMessage: async (message: Message) => {
@@ -161,6 +163,7 @@ function RunSIPConnection(username: string, password: string, server: string, ow
                     switch (data) {
                         case RegistererState.Registered:
                             backoff = 0; // reset reconnect backoff timer
+                            emitter.emit('web-socket-registered');
                             break;
                         case RegistererState.Unregistered:
                             let registerRequest = await registerer.register();

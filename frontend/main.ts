@@ -101,15 +101,15 @@ export const initializeWebTextingContainer =
       }
     });
 
-    // RunSIPConnection(
-    //   opts.username,
-    //   opts.password,
-    //   opts.server,
-    //   opts.ownNumber,
-    //   opts.extensionUUID,
-    //   opts.remoteNumber,
-    //   opts.groupUUID
-    // );
+    RunSIPConnection(
+      opts.username,
+      opts.password,
+      opts.server,
+      opts.ownNumber,
+      opts.extensionUUID,
+      opts.remoteNumber,
+      opts.groupUUID
+    );
     // any event that needs absolute global scope should be listened for here
     emitter.on("backfill-requested", (key: string) => {
       console.log(`main.ts backfill key ${key}`);

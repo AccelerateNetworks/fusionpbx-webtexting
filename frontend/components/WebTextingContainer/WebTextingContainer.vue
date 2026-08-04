@@ -171,6 +171,7 @@ export default {
         loadPreviews(this.extensionUUID, state.oldestMessage);
     },
     mounted() {
+         let  pollingInterval = null;
         emitter.on('document-unhidden', () => {
             //console.log("document unhidden - wtc");
             loadPreviews(this.extensionUUID);
@@ -277,12 +278,37 @@ export default {
         });
         emitter.on('web-socket-error', (err: Error) => {
             console.log("web socket error received in wtc", err);
+            console.log("state.polling: ", state.polling);
+            if (state.polling) {
+                //if polling already, do nothing
+                console.log("Web Socket Error while attempting to reconnect")
+            }
+            else {
+                console.log("Web socket error starting 10 second polling interval")
+                state.polling = true;
+                pollingInterval = setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
+            }
             //if (1st w-s-e) then start the polling interval for backfill from timestamp, else do nothing
             //setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
 
         })
+        emitter.on('web-socket-connected', () => {
+            console.log("web socket connected received in wtc");
+            
+        })
+        emitter.on('web-socket-registered', () => {
+            console.log("web socket registered received in wtc");
+            if(state.polling) {
+                //if polling already, stop
+                state.polling = false;
+                clearInterval(pollingInterval);
+            }
+            else {
+                //if not polling, do nothing
+            }
+        })
         //used in test environment since ws doesn't work there
-        setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
+        //setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
 
     },
 }

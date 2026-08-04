@@ -70,6 +70,7 @@ type GlobalState = {
     previews: PreviewData,
     page: number,
     oldestMessage: string,
+    polling: boolean
 };
 const QUERY_LIMIT = 20;  //this limits the number of threadpreview results per load request
 type PreviewData = Map<string, ThreadPreviewData>;
@@ -82,7 +83,8 @@ const state = reactive<GlobalState>({
     currentSessionStartTime: new Date(Date.now()).toISOString(),
     previews: new Map<string, ThreadPreviewData>(),
     page: 0,
-    oldestMessage: null
+    oldestMessage: null,
+    polling: false
 });
 
 const emitter = mitt();
