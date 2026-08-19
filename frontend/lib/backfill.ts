@@ -58,7 +58,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
         const response: BackfillResponse = await fetch('/app/webtexting/messages.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         //console.log("[backfill.backfillMessages] received", response.messages, "as backlog");
         if (response.messages) {
-            //console.log("[backfill.backfillMessages] received", response.messages.length, "message from backlog");
+            console.log("[backfill.backfillMessages] received", response.messages.length, "message from backlog");
             for (let i = 0; i < response.messages.length; i++) {
                 let m = response.messages[i];
                 //console.log(m)
@@ -127,17 +127,15 @@ export function insertMessageInHistory(key: string, message: MessageData) {
     //console.log("message", message);
     if (state.conversations[key]) {
         for (let i = 0; i < state.conversations[key].length; i++) {
-            //in theory we could also do nothing if the message already exists, we'll update it anyway for now
-            state.conversations[key][i] = message;
+            if (state.conversations[key][i].timestamp.isAfter(message.timestamp)) {
+                state.conversations[key].splice(i, 0, message);
 
-            return;
+                return;
+            }
+            //insert the message where it belongs in the history based on timestamp
         }
-        //insert the message where it belongs in the history based on timestamp
-        if (state.conversations[key][i].timestamp.isAfter(message.timestamp)) {
-            state.conversations[key].splice(i, 0, message);
 
-            return;
-        }
+
     }
     //add a new history if no history is found
     else {

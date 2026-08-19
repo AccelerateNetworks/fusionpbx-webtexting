@@ -187,7 +187,7 @@ export default {
         return;
       } else if (this.topVisible && this.bottomVisible) {
         console.log("top and bottom of conversation visible, attempting to backfill immediately");
-        emitter.emit("backfill-requested", this.conversationKey);
+        //emitter.emit("backfill-requested", this.conversationKey);
         return;
       }
       setTimeout(() => {
