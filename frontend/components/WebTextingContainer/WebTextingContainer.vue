@@ -289,8 +289,6 @@ export default {
                 pollingInterval = setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
             }
             //if (1st w-s-e) then start the polling interval for backfill from timestamp, else do nothing
-            //setInterval(() => backfillFromTimestamp(this.extensionUUID, state.currentSessionStartTime, undefined, undefined), 10000)
-
         })
         emitter.on('web-socket-connected', () => {
             console.log("web socket connected received in wtc");

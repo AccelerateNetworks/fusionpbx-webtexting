@@ -68,7 +68,7 @@ final class Messages
                 $filename = $filenames[$i] ?? basename(parse_url($attachment, PHP_URL_PATH));
                 $c = CPIM::forFileTransfer(
                     $filename,
-                    (int)$info['ContentLength'],
+                    (int) $info['ContentLength'],
                     $info['ContentType'],
                     $attachment
                 );
@@ -397,28 +397,28 @@ final class Messages
             unset($parameters);
         }
     }
-    
-    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $dedupeID, ?string $groupUUID=null, ?string $originalTo=null, bool $inbound=false)
+
+    private static function _sendSIP(string $domainName, string $extension, string $from, string $to, string $body, string $contentType, ?string $dedupeID, ?string $groupUUID = null, ?string $originalTo = null, bool $inbound = false)
     {
-        $toAddress = $extension."@".$domainName;
-        $fromAddress = $from."@".$domainName;
+        $toAddress = $extension . "@" . $domainName;
+        $fromAddress = $from . "@" . $domainName;
 
         $baseHeaders = array(
-            "Event-Subclass"     => "SMS::SEND_MESSAGE",
-            "proto"              => "sip",
-            "from"               => "sip:".$from,
-            "from_user"          => $from,
-            "from_host"          => $domainName,
-            "from_full"          => "sip:".$fromAddress,
-            "to"                 => $toAddress,
-            "to_user"            => $extension,
-            "to_host"            => $domainName,
-            "subject"            => "SIMPLE MESSAGE",
-            "type"               => $contentType,
-            "hint"               => "the hint",
-            "DP_MATCH"           => $toAddress,
+            "Event-Subclass" => "SMS::SEND_MESSAGE",
+            "proto" => "sip",
+            "from" => "sip:" . $from,
+            "from_user" => $from,
+            "from_host" => $domainName,
+            "from_full" => "sip:" . $fromAddress,
+            "to" => $toAddress,
+            "to_user" => $extension,
+            "to_host" => $domainName,
+            "subject" => "SIMPLE MESSAGE",
+            "type" => $contentType,
+            "hint" => "the hint",
+            "DP_MATCH" => $toAddress,
             "sip_h_X-Message-ID" => $dedupeID,
-            "Content-Length"     => strlen($body),
+            "Content-Length" => strlen($body),
         );
 
         if ($groupUUID != null) {
@@ -430,9 +430,9 @@ final class Messages
 
         $destinations = array(
             array(
-                "dest_proto"  => "sip",
+                "dest_proto" => "sip",
                 "sip_profile" => "websocket",
-                "replying"    => "true",
+                "replying" => "true",
             ),
         );
 
@@ -442,8 +442,8 @@ final class Messages
         if ($inbound) {
             $destinations[] = array(
                 "dest_proto" => "GLOBAL_SMS",
-                "context"    => "public",
-                "inbound"    => "true",
+                "context" => "public",
+                "inbound" => "true",
             );
         }
 
@@ -454,7 +454,7 @@ final class Messages
             foreach ($eventHeaders as $k => $v) {
                 $cmd .= "$k: $v\n";
             }
-            $cmd .= "\n".$body;
+            $cmd .= "\n" . $body;
 
             event_socket_request_cmd($cmd);
         }

@@ -143,6 +143,6 @@ export function insertMessageInHistory(key: string, message: MessageData) {
     }
     // message not found in loaded history, append to end    
     state.conversations[key].push(message);
-    emitter.emit("update-last-message", message)
+    //emitter.emit("update-last-message", message)
 
 }

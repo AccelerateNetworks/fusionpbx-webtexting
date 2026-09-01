@@ -102,8 +102,10 @@ export default {
     },
     mounted(){
         emitter.on("update-last-message",(message:MessageData) =>{
-            if(message.cpim){
-                if( message.cpim.headers["group-uuid"]){
+            console.log("update-last-message", message);
+            if (message.contentType == 'message/cpim'){
+                console.log("message.cpim.headers", message.cpim.headers);
+                if( message.groupUUID && this.groupUUID){
                     if(message.direction =='incoming' && this.groupUUID == message.cpim.headers["group-uuid"] ){
                         this.newMessagesData++;
                     }

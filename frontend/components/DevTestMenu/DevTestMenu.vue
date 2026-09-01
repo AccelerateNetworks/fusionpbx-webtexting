@@ -89,8 +89,7 @@ export default {
                     message.cpim = cpim;
                 }
             }
-            console.log('emitting message', message);
-            emitter.emit("outbound-message", message);
+
             //group messages are handled differently so we need to modify message before sending
             if (this.groupUUID) {
               const url = await uploadText(moment(new Date()).toDate() + " Group Test Message from " + this.$props.ownNumber);

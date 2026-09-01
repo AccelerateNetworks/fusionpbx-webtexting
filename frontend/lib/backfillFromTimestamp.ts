@@ -97,6 +97,8 @@ export async function backfillFromTimestamp(extensionUUID: string, timestamp: st
                         });
                         break;
                 }
+                emitter.emit("update-last-message", m);
+
             }
             if (response.messages.length == 0) {
                 //emitter.emit('conversation-fully-backfilled');
@@ -106,6 +108,7 @@ export async function backfillFromTimestamp(extensionUUID: string, timestamp: st
                 emitter.emit('last-checked-timestamp', new Date(Date.now()).toISOString());
             }
         }
+
         emitter.emit('backfill-poll-complete');
     } catch (e) {
         updating = false;
