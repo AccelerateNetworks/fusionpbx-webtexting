@@ -3,7 +3,7 @@ import { createApp } from "vue";
 import { router } from "./routes";
 import { calculateCPIMThreadID, RunSIPConnection } from "./lib/SIP";
 import WebTextingContainer from "./components/WebTextingContainer/WebTextingContainer.vue";
-import { backfillMessages } from "./lib/backfill";
+import { BackfillMessages } from "./lib/backfill";
 import { backfillFromTimestamp } from "./lib/backfillFromTimestamp";
 import { emitter, MessageData, addMessage } from "./lib/global";
 import { sendMessage } from "./lib/sendMessage";
@@ -117,10 +117,10 @@ export const initializeWebTextingContainer =
       if (key) {
         if (key.length < 15) {
           console.log(`backfill using remotenumber: ${key}`);
-          backfillMessages(opts.extensionUUID, key, undefined);
+          BackfillMessages(opts.extensionUUID, key, undefined);
         } else {
           console.log(`backfill using group ${key}`);
-          backfillMessages(opts.extensionUUID, undefined, key);
+          BackfillMessages(opts.extensionUUID, undefined, key);
         }
       } else {
         console.log("ignoring backfill request with no key");

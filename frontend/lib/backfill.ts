@@ -27,9 +27,9 @@ type backfillQuery = {
 
 let fetching = false;
 
-export async function backfillMessages(extensionUUID: string, remoteNumber?: string, group?: string) {
+export async function BackfillMessages(extensionUUID: string, remoteNumber?: string, group?: string) {
     if (fetching) {
-        //console.log("[backfill.backfillMessages] skipping duplicate backfill request");
+        //console.log("[backfill.BackfillMessages] skipping duplicate backfill request");
         return;
     }
     fetching = true;
@@ -56,9 +56,9 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
 
         // console.log(params)
         const response: BackfillResponse = await fetch('/app/webtexting/messages.php?' + new URLSearchParams(params).toString()).then(r => r.json());
-        //console.log("[backfill.backfillMessages] received", response.messages, "as backlog");
+        //console.log("[backfill.BackfillMessages] received", response.messages, "as backlog");
         if (response.messages) {
-            console.log("[backfill.backfillMessages] received", response.messages.length, "message from backlog");
+            console.log("[backfill.BackfillMessages] received", response.messages.length, "message from backlog");
             for (let i = 0; i < response.messages.length; i++) {
                 let m = response.messages[i];
                 //console.log(m)
@@ -83,7 +83,6 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
                         else {
                             key = remoteNumber;
                         }
-                        //console.log(`cpim ${m.message}`);
                         insertMessageInHistory(key, {
                             direction: m.direction,
                             contentType: m.content_type,
@@ -116,7 +115,7 @@ export async function backfillMessages(extensionUUID: string, remoteNumber?: str
 
     } catch (e) {
         fetching = false;
-        //console.log('[backfill.backfillMessages] backfill error:', e);
+        console.log('[backfill.BackfillMessages] backfill error:', e);
     }
 }
 

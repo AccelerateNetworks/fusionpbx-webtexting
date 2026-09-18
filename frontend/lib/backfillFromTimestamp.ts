@@ -4,9 +4,9 @@ import moment from 'moment';
 import { insertMessageInHistory } from './backfill';
 
 type BackfillResponse = {
-    messages: BackfilMessage[],
+    messages: BackfillMessage[],
 };
-type BackfilMessage = {
+type BackfillMessage = {
     content_type: string,
     direction: string,
     from_number: string,
@@ -38,7 +38,7 @@ export async function backfillFromTimestamp(extensionUUID: string, timestamp: st
         const response: BackfillResponse = await fetch('/app/webtexting/messages.php?' + new URLSearchParams(params).toString()).then(r => r.json());
         if (response.messages) {
             let key;
-            console.log("[backfill.backfillMessages] received", response.messages.length, "message from backlog");
+            console.log("[backfill.BackfillMessages] received", response.messages.length, "message from backlog");
             for (let i = 0; i < response.messages.length; i++) {
                 let m = response.messages[i];
                 switch (m.content_type) {
@@ -84,7 +84,6 @@ export async function backfillFromTimestamp(extensionUUID: string, timestamp: st
                         else {
                             key = 'unknown';
                         }
-                        console.log(`cpim ${m.message}`);
                         insertMessageInHistory(key, {
                             direction: m.direction,
                             contentType: m.content_type,
@@ -112,7 +111,7 @@ export async function backfillFromTimestamp(extensionUUID: string, timestamp: st
         emitter.emit('backfill-poll-complete');
     } catch (e) {
         updating = false;
-        console.log('[backfill.backfillMessages] backfill error:', e);
+        console.log('[backfill.BackfillMessages] backfill error:', e);
     }
     updating = false;
 }

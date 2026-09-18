@@ -101,28 +101,27 @@ export default {
         }
     },
     mounted(){
-        emitter.on("update-last-message",(message:MessageData) =>{
-            console.log("update-last-message", message);
-            if (message.contentType == 'message/cpim'){
-                console.log("message.cpim.headers", message.cpim.headers);
-                if( message.groupUUID && this.groupUUID){
-                    if(message.direction =='incoming' && this.groupUUID == message.cpim.headers["group-uuid"] ){
+        emitter.on("update-last-message", (message: MessageData) => {
+            //cpim is either group or individual message, 
+            if (message.content_type == "message/cpim") {
+                //group check
+                if( message.group_uuid && this.groupUUID && message.group_uuid == this.groupUUID){
+
+                    if (message.direction == 'incoming') {
                         this.newMessagesData++;
                     }
                 }
-                else{
-                    if(message.direction=='incoming' && this.remoteNumber == message.from){
+                //if not group then solo w/attachment
+                else{                                    
+                    if (message.direction == 'incoming' && this.remoteNumber == message.from_number && !message.group_uuid) {
                         this.newMessagesData++;
                     }
                 }
             }
-            else{
-                if(message.direction == 'incoming' && message.from == this.remoteNumber ){
-                    //console.log(this.remoteNumber, " ", message.from)
-                    if(this.currentThread != 'activeThread'){
+            //if not cpim then message/text due to current architecture still have to filter out group messages from individual messages
+            else {
+                if(message.direction == 'incoming' && message.from_number == this.remoteNumber && !this.groupUUID){
                         this.newMessagesData++;
-                        //console.log(this.newMessagesData);
-                    }
                 }
             }                
         })
