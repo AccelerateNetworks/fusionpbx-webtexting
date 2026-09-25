@@ -68,13 +68,13 @@ export const router = createRouter({
                         rightSide: EmailForwardMenu
                     }
                 },
-                {
-                    path: "/test.php",
-                    components: {
-                        leftSide: MenuList,
-                        rightSide: DeveloperTestMenu
-                    }
-                },
+                // {
+                //     path: "/test.php",
+                //     components: {
+                //         leftSide: MenuList,
+                //         rightSide: DeveloperTestMenu
+                //     }
+                // },
 
             ]
         }
