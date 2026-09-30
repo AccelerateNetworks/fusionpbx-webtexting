@@ -91,11 +91,18 @@ require __DIR__."/providers/".$provider.".php";
 
 $message_uuid = $dedupeID;
 
+// Group-UUID is captured here (pre-switch) so it survives the text/plain unwrap
+// below. If we waited to read it inside `case "message/cpim":`, the unwrap block
+// would have already mutated $contentType to 'text/plain' and the CPIM's group
+// context would be lost when the text/plain switch case calls OutgoingSMS.
+$groupUUID = null;
+
 // Unwrap CPIM envelope by inner content type. Post-Fix-2f, Linphone wraps ALL
 // outbound messages in CPIM — SMS, IMDN, typing indicators, and MMS alike.
 // Dispatch on the inner type so the existing per-type cases still work.
 if ($contentType === 'message/cpim') {
     $cpim = CPIM::fromString($body);
+    $groupUUID = $cpim->getHeader('Group-UUID');
     $innerContentType = $cpim->getHeader('content-type');
 
     // Drop notifications that have no carrier-side equivalent
@@ -119,13 +126,26 @@ if ($contentType === 'message/cpim') {
 
 switch($contentType) {
 case "text/plain":
-    $message_uuid = Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $message_uuid);
+    // Group-context handling for text messages: when $groupUUID was captured
+    // pre-switch (see the CPIM unwrap block above), inflate $to to the CSV of
+    // group members so carrier dispatch fans out to all recipients, and pin the
+    // response's thread key to the group_uuid instead of a single number.
+    // Mirrors the same-shaped block in `case "message/cpim":` below.
+    if ($groupUUID) {
+        $to = Messages::findRecipients($domainUUID, $extensionUUID, $from, $groupUUID);
+        if ($to == null) {
+            error_log("dropping message for unknown group: domain_uuid=".$domainUUID." extension_uuid=".$extensionUUID." group_uuid=".$groupUUID."\n");
+            die();
+        }
+        $mixins['key'] = $groupUUID;
+    }
+    $message_uuid = Messages::OutgoingSMS($extensionUUID, $domainUUID, $from, $to, $body, $message_uuid, $groupUUID);
     if(!$message_uuid){
         error_log("failed to write outgoing SMS message record to database for $from to $to");
         http_response_code(501);
         die();
     }
-    $response = outgoing_sms($from, $to, $body);  
+    $response = outgoing_sms($from, $to, $body);
     $response = json_decode($response);
     if(!$response){
         error_log("failed to send outgoing SMS message from $from to $to");
@@ -141,17 +161,17 @@ case "text/plain":
             http_response_code(505);
             die();
         }
-    
+
     // db update message status to true
     $mixins['id'] = $message_uuid;
-    $mixins['key'] = $to;
+    if (!isset($mixins['key'])) {
+        $mixins['key'] = $to;
+    }
     $extended = (object) array_merge((array)$response, (array)$mixins);
     echo json_encode($extended);
     return json_encode($extended);
     break;
 case "message/cpim":
-    $cpim = CPIM::fromString($body);
-    $groupUUID = $cpim->getHeader('Group-UUID');
     if ($groupUUID) {
         $to = Messages::findRecipients($domainUUID, $extensionUUID, $from, $groupUUID);
         if ($to == null) {
